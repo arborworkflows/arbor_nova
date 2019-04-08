@@ -1,7 +1,7 @@
 
 from setuptools import setup
 
-setup(name='arbor_tasks_tasks',
+setup(name='arbor_nova_tasks',
       version='0.0.0',
       description='A girder_worker extension with arbor task examples',
       author='Kitware Inc.',
@@ -15,11 +15,11 @@ setup(name='arbor_tasks_tasks',
       ],
       entry_points={
           'girder_worker_plugins': [
-              'arbor_tasks = arbor_tasks:ArborTasksPlugin',
+              'arbor_nova_tasks = arbor_nova_tasks:ArborNovaTasksGirderWorkerPlugin',
           ]
       },
       install_requires=[
           'girder_worker'
       ],
-      packages=['arbor_gw_tasks'],
+      packages=['arbor_nova_tasks'],
       zip_safe=False)

@@ -2,18 +2,17 @@
 # -*- coding: utf-8 -*-
 
 
-from arbor_gw_tasks import column_append
+from arbor_nova_tasks import column_append
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute
 from girder.api.rest import filtermodel, Resource
-from girder.models.token import Token
-from girder_worker_utils.transforms import girder_io
+from girder_worker_utils.transforms.girder_io import GirderFileId, GirderUploadToItem
 
 
-class ArborTask(Resource):
+class ArborNova(Resource):
     def __init__(self):
-        super(ArborTask, self).__init__()
-        self.resourceName = 'arbor_task'
+        super(ArborNova, self).__init__()
+        self.resourceName = 'arbor_nova'
         self.route('POST', ('csvColumnAppend', ), self.csv_column_append)
 
     @access.token
@@ -27,10 +26,7 @@ class ArborTask(Resource):
         .errorResponse('Failed to upload output file.', 500)
     )
     def csv_column_append(self, fileId, itemId):
-        token = Token().createToken(user=self.getCurrentUser())
-        token_id = str(token['_id'])
-        result = column_append.delay(in_filepath=girder_io.GirderFileId(fileId),
-                                     output_item_id=itemId,
-                                     girder_client_token=token_id)
+        result = column_append.delay(GirderFileId(fileId),
+                                     girder_result_hooks=[GirderUploadToItem(itemId)])
 
         return result.job

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-from arbor_gw_tasks import column_append
+from arbor_nova_tasks import column_append
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute
 from girder.api.rest import filtermodel, Resource
@@ -10,10 +10,10 @@ from girder.models.token import Token
 from girder_worker_utils.transforms import girder_io
 
 
-class ArborTask(Resource):
+class ArborNova(Resource):
     def __init__(self):
-        super(ArborTask, self).__init__()
-        self.resourceName = 'arbor_task'
+        super(ArborNova, self).__init__()
+        self.resourceName = 'arbor_nova'
         self.route('POST', ('csvColumnAppend', ), self.csv_column_append)
 
     @access.token

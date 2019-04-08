@@ -7,14 +7,14 @@ from girder_worker.utils import girder_job
 from girder_worker_utils.transforms import girder_io
 
 
-class ArborTasksPlugin(GirderWorkerPluginABC):
+class ArborNovaTasksGirderWorkerPlugin(GirderWorkerPluginABC):
     def __init__(self, app, *args, **kwargs):
         self.app = app
 
     def task_imports(self):
         # Return a list of python importable paths to the
         # plugin's path directory
-        return ['arbor_gw_tasks.hello']
+        return ['arbor_nova_tasks.column_append']
 
 
 @girder_job(title='ColumnAppendTask')

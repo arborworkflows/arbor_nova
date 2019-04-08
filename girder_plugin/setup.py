@@ -21,15 +21,15 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7'
     ],
-    description='A plugin to run R or Python Arbor tasks.',
+    description='A Girder 3 plugin for Arbor Easy Mode Apps.',
     license='Apache Software License 2.0',
     long_description=readme,
     long_description_content_type='text/x-rst',
     include_package_data=True,
-    keywords='girder-plugin, arbor_tasks',
-    name='Arbor Tasks',
+    keywords='girder-plugin, arbor_nova',
+    name='Arbor Nova',
     packages=find_packages(exclude=['test', 'test.*']),
-    url='https://github.com/girder/arbor_tasks',
+    url='https://github.com/girder/arbor_nova',
     version='0.1.0',
     zip_safe=False,
     install_requires=[
@@ -39,7 +39,7 @@ setup(
     ],
     entry_points={
         'girder.plugin': [
-            'arbor_tasks = arbor_tasks:ArborTasksPlugin'
+            'arbor_nova = arbor_nova:ArborNovaGirderPlugin'
         ]
     }
 )

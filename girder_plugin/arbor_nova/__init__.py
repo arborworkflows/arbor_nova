@@ -30,5 +30,4 @@ class ArborNovaGirderPlugin(GirderPlugin):
             anon_user = User().save(anon_user)
 
         getPlugin('jobs').load(info)
-
-        info['apiRoot'].arbor_nova = rest.ArborNova()
+        info['apiRoot'].arbor_nova = rest.ArborNova(ANONYMOUS_USER)

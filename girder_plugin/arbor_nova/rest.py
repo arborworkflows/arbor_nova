@@ -18,7 +18,7 @@ class ArborNova(Resource):
         self.route('POST', ('anonlogin',), self.anonymousLogin)
         self.anonymous_user = anonymous_user
 
-    @access.token
+    @access.token(cookie=True)
     @filtermodel(model='job', plugin='jobs')
     @autoDescribeRoute(
         Description('Append a new column to a csv file.')

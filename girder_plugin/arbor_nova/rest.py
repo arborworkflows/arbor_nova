@@ -5,20 +5,17 @@
 from arbor_nova_tasks import column_append
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute
-from girder.api.rest import filtermodel, Resource, setCurrentUser
-from girder.models.user import User
+from girder.api.rest import filtermodel, Resource
 from girder_worker_utils.transforms.girder_io import GirderFileId, GirderUploadToItem
 
 
 class ArborNova(Resource):
-    def __init__(self, anonymous_user):
+    def __init__(self):
         super(ArborNova, self).__init__()
         self.resourceName = 'arbor_nova'
         self.route('POST', ('csvColumnAppend', ), self.csv_column_append)
-        self.route('POST', ('anonlogin',), self.anonymousLogin)
-        self.anonymous_user = anonymous_user
 
-    @access.token(cookie=True)
+    @access.token
     @filtermodel(model='job', plugin='jobs')
     @autoDescribeRoute(
         Description('Append a new column to a csv file.')
@@ -33,27 +30,3 @@ class ArborNova(Resource):
                                      girder_result_hooks=[GirderUploadToItem(itemId)])
 
         return result.job
-
-    @autoDescribeRoute(
-        Description('Log in using the "anonymous user".')
-    )
-    @access.public
-    def anonymousLogin(self, params):
-        """Log in using the "anonymous user"."""
-        user = User().findOne({
-            'login': self.anonymous_user
-        })
-        user = User().filter(user, user)
-
-        setCurrentUser(user)
-        token = self.sendAuthTokenCookie(user)
-
-        return {
-            'user': user,
-            'authToken': {
-                'token': token['_id'],
-                'expires': token['expires'],
-                'scope': token['scope']
-            },
-            'message': 'Anonymous login succeeded.'
-        }

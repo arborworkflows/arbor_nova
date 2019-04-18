@@ -12,21 +12,25 @@
 import { utils } from '@girder/components/src';
 
 export default {
-  name: 'app',
-  inject: ['girderRest'],
-  data: () => ({
-    inputFile: {},
-    job: {},
-    result: '',
-  }),
-  asyncComputed: {
-    async me() {
-      return (await this.girderRest.get('user/me')).data;
-    },
-    async scratchFolder() {
-      const me = (await this.girderRest.get('user/me')).data;
-      const folders = (await this.girderRest.get(`folder?parentId=${me._id}&parentType=user`)).data;
-      return folders.filter(folder => folder.name === 'Private')[0];
+    name: 'app',
+    inject: ['girderRest'],
+    data: () => ({
+        inputFile: {},
+        job: {},
+        result: '',
+    }),
+    asyncComputed: {
+        async scratchFolder() {
+            let folder;
+            let currentUser = (await this.girderRest.get('user/me')).data;
+            if (!currentUser) {
+                currentUser = (await this.girderRest.login('anonymous', 'letmein')).data.user;
+            }
+            folder = (await this.girderRest.get('/folder', {
+                params: {parentType: 'user',
+                         parentId: currentUser._id,
+                         name: 'Private'}})).data[0];
+            return folder
     }
   },
   methods: {

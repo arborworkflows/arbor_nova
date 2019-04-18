@@ -11,18 +11,6 @@ from . import rest
 class ArborNovaGirderPlugin(GirderPlugin):
     DISPLAY_NAME = 'Arbor Nova'
 
-    def _create_result_folder(self, user):
-        collection = Collection().createCollection('Arbor',
-                                                   creator=user,
-                                                   public=True,
-                                                   reuseExisting=True)
-
-        Folder().createFolder(collection, 'Results',
-                              parentType='collection',
-                              public=True,
-                              creator=user,
-                              reuseExisting=True)
-
     def _create_anonymous_user(self):
         ANONYMOUS_USER = 'anonymous'
         ANONYMOUS_PASSWORD = 'letmein'
@@ -47,6 +35,5 @@ class ArborNovaGirderPlugin(GirderPlugin):
 
     def load(self, info):
         anon_user = self._create_anonymous_user()
-        self._create_result_folder(anon_user)
         getPlugin('jobs').load(info)
         info['apiRoot'].arbor_nova = rest.ArborNova()

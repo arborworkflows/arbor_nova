@@ -20,13 +20,17 @@ export default {
     result: '',
   }),
   asyncComputed: {
-    async me() {
-      return (await this.girderRest.get('user/me')).data;
-    },
     async scratchFolder() {
-      const me = (await this.girderRest.get('user/me')).data;
-      const folders = (await this.girderRest.get(`folder?parentId=${me._id}&parentType=user`)).data;
-      return folders.filter(folder => folder.name === 'Private')[0];
+      let folder;
+      let currentUser = (await this.girderRest.get('user/me')).data;
+      if (!currentUser) {
+        currentUser = (await this.girderRest.login('anonymous', 'letmein')).data.user;
+      }
+      folder = (await this.girderRest.get('/folder', {
+        params: {parentType: 'user',
+                 parentId: currentUser._id,
+                 name: 'Private'}})).data[0];
+      return folder
     }
   },
   methods: {

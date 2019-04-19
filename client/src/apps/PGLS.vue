@@ -1,38 +1,59 @@
 <template>
-  <div>
+  <v-app>
+		<v-content>
+			<v-container fluid>
+				<v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
+          <v-text-field label="Select Table" @click='selectTableFile' v-model='tableFileName'></v-text-field>
+          <input
+            type="file"
+            style="display: none"
+            ref="tableFile"
+            @change="uploadTable($event.target.files[0])"
+          >
+				</v-flex>
+				<v-flex xs12 class="text-xs-center text-sm-center text-md-center text-lg-center">
+          <v-text-field label="Select Tree" @click='selectTreeFile' v-model='treeFileName'></v-text-field>
+          <input
+            type="file"
+            style="display: none"
+            ref="treeFile"
+            @change="uploadTree($event.target.files[0])"
+          >
+				</v-flex>
     <div>
-      Table: <input type="file" @change="uploadTable($event.target.files[0])">
+      <v-radio-group v-model="correlation" row>
+        <template v-slot:label>
+          <div>Correlation</div>
+        </template>
+        <v-radio label="BM" value="BM"></v-radio>
+        <v-radio label="OU" value="OU"></v-radio>
+        <v-radio label="lambda" value="lambda"></v-radio>
+      </v-radio-group>
     </div>
     <div>
-      Tree: <input type="file" @change="uploadTree($event.target.files[0])">
+      <v-radio-group v-model="independentVariable" row>
+        <template v-slot:label>
+          <div>Independent Variable</div>
+        </template>
+        <v-radio v-for="col in columns" v-bind:key="col" :label="col" :value="col"></v-radio>
+      </v-radio-group>
     </div>
     <div>
-      Correlation:
-      <select v-model="correlation">
-        <option>BM</option>
-        <option>OU</option>
-        <option>lambda</option>
-      </select>
+      <v-radio-group v-model="dependentVariable" row>
+        <template v-slot:label>
+          <div>Dependent Variable</div>
+        </template>
+        <v-radio v-for="col in columns" v-bind:key="col" :label="col" :value="col"></v-radio>
+      </v-radio-group>
     </div>
     <div>
-      Independent Variable:
-      <select v-model="independentVariable">
-        <option v-for="col in columns" v-bind:key="col">{{ col }}</option>
-      </select>
-    </div>
-    <div>
-      Dependent Variable:
-      <select v-model="dependentVariable">
-        <option v-for="col in columns" v-bind:key="col">{{ col }}</option>
-      </select>
-    </div>
-    <div>
-      <button @click="run">Run</button>
+      <v-btn @click="run">Run</v-btn>
     </div>
     <div>Job status: {{ job.status }}</div>
     <div>{{ result }}</div>
-    <img :src="plotUrl">
-  </div>
+    <img :src="plotUrl">			</v-container>
+		</v-content>
+  </v-app>
 </template>
 
 <script>
@@ -48,6 +69,8 @@ export default {
   data: () => ({
     tableFile: {},
     treeFile: {},
+    tableFileName: '',
+    treeFileName: '',
     job: { status: 0 },
     result: '',
     plotUrl: '',
@@ -89,7 +112,14 @@ export default {
         this.plotUrl = `${this.girderRest.apiRoot}/item/${plotItem._id}/download`;
       }
     },
+    selectTableFile() {
+      this.$refs.tableFile.click();
+    },
+    selectTreeFile() {
+      this.$refs.treeFile.click();
+    },
     async uploadTable(file) {
+      this.tableFileName = file.name;
       const uploader = new utils.Upload(this.girderRest, file, this.scratchFolder);
       this.tableFile = await uploader.start();
       const reader = new FileReader();
@@ -100,6 +130,7 @@ export default {
       reader.readAsText(file);
     },
     async uploadTree(file) {
+      this.treeFileName = file.name;
       const uploader = new utils.Upload(this.girderRest, file, this.scratchFolder);
       this.treeFile = await uploader.start();
     },

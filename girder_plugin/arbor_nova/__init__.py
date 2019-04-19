@@ -2,13 +2,38 @@
 # -*- coding: utf-8 -*-
 
 from girder.plugin import getPlugin, GirderPlugin
+from girder.models.user import User
+from girder.models.collection import Collection
+from girder.models.folder import Folder
 from . import rest
 
 
 class ArborNovaGirderPlugin(GirderPlugin):
     DISPLAY_NAME = 'Arbor Nova'
 
-    def load(self, info):
-        getPlugin('jobs').load(info)
+    def _create_anonymous_user(self):
+        ANONYMOUS_USER = 'anonymous'
+        ANONYMOUS_PASSWORD = 'letmein'
 
+        anon_user = User().findOne({
+            'login': ANONYMOUS_USER
+        })
+
+        if not anon_user:
+            anon_user = User().createUser(
+                login=ANONYMOUS_USER,
+                password=ANONYMOUS_PASSWORD,
+                firstName='Public',
+                lastName='User',
+                email='anon@example.com',
+                admin=False,
+                public=False)
+            anon_user['status'] = 'enabled'
+
+            anon_user = User().save(anon_user)
+        return anon_user
+
+    def load(self, info):
+        anon_user = self._create_anonymous_user()
+        getPlugin('jobs').load(info)
         info['apiRoot'].arbor_nova = rest.ArborNova()

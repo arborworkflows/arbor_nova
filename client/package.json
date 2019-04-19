@@ -10,11 +10,13 @@
   "dependencies": {
     "@girder/components": "^3.0.0-alpha.3",
     "core-js": "^2.6.5",
+    "d3-dsv": "^1.1.1",
     "node-sass": "^4.11.0",
     "pug": "^2.0.3",
     "pug-plain-loader": "^1.0.0",
     "sass-loader": "^7.1.0",
-    "vue": "^2.6.6"
+    "vue": "^2.6.6",
+    "vue-router": "^3.0.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.5.0",

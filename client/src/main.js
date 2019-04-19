@@ -1,10 +1,12 @@
 import Vue from 'vue'
 import App from './App.vue'
 import GirderProvider from '@/plugins/girder';
+import router from './router'
 
 new Vue({
   provide: GirderProvider,
-  render: h => h(App),
+  router,
+  render: h => h(App)
 }).$mount('#app')
 
 Vue.config.productionTip = false

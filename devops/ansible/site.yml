@@ -1,0 +1,45 @@
+---
+- hosts: all
+  vars:
+    ansible_python_interpreter: '/usr/bin/python3'
+    girder_virtualenv: '{{ ansible_env.HOME }}/.venv'
+
+  pre_tasks:
+    - name: Install pip3
+      apt:
+        name: python3-pip
+      become: true
+      become_user: root
+
+    - name: Install virtualenv
+      pip:
+        name: virtualenv
+      become: true
+      become_user: root
+
+  tasks:
+    - name: Include mongodb role
+      include_role:
+        name: ansible-role-girder-mongodb
+
+    - name: Install rabbitmq
+      apt:
+        name: rabbitmq-server
+      become: true
+      become_user: root
+
+    - name: Include girder role
+      include_role:
+        name: ansible-role-girder
+      vars:
+        girder_pip_extra_args: "--pre"
+        girder_daemonize: true
+
+    - name: Include girder_worker role
+      include_role:
+        name: ansible-role-girder-worker
+      vars:
+        girder_worker_install_source: "git"
+        girder_worker_git_version: "master"
+        girder_Worker_virtualenv: "{{ girder_virtualenv }}"
+

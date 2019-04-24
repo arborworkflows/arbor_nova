@@ -6,7 +6,7 @@
     >
       <v-layout row wrap>
         <v-flex xs12 class="text-xs-center">
-          <img src="arbor_128px.png">
+          <img src="../assets/arbor_128px.png">
         </v-flex>
         <v-flex xs12>
           <span class="title">Applications</span>
@@ -52,13 +52,13 @@ export default {
     samples: [
       {
         label: 'Phylogenetic generalized least squares (PGLS)',
-        image: 'pgls.png',
+        image: require('../assets/pgls.png'),
         route: 'pgls',
         description: 'A method for testing for correlations of two continuously distributed characters that vary across species.',
       },
       {
         label: 'PhyloMap',
-        image: 'phylomap.png',
+        image: require('../assets/phylomap.png'),
         route: 'phylomap',
         description: 'Explore a phylogenetic tree and associated species location data.',
       },

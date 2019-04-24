@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import App from './App.vue'
 import GirderProvider from '@/plugins/girder';
+import '@/plugins/resonantgeo';
 import router from './router'
 
 new Vue({

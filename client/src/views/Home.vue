@@ -41,10 +41,6 @@
       </v-layout>
     </v-container>
   </div>
-  <!-- <div>
-    <router-link to="/appendcolumn">Append Column</router-link>
-    <router-link to="/pgls">PGLS</router-link>
-  </div> -->
 </v-app>
 </template>
 
@@ -59,6 +55,12 @@ export default {
         image: 'pgls.png',
         route: 'pgls',
         description: 'A method for testing for correlations of two continuously distributed characters that vary across species.',
+      },
+      {
+        label: 'PhyloMap',
+        image: 'phylomap.png',
+        route: 'phylomap',
+        description: 'Explore a phylogenetic tree and associated species location data.',
       },
     ],
   }),

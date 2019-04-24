@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Home from './views/Home.vue'
 import AppendColumn from './apps/AppendColumn.vue'
 import PGLS from './apps/PGLS.vue'
+import PhyloMap from './apps/PhyloMap.vue'
 
 Vue.use(Router)
 
@@ -22,6 +23,11 @@ export default new Router({
       path: '/pgls',
       name: 'pgls',
       component: PGLS,
+    },
+    {
+      path: '/phylomap',
+      name: 'phylomap',
+      component: PhyloMap,
     },
   ]
 })

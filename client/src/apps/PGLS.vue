@@ -179,7 +179,7 @@ export default {
     async uploadTable(file) {
       if (file) {
         this.tableFileName = file.name;
-        const uploader = new utils.Upload(this.girderRest, file, this.scratchFolder);
+        const uploader = new utils.Upload(file, {$rest: this.girderRest, parent: this.scratchFolder});
         this.tableFile = await uploader.start();
         const reader = new FileReader();
         reader.addEventListener('loadend', e => {
@@ -193,7 +193,7 @@ export default {
     async uploadTree(file) {
       if (file) {
         this.treeFileName = file.name;
-        const uploader = new utils.Upload(this.girderRest, file, this.scratchFolder);
+        const uploader = new utils.Upload(file, {$rest: this.girderRest, parent:this.scratchFolder});
         this.treeFile = await uploader.start();
       }
     },

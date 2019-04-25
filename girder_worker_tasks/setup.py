@@ -19,7 +19,8 @@ setup(name='arbor_nova_tasks',
           ]
       },
       install_requires=[
-          'girder_worker'
+          'girder_worker',
+          'rpy2'
       ],
       packages=['arbor_nova_tasks'],
       zip_safe=False)

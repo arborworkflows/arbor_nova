@@ -69,7 +69,7 @@
     - name: Clone arbor_nova
       git:
         repo: https://github.com/arborworkflows/arbor_nova.git
-        version: "static-asset-serving"
+        version: "master"
         dest: "{{ arbor_nova_directory }}"
 
     - name: Install yarn

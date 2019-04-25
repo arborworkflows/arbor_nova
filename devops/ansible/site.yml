@@ -30,6 +30,15 @@
       become: true
       become_user: root
 
+    - name: Install r packages
+      command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item }}' %in% installed.packages()[,'Package'])) install.packages(pkgs='{{ item }}', repos=c('http://cran.cnr.Berkeley.edu'))"
+      become: yes
+      with_items:
+        - ape
+        - nlme
+      environment:
+        DISPLAY: :7
+
     - name: Copy girder config file
       copy:
         src: config/girder.cfg
@@ -50,6 +59,12 @@
     - name: Include girder role
       include_role:
         name: ansible-role-girder
+
+    - name: Install girder plugins
+      pip:
+        name:
+          - girder-jobs
+        virtualenv: "{{ girder_virtualenv }}"
 
     - name: Clone arbor_nova
       git:
@@ -89,8 +104,8 @@
         name: ansible-role-girder-worker
       vars:
         girder_worker_install_source: "git"
-        girder_worker_git_version: "master"
-        girder_Worker_virtualenv: "{{ girder_virtualenv }}"
+        girder_worker_git_version: "41b634e0e7cafdabe1388d9aa05f6d8ebcaa12a3"
+        girder_worker_virtualenv: "{{ girder_virtualenv }}"
 
   post_tasks:
 

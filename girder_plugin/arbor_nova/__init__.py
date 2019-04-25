@@ -37,7 +37,6 @@ class ArborNovaGirderPlugin(GirderPlugin):
         info['serverRoot'], info['serverRoot'].girder = (ClientWebroot(),
                                                          info['serverRoot'])
         info['serverRoot'].api = info['serverRoot'].girder.api
-
         self._create_anonymous_user()
         getPlugin('jobs').load(info)
         info['apiRoot'].arbor_nova = rest.ArborNova()

@@ -9,5 +9,8 @@ Vagrant.configure("2") do |config|
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "ansible/site.yml"
     ansible.galaxy_role_file = "ansible/requirements.yml"
+    ansible.raw_arguments = [
+       "--module-path", "./ansible/roles/ansible-role-girder/library"
+    ]
   end
 end

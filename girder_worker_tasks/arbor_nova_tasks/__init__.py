@@ -1,6 +1,7 @@
 from girder_worker import GirderWorkerPluginABC
 from girder_worker.app import app
 from girder_worker.utils import girder_job
+from tempfile import NamedTemporaryFile
 
 
 class ArborNovaTasksGirderWorkerPlugin(GirderWorkerPluginABC):
@@ -39,8 +40,8 @@ def pgls(
 ):
     from rpy2 import robjects
     r = robjects.r
-    modelfit_summary_file = 'modelfit.csv'
-    plot_file = 'plot.png'
+    modelfit_summary_file = NamedTemporaryFile(delete=False).name
+    plot_file = NamedTemporaryFile(delete=False).name
     env = robjects.globalenv
     env['tree_file'] = tree_file
     env['table_file'] = table_file

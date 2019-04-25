@@ -1,0 +1,190 @@
+---
+- hosts: all
+  vars:
+    ansible_python_interpreter: '/usr/bin/python3'
+    girder_virtualenv: '{{ ansible_env.HOME }}/.venv'
+    arbor_nova_directory: '{{ ansible_env.HOME }}/arbor_nova'
+
+  pre_tasks:
+    - name: Install python prereqs
+      apt:
+        name:
+          - python-setuptools
+          - python3-venv
+          - python3-dev
+          - python3-pip
+      become: true
+      become_user: root
+
+    - name: Create virtualenv
+      command: |
+        /usr/bin/python3.6 -m venv "{{ girder_virtualenv }}"
+      args:
+        creates: "{{ girder_virtualenv }}"
+
+  tasks:
+
+    - name: Install R
+      apt:
+        name: r-base
+      become: true
+      become_user: root
+
+    - name: Install r packages
+      command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item }}' %in% installed.packages()[,'Package'])) install.packages(pkgs='{{ item }}', repos=c('http://cran.cnr.Berkeley.edu'))"
+      become: yes
+      with_items:
+        - ape
+        - nlme
+      environment:
+        DISPLAY: :7
+
+    - name: Copy girder config file
+      copy:
+        src: config/girder.cfg
+        dest: /etc/girder.cfg
+      become: true
+      become_user: root
+
+    - name: Include mongodb role
+      include_role:
+        name: ansible-role-girder-mongodb
+
+    - name: Install rabbitmq
+      apt:
+        name: rabbitmq-server
+      become: true
+      become_user: root
+
+    - name: Include girder role
+      include_role:
+        name: ansible-role-girder
+
+    - name: Install girder plugins
+      pip:
+        name:
+          - girder-jobs
+        virtualenv: "{{ girder_virtualenv }}"
+
+    - name: Clone arbor_nova
+      git:
+        repo: https://github.com/arborworkflows/arbor_nova.git
+        version: "master"
+        dest: "{{ arbor_nova_directory }}"
+
+    - name: Install yarn
+      npm:
+        name: yarn
+        global: true
+      become: true
+      become_user: root
+
+    - name: Install client requirements
+      yarn:
+        path: "{{ arbor_nova_directory }}/client"
+
+    - name: Build the static assets
+      command: yarn build
+      args:
+        chdir: "{{ arbor_nova_directory }}/client"
+        creates: "{{ arbor_nova_directory }}/dist"
+
+    - name: Create static directory
+      file:
+        path: "{{ girder_virtualenv }}/share/girder/static/arbornova"
+        state: directory
+
+    - name: Copy static assets to the correct directory
+      shell: cp -rf * "{{ girder_virtualenv }}/share/girder/static/arbornova/"
+      args:
+        chdir: "{{ arbor_nova_directory }}/client/dist"
+
+    - name: Include girder_worker role
+      include_role:
+        name: ansible-role-girder-worker
+      vars:
+        girder_worker_install_source: "git"
+        girder_worker_git_version: "41b634e0e7cafdabe1388d9aa05f6d8ebcaa12a3"
+        girder_worker_virtualenv: "{{ girder_virtualenv }}"
+
+  post_tasks:
+
+    - name: Restart mongodb
+      systemd:
+        name: mongod
+        state: restarted
+      become: true
+      become_user: root
+
+    - name: Start Girder service
+      systemd:
+        name: girder
+        state: started
+      become: true
+      become_user: root
+
+    - name: Wait for girder to be up
+      wait_for:
+        port: 8080
+        host: 0.0.0.0
+
+    - name: install girder-client pip package
+      pip:
+        name: girder-client
+      become: true
+      become_user: root
+
+    - name: Create 'admin' user
+      girder:
+        user:
+          firstName: "Admin"
+          lastName: "User"
+          login: "admin"
+          password: "letmein"
+          email: "admin.admin@test.com"
+          admin: true
+        state: present
+
+    - name: Create filesystem assetstore
+      girder:
+        username: "admin"
+        password: "letmein"
+        assetstore:
+          name: "Filesystem Assetstore"
+          type: "filesystem"
+          root: "{{ ansible_env.HOME }}/assetstore/"
+          current: true
+        state: present
+
+    - name: Set the CORS setting
+      girder:
+        username: 'admin'
+        password: 'letmein'
+        put:
+          path: "/system/setting"
+          parameters:
+            key: "core.cors.allow_origin"
+            value: "*"
+
+    - name: Install arbor_nova girder plugin and girder_worker tasks
+      pip:
+        name:
+          - "file://{{ arbor_nova_directory }}/girder_plugin"
+          - "file://{{ arbor_nova_directory }}/girder_worker_tasks"
+        editable: true
+        virtualenv: "{{ girder_virtualenv }}"
+
+
+    - name: Restart girder service
+      systemd:
+        name: girder
+        state: restarted
+      become: true
+      become_user: root
+
+    - name: Restart girder_worker service
+      systemd:
+        name: girder_worker
+        state: restarted
+      become: true
+      become_user: root

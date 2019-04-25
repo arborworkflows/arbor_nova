@@ -3,8 +3,7 @@
 
 from girder.plugin import getPlugin, GirderPlugin
 from girder.models.user import User
-from girder.models.collection import Collection
-from girder.models.folder import Folder
+from .client_webroot import ClientWebroot
 from . import rest
 
 
@@ -34,6 +33,11 @@ class ArborNovaGirderPlugin(GirderPlugin):
         return anon_user
 
     def load(self, info):
-        anon_user = self._create_anonymous_user()
+        # Relocate Girder
+        info['serverRoot'], info['serverRoot'].girder = (ClientWebroot(),
+                                                         info['serverRoot'])
+        info['serverRoot'].api = info['serverRoot'].girder.api
+
+        self._create_anonymous_user()
         getPlugin('jobs').load(info)
         info['apiRoot'].arbor_nova = rest.ArborNova()

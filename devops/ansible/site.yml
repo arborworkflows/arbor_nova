@@ -6,6 +6,12 @@
     arbor_nova_directory: '{{ ansible_env.HOME }}/arbor_nova'
 
   pre_tasks:
+    - name: Update system package list
+      apt:
+        update_cache: true
+      become: true
+      become_user: root
+
     - name: Install python prereqs
       apt:
         name:

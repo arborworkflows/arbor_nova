@@ -13,21 +13,37 @@ This is descriptive rather than prescriptive, but it is what has been tested.
 * Have two virtualenvs, one for girder named `girder` and one for girder-worker named `gw`.
 * Install mongo and rabbitmq
 
-* In virtualenv `girder` run the following commands, it doesn't matter where you run them from:
-  * `pip install --pre girder[plugins]`
-  * `girder build`
-* These commands need to be run in the `girder` virtualenv from specific locations.
-  * from `arbor_nova/girder_plugin` run `pip install -e .`        # install girder plugin
-  * from `arbor_nova/girder_worker_tasks` run `pip install -e .`  # install gw tasks for producer
-* Run Girder, some variant of `girder serve`
-* Enable the arbor_nova plugin in Girder
+* In virtualenv **girder** run the following commands, it doesn't matter where you run them from:
 
+.. code-block:: bash
 
-* In virtualenv `gw` run the following commands, it doesn't matter where you run them from:
-  * `pip install --pre girder-worker`
-* This command needs to be run in the `gw` virtualenv from a specific locations
-  * from `arbor_nova/girder_worker_tasks` run `pip install -e .`  # install gw tasks for consumer
-* Start girder-worker by running `girder-worker` 
+    $ pip install --pre girder[plugins]
+    $ girder build
+
+* These commands need to be run in the **girder** virtualenv from specific locations.
+
+.. code-block:: bash
+
+    $ cd arbor_nova/girder_worker_tasks    
+    $ pip install -e .                     # install gw tasks for producer
+    $ cd ../../arbor_nova/girder_plugin
+    $ pip install -e .                     # install girder plugin
+    $ girder serve                         # start serving girder
+ 
+
+* In virtualenv **gw** run the following command, it doesn't matter where you run it from:
+
+.. code-block:: bash
+
+    $ pip install --pre girder-worker
+
+* These commands need to be run in the **gw** virtualenv from a specific location
+
+.. code-block:: bash
+
+    $ cd arbor_nova/girder_worker_tasks    
+    $ pip install -e .                     # install gw tasks for consumer
+    $ girder-worker                        # start girder-worker
 
 
 Features

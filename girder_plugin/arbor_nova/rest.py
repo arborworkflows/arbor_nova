@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
-from arbor_nova_tasks import column_append, pgls
+from arbor_nova_tasks.arbor_tasks.example import column_append
+from arbor_nova_tasks.arbor_tasks.app_support import pgls
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute
 from girder.api.rest import filtermodel, Resource

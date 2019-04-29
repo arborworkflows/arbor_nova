@@ -162,17 +162,16 @@
           current: true
         state: present
 
-    - name: Set the CORS setting
+    - name: Set Worker API Url
       girder:
-        username: 'admin'
-        password: 'letmein'
-        put:
-          path: "/system/setting"
-          parameters:
-            key: "core.cors.allow_origin"
-            value: "*"
+        port: 8080
+        username: "admin"
+        password: "letmein"
+        setting:
+          key: "worker.api_url"
+          value: "http://localhost:8080/api/v1"
 
-    - name: Install arbor_nova girder plugin and girder_worker tasks
+    - name: Install arbor_nova girder plugin
       pip:
         name:
           - "file://{{ arbor_nova_directory }}/girder_plugin"
@@ -180,6 +179,12 @@
         editable: true
         virtualenv: "{{ girder_virtualenv }}"
 
+    - name: Install arbor_nova girder_worker tasks
+      pip:
+        name:
+          - "file://{{ arbor_nova_directory }}/girder_worker_tasks"
+        editable: true
+        virtualenv: "{{ girder_virtualenv }}"
 
     - name: Restart girder service
       systemd:

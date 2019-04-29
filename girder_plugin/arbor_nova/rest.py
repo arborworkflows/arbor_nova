@@ -3,6 +3,7 @@
 
 from arbor_nova_tasks.arbor_tasks.example import column_append
 from arbor_nova_tasks.arbor_tasks.app_support import pgls
+from arbor_nova_tasks.arbor_tasks.app_support import asr 
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute
 from girder.api.rest import filtermodel, Resource
@@ -15,6 +16,7 @@ class ArborNova(Resource):
         self.resourceName = 'arbor_nova'
         self.route('POST', ('csvColumnAppend', ), self.csv_column_append)
         self.route('POST', ('pgls', ), self.pgls)
+        self.route('POST', ('asr', ), self.asr)
 
     @access.token
     @filtermodel(model='job', plugin='jobs')
@@ -94,7 +96,7 @@ class ArborNova(Resource):
         resultSummaryItemId,
         plotItemId
     ):
-        result = pgls.delay(
+        result = asr.delay(
             GirderFileId(treeFileId),
             GirderFileId(tableFileId),
             selectedColumn,

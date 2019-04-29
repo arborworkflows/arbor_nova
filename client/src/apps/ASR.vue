@@ -114,7 +114,7 @@ export default {
     readyToRun() {
       return !!this.treeFileName &&
         !!this.tableFileName &&
-        !!this.column;
+        !!this.selectedColumn;
     },
   },
   methods: {
@@ -131,7 +131,7 @@ export default {
       const params = optionsToParameters({
         tableFileId: this.tableFile._id,
         treeFileId: this.treeFile._id,
-        column: this.column._id,
+        selectedColumn: this.selectedColumn,
         resultSummaryItemId: resultSummaryItem._id,
         plotItemId: plotItem._id,
       });
@@ -154,7 +154,7 @@ export default {
     async uploadTable(file) {
       if (file) {
         this.tableFileName = file.name;
-        const uploader = new utils.Upload(this.girderRest, file, this.scratchFolder);
+        const uploader = new utils.Upload(file, {$rest: this.girderRest, parent: this.scratchFolder}); 
         this.tableFile = await uploader.start();
         const reader = new FileReader();
         reader.addEventListener('loadend', e => {
@@ -168,7 +168,7 @@ export default {
     async uploadTree(file) {
       if (file) {
         this.treeFileName = file.name;
-        const uploader = new utils.Upload(this.girderRest, file, this.scratchFolder);
+        const uploader = new utils.Upload(file, {$rest: this.girderRest,  parent: this.scratchFolder});
         this.treeFile = await uploader.start();
       }
     },

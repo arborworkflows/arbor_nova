@@ -17,8 +17,8 @@ def asr(
 ):
     from rpy2 import robjects
     r = robjects.r
-    modelfit_summary_file = 'asrResults.csv'
-    plot_file = 'plot.png'
+    results_file = NamedTemporaryFile(delete=False).name
+    plot_file = NamedTemporaryFile(delete=False).name
     env = robjects.globalenv
     env['tree_file'] = tree_file
     env['table_file'] = table_file

@@ -121,7 +121,7 @@ export default {
     async run() {
       this.running = true;
       this.errorLog = null;
-      const modelFitSummaryItem = (await this.girderRest.post(
+      const resultSummaryItem = (await this.girderRest.post(
         `item?folderId=${this.scratchFolder._id}&name=result`,
       )).data
       const plotItem = (await this.girderRest.post(

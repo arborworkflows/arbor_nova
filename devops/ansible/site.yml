@@ -65,6 +65,8 @@
     - name: Include girder role
       include_role:
         name: ansible-role-girder
+      vars:
+        girder_version: "3.0.0a7.dev65"
 
     - name: Install girder plugins
       pip:

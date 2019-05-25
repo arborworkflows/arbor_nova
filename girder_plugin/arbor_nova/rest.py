@@ -3,6 +3,7 @@
 
 from arbor_nova_tasks.arbor_tasks.example import column_append
 from arbor_nova_tasks.arbor_tasks.app_support import pgls
+from arbor_nova_tasks.arbor_tasks.app_support import asr 
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute
 from girder.api.rest import filtermodel, Resource
@@ -15,6 +16,7 @@ class ArborNova(Resource):
         self.resourceName = 'arbor_nova'
         self.route('POST', ('csvColumnAppend', ), self.csv_column_append)
         self.route('POST', ('pgls', ), self.pgls)
+        self.route('POST', ('asr', ), self.asr)
 
     @access.token
     @filtermodel(model='job', plugin='jobs')
@@ -69,3 +71,39 @@ class ArborNova(Resource):
             ])
 
         return result.job
+
+
+# added ASR from app_support directory
+
+    @access.token
+    @filtermodel(model='job', plugin='jobs')
+    @autoDescribeRoute(
+        Description('ASR')
+        .param('treeFileId', 'The ID of the input tree file.')
+        .param('tableFileId', 'The ID of the input table file.')
+        .param('selectedColumn', 'The character to use for calculation of ASR.')
+        .param('resultSummaryItemId', 'The ID of the output item where the model summary file will be uploaded.')
+        .param('plotItemId', 'The ID of the output item where the plot file will be uploaded.')
+        .errorResponse()
+        .errorResponse('Write access was denied on the parent item.', 403)
+        .errorResponse('Failed to upload output file.', 500)
+    )
+    def asr(
+        self,
+        treeFileId,
+        tableFileId,
+        selectedColumn,
+        resultSummaryItemId,
+        plotItemId
+    ):
+        result = asr.delay(
+            GirderFileId(treeFileId),
+            GirderFileId(tableFileId),
+            selectedColumn,
+            girder_result_hooks=[
+                GirderUploadToItem(resultSummaryItemId),
+                GirderUploadToItem(plotItemId)
+            ])
+
+        return result.job
+

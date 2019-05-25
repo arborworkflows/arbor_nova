@@ -62,6 +62,12 @@ export default {
         route: 'phylomap',
         description: 'Explore a phylogenetic tree and associated species location data.',
       },
+      {   
+        label: 'Ancestral State Reconstruction',
+        image: require('../assets/asr.png'),
+        route: 'asr',
+        description: 'Explore the ancestral signal of a particular character across the tree',
+      },    
     ],
   }),
 }

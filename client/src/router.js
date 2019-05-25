@@ -4,6 +4,7 @@ import Home from './views/Home.vue'
 import AppendColumn from './apps/AppendColumn.vue'
 import PGLS from './apps/PGLS.vue'
 import PhyloMap from './apps/PhyloMap.vue'
+import ASR from './apps/ASR.vue'
 
 Vue.use(Router)
 
@@ -28,6 +29,11 @@ export default new Router({
       path: '/phylomap',
       name: 'phylomap',
       component: PhyloMap,
+    },
+    {
+      path: '/asr',
+      name: 'asr',
+      component: ASR,
     },
   ]
 })

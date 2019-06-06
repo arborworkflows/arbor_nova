@@ -68,9 +68,9 @@
             ref="dataBrowser"
             v-if="location"
             :location.sync="location"
-            :select-enabled="false"
-            :new-item-enabled="false"
-            :new-folder-enabled="false"
+            :no-selection
+            :no-upload
+            :no-new-folder
             @itemclick="itemClicked"
           />
       </v-card>

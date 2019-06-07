@@ -36,14 +36,27 @@
       become: true
       become_user: root
 
-    - name: Install r packages
+    - name: Install R packages from CRAN
       command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item }}' %in% installed.packages()[,'Package'])) install.packages(pkgs='{{ item }}', repos=c('http://cran.cnr.Berkeley.edu'))"
       become: yes
       with_items:
         - ape
         - nlme
+        - devtools
       environment:
         DISPLAY: :7
+
+    - name: install R  packages from github
+      command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "options(repos='http://cran.cnr.Berkeley.edu');library(devtools);install_github('{{item}}')"
+      become: yes
+      with_items:
+        - hafen/cardoonTools
+        - tangelo-hub/romanescoTools
+        - arborworkflows/aRbor
+        - uyedaj/treeplyr
+      environment:
+        DISPLAY: :7
+
 
     - name: Copy girder config file
       copy:

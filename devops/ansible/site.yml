@@ -65,24 +65,24 @@
       become: yes
 
     - name: add R3.5 repository in apt-get catalog
-      apt_repository:
-        repo: deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/
-        state: present
+      command: apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
       become: yes
 
     - name: add R3.5 repository in apt-get catalog
-      command: apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
-      become: yes
+      apt_repository:
+        repo: deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/
+        state: present
+      become: yess
 
     - name: update before R install
       command: apt update
       become: yes
 
-    - name: Install R 3.5
+    - name: Install R 3.6
       apt:
         name:
-          - r-base*
-          - r-base-core*
+          - r-base
+          - r-base-core
           - r-recommended
       become: yes
       become_user: root

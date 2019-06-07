@@ -67,10 +67,9 @@
       command: apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
       become: yes
 
- - name: apt update to add R
+    - name: apt update to add R
       command: apt update
       become: yes
-
 
     - name: Install R packages from CRAN
       command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item }}' %in% installed.packages()[,'Package'])) install.packages(pkgs='{{ item }}', repos=c('http://cran.cnr.Berkeley.edu'))"

@@ -22,12 +22,14 @@
       become: true
       become_user: root
 
-    # install any dependencies needed for the R packages (devtools, aRbor, etc.)
+    # install any dependencies needed for the R packages (devtools, aRbor, etc.) to install 
     - name: Install R package prereqs
       apt:
         name:
           - libcurl4-openssl-dev
           - libssl-dev
+          - libmagick++-dev
+          - libgsl-dev
       become: true
       become_user: root
 

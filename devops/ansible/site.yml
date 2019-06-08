@@ -27,6 +27,7 @@
       apt:
         name:
           - libcurl4-openssl-dev
+          - libssl-dev
       become: true
       become_user: root
 

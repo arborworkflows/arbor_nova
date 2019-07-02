@@ -5,6 +5,7 @@ import AppendColumn from './apps/AppendColumn.vue'
 import PGLS from './apps/PGLS.vue'
 import PhyloMap from './apps/PhyloMap.vue'
 import ASR from './apps/ASR.vue'
+import PolyA from './apps/PolyA.vue'
 
 Vue.use(Router)
 
@@ -34,6 +35,11 @@ export default new Router({
       path: '/asr',
       name: 'asr',
       component: ASR,
+    },
+    {
+      path: '/polya',
+      name: 'polya',
+      component: PolyA,
     },
   ]
 })

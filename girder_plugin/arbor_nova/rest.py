@@ -4,6 +4,7 @@
 from arbor_nova_tasks.arbor_tasks.example import column_append
 from arbor_nova_tasks.arbor_tasks.app_support import pgls
 from arbor_nova_tasks.arbor_tasks.app_support import asr 
+from arbor_nova_tasks.arbor_tasks.fnlcr import polyA_v10 
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute
 from girder.api.rest import filtermodel, Resource
@@ -17,6 +18,7 @@ class ArborNova(Resource):
         self.route('POST', ('csvColumnAppend', ), self.csv_column_append)
         self.route('POST', ('pgls', ), self.pgls)
         self.route('POST', ('asr', ), self.asr)
+        self.route('POST', ('polya', ), self.polyA_v10)
 
     @access.token
     @filtermodel(model='job', plugin='jobs')
@@ -105,5 +107,33 @@ class ArborNova(Resource):
                 GirderUploadToItem(plotItemId)
             ])
 
+        return result.job
+
+    @access.token
+    @filtermodel(model='job', plugin='jobs')
+    @autoDescribeRoute(
+        Description('Calculate a Polyadenylation (PolyA) tail')
+        .param('fastaId', 'The ID of the input file.')
+        .param('linkerId', 'The ID of the linker input file.')
+        .param('transcriptId', 'The ID of the input file.')
+        .param('outputId', 'The ID of the output item where the output file will be uploaded.')
+        .errorResponse()
+        .errorResponse('Write access was denied on the parent item.', 403)
+        .errorResponse('Failed to upload output file.', 500)
+    )
+    def polyA_v10(
+            self, 
+            fastaId, 
+            linkerId, 
+            transcriptId,
+            outputId
+    ):
+        result = polyA_v10.delay(
+                GirderFileId(fastaId), 
+                GirderFileId(linkerId),
+                GirderFileId(transcriptId),
+                girder_result_hooks=[
+                    GirderUploadToItem(outputId)
+                ])
         return result.job
 

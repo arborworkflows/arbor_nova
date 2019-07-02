@@ -68,6 +68,12 @@ export default {
         route: 'asr',
         description: 'Explore the ancestral signal of a particular character across the tree',
       },    
+      {   
+        label: 'PolyA tail',
+        image: require('../assets/polya.png'),
+        route: 'polya',
+        description: 'Search for Polyadenylation tails',
+      },    
     ],
   }),
 }

@@ -7,30 +7,30 @@
         </v-toolbar>
         <v-container fluid>
           <v-flex xs12>
-            <v-btn class="text-none" outline block @click='$refs.tableFile.click()'>{{ fastaFileName || 'UPLOAD FASTA' }}</v-btn>
+            <v-btn class="text-none" outline block @click='$refs.fastaFile.click()'>{{ fastaFileId || 'UPLOAD FASTA' }}</v-btn>
             <input
               type="file"
               style="display: none"
               ref="fastaFile"
-              @change="uploadTable($event.target.files[0])"
+              @change="uploadFastaFile($event.target.files[0])"
             >
           </v-flex>
           <v-flex xs12>
-            <v-btn class="text-none" outline block @click='$refs.treeFile.click()'>{{ linkerFileName || 'UPLOAD LINKER' }}</v-btn>
+            <v-btn class="text-none" outline block @click='$refs.linkerFile.click()'>{{ linkerFileId || 'UPLOAD LINKER' }}</v-btn>
             <input
               type="file"
               style="display: none"
               ref="linkerFile"
-              @change="uploadTree($event.target.files[0])"
+              @change="uploadLinkerFile($event.target.files[0])"
             >
           </v-flex>
           <v-flex xs12>
-            <v-btn class="text-none" outline block @click='$refs.treeFile.click()'>{{ transcriptFileName || 'UPLOAD TRANSCRIPT' }}</v-btn>
+            <v-btn class="text-none" outline block @click='$refs.transcriptFile.click()'>{{ transcriptFileId || 'UPLOAD TRANSCRIPT' }}</v-btn>
             <input
               type="file"
               style="display: none"
               ref="transcriptFile"
-              @change="uploadTree($event.target.files[0])"
+              @change="uploadTranscriptFile($event.target.files[0])"
             >
           </v-flex>
           <v-flex xs12>
@@ -65,7 +65,7 @@
         <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code>
         <template v-if="!running && job.status === 3">
           <v-card v-if="result.length > 0" class="mb-4 ml-4 mr-4">
-            <v-card-text>Model fit summary</v-card-text>
+            <v-card-text>PolyA Tail Results</v-card-text>
             <json-data-table :data="result" hide-actions/>
           </v-card>
         </template>
@@ -89,13 +89,16 @@ export default {
     JsonDataTable,
   },
   data: () => ({
+    fastaFile: {},
+    linkerFile: {},
+    transcriptFile: {},
     fastaFileId: '',
     linkerFileId: '',
     transcriptFileId: '',
     job: { status: 0 },
     running: false,
     result: [],
-    plotUrl: '',
+    resultColumns: [],
   }),
   asyncComputed: {
     scratchFolder() {
@@ -131,9 +134,8 @@ export default {
 
       if (this.job.status === 3) {
         this.running = false;
-        this.result = csvParse((await this.girderRest.get(`item/${modelFitSummaryItem._id}/download`)).data);
+        this.result = csvParse((await this.girderRest.get(`item/${outputItem._id}/download`)).data);
         this.resultColumns = this.result.columns.map(d => ({text: d, value: d, sortable: false}));
-        this.plotUrl = `${this.girderRest.apiRoot}/item/${plotItem._id}/download`;
       }
       if (this.job.status === 4) {
         this.running = false;
@@ -142,16 +144,22 @@ export default {
     async uploadLinkerFile(file) {
       if (file) {
         this.linkerFileId = file.name;
+        const uploader = new utils.Upload(file, {$rest: this.girderRest, parent: this.scratchFolder});
+        this.linkerFile = await uploader.start();
       }
     },
     async uploadTranscriptFile(file) {
       if (file) {
         this.transcriptFileId = file.name;
+        const uploader = new utils.Upload(file, {$rest: this.girderRest, parent: this.scratchFolder});
+        this.transcriptFile = await uploader.start();
       }
     },
     async uploadFastaFile(file) {
       if (file) {
         this.fastaFileId = file.name;
+        const uploader = new utils.Upload(file, {$rest: this.girderRest, parent: this.scratchFolder});
+        this.fastaFile = await uploader.start();
       }
     },
   }

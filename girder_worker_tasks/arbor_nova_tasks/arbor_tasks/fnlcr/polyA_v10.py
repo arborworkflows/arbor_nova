@@ -1,5 +1,6 @@
 from girder_worker.app import app
 from girder_worker.utils import girder_job
+from tempfile import NamedTemporaryFile
 
 # from polyA_v1 source
 import sys
@@ -197,7 +198,6 @@ def polyA_v10(self,fasta_file,linker_file,transcript_file,**kwargs):
     transcript_header = []
     transcript_header = transcript.keys()
 
-    print('linker keys:',linker.keys())
     
     # if ((len(fasta_headers) == 0) or (len(linker_header) == 0) or (len(transcript_header) == 0)):
     if (not fasta_headers) or (not linker_header) or (not transcript_header):
@@ -213,12 +213,9 @@ def polyA_v10(self,fasta_file,linker_file,transcript_file,**kwargs):
     # Read the linker and transcript sequences
     #
     for i, el in enumerate(linker_header,1):
-        print('i,el',i,el)
         linker_seq=str(linker[el][5:].seq)
-        print(linker_seq)
     for i, tr in enumerate(transcript_header,1):
         transcript_seq=str(transcript[tr][:].seq)
-        print(transcript_seq)
 
     #
     #   START OF LOOPING THROUGH THE SEQUENCES - START OF PROGRAM
@@ -229,16 +226,16 @@ def polyA_v10(self,fasta_file,linker_file,transcript_file,**kwargs):
     for i, h in enumerate(fasta_headers, 1):
         seq=str(fasta[h][:].seq)
         seq_len=len(seq)
-        print("Sequence {:6d} {:6d} bases {}".format(i,seq_len,h))
+        #print("Sequence {:6d} {:6d} bases {}".format(i,seq_len,h))
         linker_matches=find_linker_seqs(linker,seq,0,linker_seq)
-        print(linker_matches)
+        #print(linker_matches)
         if not linker_matches:
             print("Sequence {:6d} - Linker not found".format(i))
             quit()
     #   print("type of linker_matches = {}".format(type(linker_matches)))
         l=0
         seeds.clear()
-        print(seeds)
+        #print(seeds)
     #
     # Search for Linker/Poly(A) pairs
     #
@@ -255,7 +252,7 @@ def polyA_v10(self,fasta_file,linker_file,transcript_file,**kwargs):
                 break
             else:
                 seed_start, seed_stop=find_seed('AAAAAAAAAA',seq[sstart:sstart+20],hit='last',edit_dist=0)
-                print("Seed AAAAAAAAAA seed_start:{:6d} seed_stop:{:6d}".format(seed_start,seed_stop))
+                #print("Seed AAAAAAAAAA seed_start:{:6d} seed_stop:{:6d}".format(seed_start,seed_stop))
                 if (seed_start > 0):
                     seed_start=seed_start+sstart
                     seed_stop=seed_stop+sstart
@@ -265,12 +262,12 @@ def polyA_v10(self,fasta_file,linker_file,transcript_file,**kwargs):
     #               right=fine_search(seed_stop,seq,direction='right',pattern='AAAAA',edit_dist=2)
                     right=fine_search(seed_stop,seq,direction='right',pattern='AA',edit_dist=1)
     #               right=fine_search(right-2,seq,direction='right',pattern='AA',edit_dist=1)
-                    print("Seed AAAAAAAAAA left:{:6d} right:{:6d}".format(left,right))
+                    #print("Seed AAAAAAAAAA left:{:6d} right:{:6d}".format(left,right))
                     seed_info=seed_params(l,left,right)
                     seeds.append(seed_info)
                 else:
                     seed_start, seed_stop=find_seed('AAAAA',seq[sstart:sstart+20],hit='last',edit_dist=2)
-                    print("Seed AAAAA seed_start:{:6d} seed_stop:{:6d}".format(seed_start,seed_stop))
+                    #print("Seed AAAAA seed_start:{:6d} seed_stop:{:6d}".format(seed_start,seed_stop))
                     if (seed_start > 0):
                         seed_start=seed_start+sstart
                         seed_stop=seed_stop+sstart
@@ -280,15 +277,15 @@ def polyA_v10(self,fasta_file,linker_file,transcript_file,**kwargs):
     #                   right=fine_search(seed_stop,seq,direction='right',pattern='AAAAA',edit_dist=2)
                         right=fine_search(seed_stop,seq,direction='right',pattern='AA',edit_dist=1)
     #                   right=fine_search(right-2,seq,direction='right',pattern='AA',edit_dist=1)
-                        print("Seed AAAAA left:{:6d} right:{:6d}".format(left,right))
+                        #print("Seed AAAAA left:{:6d} right:{:6d}".format(left,right))
                         seed_info=seed_params(l,left,right)
                         seeds.append(seed_info)
     #               else:
     #                   seed_info=seed_params(l,-1,-1)
     #                   seeds.append(seed_info)
             l=l+1
-        print("Printing seeds after search")
-        print(seeds)
+        #print("Printing seeds after search")
+        #print(seeds)
         num_linkers=l
         l=0
         if seeds:
@@ -297,7 +294,7 @@ def polyA_v10(self,fasta_file,linker_file,transcript_file,**kwargs):
             seedidx=seeds[len(seeds)-1].idx
             lright=linker_matches[seeds[len(seeds)-1].idx].start-5
             left=seeds[len(seeds)-1].start
-            print("Sequence:{:6d} Header:{} left:{:6d} right:{:6d} nseeds:{:6d} seed_idx:{:6d} lright:{:6d} tail_len:{:6d} tail:{}".format(i,h,left,right,nseeds,seedidx,lright,right-left,seq[left:right]))
+            #print("Sequence:{:6d} Header:{} left:{:6d} right:{:6d} nseeds:{:6d} seed_idx:{:6d} lright:{:6d} tail_len:{:6d} tail:{}".format(i,h,left,right,nseeds,seedidx,lright,right-left,seq[left:right]))
             right=linker_matches[seeds[len(seeds)-1].idx].start-5
             tail_info=tail_params(i,h,left+1,right,right-left,seq[left-10:left],seq[left:right],seq[right:right+15])
         else:
@@ -309,9 +306,11 @@ def polyA_v10(self,fasta_file,linker_file,transcript_file,**kwargs):
     #
     #  Print the spreadsheet version
     #
-    outname = 'outfile.txt'
+    # generate unique names for multiple runs?  Add extension so it is easier to use
+    outname = NamedTemporaryFile(delete=False).name+'.tsv'
+
     with open(outname, 'w') as tmp:
-        print("Index\tSeq_Header\tTail_Start\tTail_End\tTail_Length\tTranscript_End\tTail_Seq\tLast_2_Tail_seq\tBeg_Link_Seq")
+        print("Index\tSeq_Header\tTail_Start\tTail_End\tTail_Length\tTranscript_End\tTail_Seq\tLast_2_Tail_seq\tBeg_Link_Seq",file=tmp)
         for tail in tails:
             if(tail.len > 1):
                 print("{:5d}\t{}\t{:5d}\t{:5d}\t{:5d}\t{}\t{}\t{}\t{}".format(tail.idx, tail.header, tail.start, tail.end, tail.len,

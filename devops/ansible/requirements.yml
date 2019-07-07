@@ -1,3 +1,6 @@
 - src: https://github.com/girder/ansible-role-girder-mongodb
+  version: 927743b747f447897d2a58d7b59c6c5733b9d170
 - src: https://github.com/girder/ansible-role-girder
+  version: df035ffecb8fccb6831dfb502c6ab751a3d9bdf9
 - src: https://github.com/girder/ansible-role-girder-worker
+  version: c1ad1d876ac00dc3e87c8e17903014eb697fbdfe

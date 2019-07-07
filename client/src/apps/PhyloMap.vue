@@ -58,7 +58,7 @@
         </v-layout>
       </v-container>
     </v-content>
-    <v-dialog v-model="dialog">
+    <v-dialog v-model="dialog" full-width max-width="600px">
       <template v-slot:activator="{ on }">
         <v-btn class="data-button text-none primary" flat absolute v-on="on">{{ item ? item.name : 'SELECT DATA' }}</v-btn>
       </template>
@@ -67,10 +67,10 @@
           <GirderDataBrowser
             ref="dataBrowser"
             v-if="location"
-            :select-enabled="false"
             :location.sync="location"
-            :new-item-enabled="false"
-            :new-folder-enabled="false"
+            :no-selection
+            :no-upload
+            :no-new-folder
             @itemclick="itemClicked"
           />
       </v-card>
@@ -113,6 +113,7 @@
 import { DataBrowser as GirderDataBrowser } from "@girder/components/src/components";
 import { scaleOrdinal, scaleSequential } from 'd3-scale';
 import { schemeCategory10, schemePaired, interpolateWarm } from 'd3-scale-chromatic';
+import scratchFolder from '../scratchFolder';
 
 export default {
   name: 'phylo-map',
@@ -150,8 +151,13 @@ export default {
     traits: null,
   }),
   async created() {
-    var { data: users } = await this.girderRest.get('user');
-    this.location = users[0];
+    await scratchFolder(this.girderRest);
+    this.location = {...this.girderRest.user};
+  },
+  asyncComputed: {
+    scratchFolder() {
+      return scratchFolder(this.girderRest);
+    },
   },
   mounted() {
     var interactorOptions = this.$refs.mapViewport.$geojsMap.interactor().options();

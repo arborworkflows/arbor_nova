@@ -7,7 +7,7 @@
         </v-toolbar>
         <v-container fluid>
           <v-flex xs12>
-            <v-btn class="text-none" outline block @click='$refs.fastaFile.click()'>{{ fastaFileId || 'UPLOAD FASTA' }}</v-btn>
+            <v-btn class="text-none" outline block @click='$refs.fastaFile.click()'>{{ fastaFileName || 'UPLOAD FASTA' }}</v-btn>
             <input
               type="file"
               style="display: none"
@@ -16,7 +16,7 @@
             >
           </v-flex>
           <v-flex xs12>
-            <v-btn class="text-none" outline block @click='$refs.linkerFile.click()'>{{ linkerFileId || 'UPLOAD LINKER' }}</v-btn>
+            <v-btn class="text-none" outline block @click='$refs.linkerFile.click()'>{{ linkerFileName || 'UPLOAD LINKER' }}</v-btn>
             <input
               type="file"
               style="display: none"
@@ -25,7 +25,7 @@
             >
           </v-flex>
           <v-flex xs12>
-            <v-btn class="text-none" outline block @click='$refs.transcriptFile.click()'>{{ transcriptFileId || 'UPLOAD TRANSCRIPT' }}</v-btn>
+            <v-btn class="text-none" outline block @click='$refs.transcriptFile.click()'>{{ transcriptFileName || 'UPLOAD TRANSCRIPT' }}</v-btn>
             <input
               type="file"
               style="display: none"
@@ -92,9 +92,9 @@ export default {
     fastaFile: {},
     linkerFile: {},
     transcriptFile: {},
-    fastaFileId: '',
-    linkerFileId: '',
-    transcriptFileId: '',
+    fastaFileName: '',
+    linkerFileName: '',
+    transcriptFileName: '',
     job: { status: 0 },
     running: false,
     result: [],
@@ -107,9 +107,9 @@ export default {
   },
   computed: {
     readyToRun() {
-      return !!this.fastaFileId &&
-        !!this.linkerFileId &&
-        !!this.transcriptFileId; 
+      return !!this.fastaFileName &&
+        !!this.linkerFileName &&
+        !!this.transcriptFileName; 
     },
   },
   methods: {
@@ -121,9 +121,9 @@ export default {
       )).data
 
       const params = optionsToParameters({
-        fastaId: this.fastaFileId,
-        linkerId: this.linkerFileId,
-        transcriptId: this.transcriptFileId,
+        fastaId: this.fastaFileName._id,
+        linkerId: this.linkerFileName._id,
+        transcriptId: this.transcriptFileName._id,
         outputId: outputItem._id,
       });
       this.job = (await this.girderRest.post(
@@ -143,21 +143,21 @@ export default {
     },
     async uploadLinkerFile(file) {
       if (file) {
-        this.linkerFileId = file.name;
+        this.linkerFileName = file.name;
         const uploader = new utils.Upload(file, {$rest: this.girderRest, parent: this.scratchFolder});
         this.linkerFile = await uploader.start();
       }
     },
     async uploadTranscriptFile(file) {
       if (file) {
-        this.transcriptFileId = file.name;
+        this.transcriptFileName = file.name;
         const uploader = new utils.Upload(file, {$rest: this.girderRest, parent: this.scratchFolder});
         this.transcriptFile = await uploader.start();
       }
     },
     async uploadFastaFile(file) {
       if (file) {
-        this.fastaFileId = file.name;
+        this.fastaFileName = file.name;
         const uploader = new utils.Upload(file, {$rest: this.girderRest, parent: this.scratchFolder});
         this.fastaFile = await uploader.start();
       }

@@ -307,22 +307,22 @@ def polyA_v10(self,fasta_file,linker_file,transcript_file,**kwargs):
     #  Print the spreadsheet version
     #
     # generate unique names for multiple runs?  Add extension so it is easier to use
-    outname = NamedTemporaryFile(delete=False).name+'.tsv'
+    outname = NamedTemporaryFile(delete=False).name+'.csv'
 
     with open(outname, 'w') as tmp:
-        print("Index\tSeq_Header\tTail_Start\tTail_End\tTail_Length\tTranscript_End\tTail_Seq\tLast_2_Tail_seq\tBeg_Link_Seq",file=tmp)
+        print("Index,Seq_Header,Tail_Start,Tail_End,Tail_Length,Transcript_End,Tail_Seq,Last_2_Tail_seq,Beg_Link_Seq",file=tmp)
         for tail in tails:
             if(tail.len > 1):
-                print("{:5d}\t{}\t{:5d}\t{:5d}\t{:5d}\t{}\t{}\t{}\t{}".format(tail.idx, tail.header, tail.start, tail.end, tail.len,
+                print("{:5d},{},{:5d},{:5d},{:5d},{},{},{},{}".format(tail.idx, tail.header, tail.start, tail.end, tail.len,
                                                                           tail.t_seq, tail.a_seq, tail.a_seq[-2:], tail.l_seq),file=tmp)
             elif(tail.len == 1):
-                print("{:5d}\t{}\t{:5d}\t{:5d}\t{:5d}\t{}\t{}\t{}\t{}".format(tail.idx, tail.header, tail.start, tail.end, tail.len,
+                print("{:5d},{},{:5d},{:5d},{:5d},{},{},{},{}".format(tail.idx, tail.header, tail.start, tail.end, tail.len,
                                                                           tail.t_seq, tail.a_seq, tail.a_seq[-1:], tail.l_seq),file=tmp)
             elif(tail.len == 0):
-                print("{:5d}\t{}\t{:5d}\t{:5d}\t{:5d}\t{}\t{}\t{}\t{}".format(tail.idx, tail.header, tail.start, tail.end, tail.len,
+                print("{:5d},{},{:5d},{:5d},{:5d},{},{},{},{}".format(tail.idx, tail.header, tail.start, tail.end, tail.len,
                                                                           tail.t_seq, tail.a_seq, '', tail.l_seq),file=tmp)
             else:
-                print("{:5d}\t{}\t{:5d}\t{:5d}\t{:5d}\t{}\t{}\t{}\t{}".format(tail.idx, tail.header, tail.start, tail.end, tail.len,
+                print("{:5d},{},{:5d},{:5d},{:5d},{},{},{},{}".format(tail.idx, tail.header, tail.start, tail.end, tail.len,
                                                                           tail.t_seq, tail.a_seq, 'XX', tail.l_seq),file=tmp)
 
     # return the name of the output file

@@ -45,6 +45,18 @@
               Go
             </v-btn>
           </v-flex>
+          <v-flex xs12>
+            <v-btn
+              block
+              :class="{ primary: readyToRun }"
+              :flat="readyToRun"
+              :outline="!readyToRun"
+              :disabled="!readyToRun"
+              @click="downloadResults"
+            >
+              Download Results 
+            </v-btn>
+          </v-flex>
         </v-container>
       </v-navigation-drawer>
       <v-layout column justify-start fill-height style="margin-left: 400px">
@@ -99,6 +111,8 @@ export default {
     running: false,
     result: [],
     resultColumns: [],
+    resultString:  '',
+    runCompleted: false,
   }),
   asyncComputed: {
     scratchFolder() {
@@ -111,6 +125,9 @@ export default {
         !!this.linkerFileName &&
         !!this.transcriptFileName; 
     },
+    readyToDownload() {
+      return (this.runCompleted)
+    },
   },
   methods: {
     async run() {
@@ -121,9 +138,9 @@ export default {
       )).data
 
       const params = optionsToParameters({
-        fastaId: this.fastaFileName._id,
-        linkerId: this.linkerFileName._id,
-        transcriptId: this.transcriptFileName._id,
+        fastaId: this.fastaFile._id,
+        linkerId: this.linkerFile._id,
+        transcriptId: this.transcriptFile._id,
         outputId: outputItem._id,
       });
       this.job = (await this.girderRest.post(
@@ -134,8 +151,11 @@ export default {
 
       if (this.job.status === 3) {
         this.running = false;
-        this.result = csvParse((await this.girderRest.get(`item/${outputItem._id}/download`)).data);
+        this.resultString = (await this.girderRest.get(`item/${outputItem._id}/download`)).data;
+        //this.result = csvParse((await this.girderRest.get(`item/${outputItem._id}/download`)).data);
+        this.result = csvParse(this.resultString);
         this.resultColumns = this.result.columns.map(d => ({text: d, value: d, sortable: false}));
+	this.runCompleted = true;
       }
       if (this.job.status === 4) {
         this.running = false;
@@ -161,6 +181,14 @@ export default {
         const uploader = new utils.Upload(file, {$rest: this.girderRest, parent: this.scratchFolder});
         this.fastaFile = await uploader.start();
       }
+    },
+    async downloadResults() {
+	console.log('resultString: ',this.resultString);
+	var resultsElem = document.createElement('a');
+	//var encoded = encodeURIComponent(this.result);
+	resultsElem.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(this.resultString));
+	resultsElem.setAttribute('download', 'polyA_results.csv');
+	resultsElem.click();
     },
   }
 }

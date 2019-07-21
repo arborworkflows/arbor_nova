@@ -33,6 +33,18 @@
       become: true
       become_user: root
 
+    # install any dependencies needed for the python tasks 
+    - name: Install prereqs for tasks
+      apt:
+        name:
+          - keras 
+          - tensorflow
+          - pathlib
+          - scikit-image
+          - alien
+      become: true
+      become_user: root
+
     - name: Create virtualenv
       command: |
         /usr/bin/python3.6 -m venv "{{ girder_virtualenv }}"

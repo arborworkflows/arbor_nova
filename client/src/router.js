@@ -6,6 +6,8 @@ import PGLS from './apps/PGLS.vue'
 //import PhyloMap from './apps/PhyloMap.vue'
 import ASR from './apps/ASR.vue'
 import PolyA from './apps/PolyA.vue'
+import blastn from './apps/blastn.vue'
+import infer from './apps/infer.vue'
 
 Vue.use(Router)
 
@@ -40,6 +42,16 @@ export default new Router({
       path: '/polya',
       name: 'polya',
       component: PolyA,
+    },
+    {
+      path: '/blastn',
+      name: 'blastn',
+      component: blastn,
+    },
+    {
+      path: '/infer',
+      name: 'infer',
+      component: infer,
     },
   ]
 })

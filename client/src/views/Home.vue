@@ -74,6 +74,18 @@ export default {
         route: 'polya',
         description: 'Search for Polyadenylation tails',
       },    
+      {   
+        label: 'Blastn',
+        image: require('../assets/blastn.png'),
+        route: 'blastn',
+        description: 'Search similarity between FASTA files',
+      },    
+      {   
+        label: 'DNN Infer',
+        image: require('../assets/infer.png'),
+        route: 'infer',
+        description: 'Perform forward inferencing using a pretrained U-Net network',
+      },    
     ],
   }),
 }

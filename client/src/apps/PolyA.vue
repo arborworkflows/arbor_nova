@@ -48,10 +48,10 @@
           <v-flex xs12>
             <v-btn
               block
-              :class="{ primary: readyToRun }"
-              :flat="readyToRun"
-              :outline="!readyToRun"
-              :disabled="!readyToRun"
+              :class="{ primary: readyToDownload }"
+              :flat="readyToDownload"
+              :outline="!readyToDownload"
+              :disabled="!readyToDownload"
               @click="downloadResults"
             >
               Download Results 
@@ -73,6 +73,9 @@
           </v-card>
         <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
           Running (Job Status {{ job.status }}) ...
+        </div>
+        <div v-if="runCompleted" xs12 class="text-xs-center mb-4 ml-4 mr-4">
+          Processing Output ... 
         </div>
         <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code>
         <template v-if="!running && job.status === 3">
@@ -152,7 +155,6 @@ export default {
       if (this.job.status === 3) {
         this.running = false;
         this.resultString = (await this.girderRest.get(`item/${outputItem._id}/download`)).data;
-        //this.result = csvParse((await this.girderRest.get(`item/${outputItem._id}/download`)).data);
         this.result = csvParse(this.resultString);
         this.resultColumns = this.result.columns.map(d => ({text: d, value: d, sortable: false}));
 	this.runCompleted = true;
@@ -163,6 +165,7 @@ export default {
     },
     async uploadLinkerFile(file) {
       if (file) {
+        this.runCompleted = false;
         this.linkerFileName = file.name;
         const uploader = new utils.Upload(file, {$rest: this.girderRest, parent: this.scratchFolder});
         this.linkerFile = await uploader.start();
@@ -170,6 +173,7 @@ export default {
     },
     async uploadTranscriptFile(file) {
       if (file) {
+        this.runCompleted = false;
         this.transcriptFileName = file.name;
         const uploader = new utils.Upload(file, {$rest: this.girderRest, parent: this.scratchFolder});
         this.transcriptFile = await uploader.start();
@@ -177,19 +181,25 @@ export default {
     },
     async uploadFastaFile(file) {
       if (file) {
+        this.runCompleted = false;
         this.fastaFileName = file.name;
         const uploader = new utils.Upload(file, {$rest: this.girderRest, parent: this.scratchFolder});
         this.fastaFile = await uploader.start();
       }
     },
+
     async downloadResults() {
-	console.log('resultString: ',this.resultString);
-	var resultsElem = document.createElement('a');
-	//var encoded = encodeURIComponent(this.result);
-	resultsElem.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(this.resultString));
-	resultsElem.setAttribute('download', 'polyA_results.csv');
-	resultsElem.click();
+	console.log('resultString beginning: ',this.resultString.split(0,200));
+	//forceFileDownload(this.resultString);
+        const url = window.URL.createObjectURL(new Blob([this.resultString]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'polyA_download.csv') //or any other extension;
+        document.body.appendChild(link);
+        link.click();
     },
+
+
   }
 }
 </script>

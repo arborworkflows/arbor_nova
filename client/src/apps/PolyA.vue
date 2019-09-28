@@ -155,6 +155,8 @@ export default {
       if (this.job.status === 3) {
         this.running = false;
         this.resultString = (await this.girderRest.get(`item/${outputItem._id}/download`)).data;
+	// generate a sample of the first 25 entries of the file
+	this.resultString = this.resultString.split('\n').slice(0,25).join('\n')
         this.result = csvParse(this.resultString);
         this.resultColumns = this.result.columns.map(d => ({text: d, value: d, sortable: false}));
 	this.runCompleted = true;
@@ -187,6 +189,9 @@ export default {
         this.fastaFile = await uploader.start();
       }
     },
+
+    // a Blob had to be used to download large files.  Otherwise the browser can choke on a 
+    // large file. 
 
     async downloadResults() {
 	console.log('resultString beginning: ',this.resultString.split(0,200));

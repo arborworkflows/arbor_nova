@@ -8,6 +8,7 @@ import ASR from './apps/ASR.vue'
 import PolyA from './apps/PolyA.vue'
 import blastn from './apps/blastn.vue'
 import infer from './apps/infer.vue'
+import DockerPolyA from './apps/DockerPolyA.vue'
 
 Vue.use(Router)
 
@@ -42,6 +43,11 @@ export default new Router({
       path: '/polya',
       name: 'polya',
       component: PolyA,
+    },
+    {
+      path: '/docker_polya',
+      name: 'docker_polya',
+      component: DockerPolyA,
     },
     {
       path: '/blastn',

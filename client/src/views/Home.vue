@@ -86,6 +86,12 @@ export default {
         route: 'infer',
         description: 'Perform forward inferencing using a pretrained U-Net network',
       },    
+      {   
+        label: 'Docker PolyA tail',
+        image: require('../assets/docker_polya.png'),
+        route: 'docker_polya',
+        description: 'Search for PolyA tails via docker',
+      },    
     ],
   }),
 }

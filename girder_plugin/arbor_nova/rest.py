@@ -7,6 +7,7 @@ from arbor_nova_tasks.arbor_tasks.app_support import asr
 from arbor_nova_tasks.arbor_tasks.fnlcr import polyA_v10 
 from arbor_nova_tasks.arbor_tasks.fnlcr import blastn 
 from arbor_nova_tasks.arbor_tasks.fnlcr import infer 
+from arbor_nova_tasks.arbor_tasks.fnlcr import docker_polyA 
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute
 from girder.api.rest import filtermodel, Resource
@@ -21,6 +22,7 @@ class ArborNova(Resource):
         self.route('POST', ('pgls', ), self.pgls)
         self.route('POST', ('asr', ), self.asr)
         self.route('POST', ('polya', ), self.polyA_v10)
+        self.route('POST', ('docker_polya', ), self.docker_polyA)
         self.route('POST', ('blastn', ), self.blastn)
         self.route('POST', ('infer', ), self.infer)
 
@@ -134,6 +136,35 @@ class ArborNova(Resource):
             outputId
     ):
         result = polyA_v10.delay(
+                GirderFileId(fastaId), 
+                GirderFileId(linkerId),
+                GirderFileId(transcriptId),
+                girder_result_hooks=[
+                    GirderUploadToItem(outputId)
+                ])
+        return result.job
+
+# --- polyA executed via docker for FNLCR
+    @access.token
+    @filtermodel(model='job', plugin='jobs')
+    @autoDescribeRoute(
+        Description('Calculate a Polyadenylation (PolyA) tail (via Jacks docker image')
+        .param('fastaId', 'The ID of the input file.')
+        .param('linkerId', 'The ID of the linker input file.')
+        .param('transcriptId', 'The ID of the input file.')
+        .param('outputId', 'The ID of the output item where the output file will be uploaded.')
+        .errorResponse()
+        .errorResponse('Write access was denied on the parent item.', 403)
+        .errorResponse('Failed to upload output file.', 500)
+    )
+    def docker_polyA(
+            self, 
+            fastaId, 
+            linkerId, 
+            transcriptId,
+            outputId
+    ):
+        result = docker_polyA.delay(
                 GirderFileId(fastaId), 
                 GirderFileId(linkerId),
                 GirderFileId(transcriptId),

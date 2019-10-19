@@ -34,16 +34,22 @@
       systemd:
         state: started
         name: docker 
+      become: true
+      become_user: root
 
     - name: enable docker for automatic restart 
       systemd:
         name: docker 
         enabled: yes
+      become: true
+      become_user: root
 
     - name: Add the vagrant user into the docker group so docker commands can execute without sudo 
       user:
         name: vagrant 
         groups: docker
+      become: true
+      become_user: root
 
     # install any dependencies needed for the R packages (devtools, aRbor, etc.) to install 
     - name: Install R package prereqs

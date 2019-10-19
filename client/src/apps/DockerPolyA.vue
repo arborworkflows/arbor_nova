@@ -62,17 +62,20 @@
       <v-layout column justify-start fill-height style="margin-left: 400px">
           <v-card class="ma-4">
             <v-card-text>
-              <b>The PolyA-tail analysis run using a public docker container. Polyadenylation is the addition of a poly(A) tail to a messenger RNA. 
+              <b>Polyadenylation is the addition of a poly(A) tail to a messenger RNA. 
 		The poly(A) tail consists of multiple adenosine monophosphates.  This method scans the input file looking for 
 		PolyA tails.  A list of the discovered tails is output when the method finishes. 	
               <br><br>
 		Once all the input files are uploaded, click the "Go" button to begin execution.  Execution may take some time
-		depending on the size of the input files being scanned.	
+		depending on the size of the input files being scanned.	In this app, the application is run using a public docker container.
 		</b>
             </v-card-text>
           </v-card>
         <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
           Running (Job Status {{ job.status }}) ...
+        </div>
+        <div v-if="running">
+          <md-progress-spinner md-mode="indeterminate"></md-progress-spinner>
         </div>
         <div v-if="runCompleted" xs12 class="text-xs-center mb-4 ml-4 mr-4">
           Processing Output ... 

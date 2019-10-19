@@ -136,12 +136,15 @@ export default {
       if (file) {
         this.runCompleted = false;
         this.fastaFileName = file.name;
+	//b64encodedFile = btoa(file)
         const uploader = new utils.Upload(file, {$rest: this.girderRest, parent: this.scratchFolder});
         this.fastaFile = await uploader.start();
       }
     },
 
     async downloadResults() {
+	// add base64 decoding of image contents
+	//b64decoded = atob(this.result)
         const url = window.URL.createObjectURL(new Blob([this.result]));
         const link = document.createElement('a');
         link.href = url;
@@ -149,8 +152,6 @@ export default {
         document.body.appendChild(link);
         link.click();
     },
-
-
   }
 }
 </script>

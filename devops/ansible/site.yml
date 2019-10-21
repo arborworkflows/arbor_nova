@@ -176,10 +176,11 @@
           - girder-jobs
         virtualenv: "{{ girder_virtualenv }}"
 
+# changed to asr branch
     - name: Clone arbor_nova
       git:
         repo: https://github.com/arborworkflows/arbor_nova.git
-        version: "master"
+        version: "asr"
         dest: "{{ arbor_nova_directory }}"
 
     - name: Install yarn

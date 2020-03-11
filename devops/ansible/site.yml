@@ -34,16 +34,22 @@
       systemd:
         state: started
         name: docker 
+      become: true
+      become_user: root
 
     - name: enable docker for automatic restart 
       systemd:
         name: docker 
         enabled: yes
+      become: true
+      become_user: root
 
     - name: Add the vagrant user into the docker group so docker commands can execute without sudo 
       user:
         name: vagrant 
         groups: docker
+      become: true
+      become_user: root
 
     # install any dependencies needed for the R packages (devtools, aRbor, etc.) to install 
     - name: Install R package prereqs
@@ -76,49 +82,60 @@
       args:
         creates: "{{ girder_virtualenv }}"
 
+    # install any dependencies needed for the python tasks 
+    - name: Install pytyon prereqs for tasks
+      pip:
+        name:
+          - keras 
+          - tensorflow
+          - pathlib
+          - scikit-image
+        virtualenv: "{{ girder_virtualenv }}"
+
   tasks:
 
     # remove the default R packages and install R 3.5 instead
 
-#    - name: remove default R version
-#      apt:
-#        name: "{{packages}}"
-#        state: absent
-#      vars:
-#        packages:
-#          - r-base
-#          - r-base-core
-#          - r-recommended
-#          - r-cran
-#      become: yes
-#
-#    - name: autoremove R
-#      apt:
-#        autoremove: yes
-#      become: yes
-#
-#    - name: add R3.5 repository in apt-get catalog
-#      command: apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
-#      become: yes
-#
-#    - name: add R3.5 repository in apt-get catalog
-#      apt_repository:
-#        repo: deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/
-#        state: present
-#      become: yes
-#
-#    - name: update before R install
-#      command: apt update
-#      become: yes
-#
-#    - name: Install R 3.6
-#      apt:
-#        name:
-#          - r-base
-#          - r-base-core
-#          - r-recommended
-#      become: yes
-#      become_user: root
+    - name: remove default R version
+      apt:
+        name: "{{packages}}"
+        state: absent
+      vars:
+        packages:
+          - r-base
+          - r-base-core
+          - r-recommended
+          - r-cran
+      become: yes
+
+    - name: autoremove R
+      apt:
+        autoremove: yes
+      become: yes
+
+    - name: add R3.5 repository in apt-get catalog
+      command: apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+      become: yes
+
+
+    - name: add R3.5 repository in apt-get catalog
+      apt_repository:
+        repo: deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/
+        state: present
+      become: yes
+
+    - name: update before R install
+      command: apt update
+      become: yes
+
+    - name: Install R
+      apt:
+        name:
+          - r-base
+          - r-base-core
+          - r-recommended
+      become: yes
+      become_user: root
 
     - name: Install R packages from CRAN
       command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item }}' %in% installed.packages()[,'Package'])) install.packages(pkgs='{{ item }}', repos=c('http://cran.cnr.Berkeley.edu'))"
@@ -135,7 +152,7 @@
       become: yes
       with_items:
         - hafen/cardoonTools
-        - tangelo-hub/romanescoTools
+#        - tangelo-hub/romanescoTools
         - arborworkflows/aRbor
         - uyedaj/treeplyr
       environment:
@@ -171,10 +188,11 @@
           - girder-jobs
         virtualenv: "{{ girder_virtualenv }}"
 
+# changed to asr branch
     - name: Clone arbor_nova
       git:
         repo: https://github.com/arborworkflows/arbor_nova.git
-        version: "master"
+        version: "asr"
         dest: "{{ arbor_nova_directory }}"
 
     - name: Install yarn

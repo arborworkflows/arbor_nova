@@ -92,6 +92,12 @@ export default {
         route: 'docker_polya',
         description: 'Search for PolyA tails via docker',
       },    
+      {   
+        label: 'Rhabdo Segmentation',
+        image: require('../assets/infer_rhabdo.png'),
+        route: 'infer_rhabdo',
+        description: 'Segment an H&E-stained Rhabdomyosarcoma image',
+      },    
     ],
   }),
 }

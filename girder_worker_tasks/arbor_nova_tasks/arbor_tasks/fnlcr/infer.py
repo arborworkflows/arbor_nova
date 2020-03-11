@@ -4,28 +4,13 @@ from tempfile import NamedTemporaryFile
 
 
 # included for the source python algorithm
-from keras.models import load_model
-from keras.models import model_from_json
-from skimage.transform import resize
-from skimage.io import imsave
+from tensorflow.keras.models import *
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.preprocessing.image import ImageDataGenerator, array_to_img,img_to_array, load_img
+from PIL import Image
+from infer_models import *
 import numpy as np
-import json
 import pathlib
-
-# this is just included for reference on how to decorate 
-# a function to be called from girder through arbor_nova plugin
-
-#@girder_job(title='PolyA')
-#@app.task(bind=True)
-#def column_append(self, in_filepath, **kwargs):
-#    outname = 'outfile.csv'
-#    with open(outname, 'w') as tmp:
-#        with open(in_filepath, 'r') as csv:
-#            for line in csv:
-#                outline = line.strip() + ', newcol\n'
-#                tmp.write(outline)
-#
-#    return outname
 
 #
 # Define a function to check whether the files exist and print a message if not
@@ -38,17 +23,77 @@ def file_exists(f,msg):
     else:
         return True
 
-# resize the image array to match the size the network is trained for and convert to floating point
-def preprocess(imgs):
-    img_rows = 256
-    img_cols = 256
 
-    imgs_p = np.ndarray((imgs.shape[0], img_rows, img_cols), dtype=np.float32)
-    for i in range(imgs.shape[0]):
-        imgs_p[i] = resize(imgs[i], (img_cols, img_rows), preserve_range=True)
+# Important Global Variables
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+model_name = "VGG-19"
 
-    imgs_p = imgs_p[..., np.newaxis]
-    return imgs_p
+# Defining Pre-Trained Models
+def unfreeze_layers(model_name, conv_base):
+    
+    # Unfreezing all
+    conv_base.trainable = True
+    
+    # Case for VGG-16
+    if (model_name == "VGG-16" or model_name == "VGG-19"):
+        set_trainable = False
+        for layer in conv_base.layers:
+            if layer.name == 'block5_conv1':
+                set_trainable = True
+            if set_trainable:
+                layer.trainable = True
+            else:
+                layer.trainable = False
+    
+    # Case for Xception            
+    elif (model_name == "Xception"):
+        for layer in conv_base.layers[:10]:
+            layer.trainable = False
+    
+    # Case for ResNetV2        
+    elif (model_name == "ResNetV2"):
+        for layer in conv_base.layers[:26]:
+            layer.trainable = False
+    
+    # Case for InceptionV3
+    elif (model_name == "InceptionV3"):
+        for layer in conv_base.layers[:249]:
+            layer.trainable = False
+            
+    # Case for InceptionResNetV2
+    elif (model_name == "InceptionResNetV2"):
+        set_trainable = False
+        for layer in conv_base.layers:
+            if layer.name == 'block8_9_mixed':
+                set_trainable = True
+            if set_trainable:
+                layer.trainable = True
+            else:
+                layer.trainable = False
+                
+    # Case for MobileNet
+    elif (model_name == "MobileNet" or model_name == "MobileNetV2"):
+        for layer in conv_base.layers[:10]:
+            layer.trainable = False
+    
+    # Case for DenseNet
+    elif (model_name == "DenseNet"):
+        for layer in conv_base.layers[:15]:
+            layer.trainable = False
+    
+    # Case for NASNetLarge
+    elif (model_name == "NASNetLarge"):
+        set_trainable = False
+        for layer in conv_base.layers:
+            if layer.name == 'activation_253':
+                set_trainable = True
+            if set_trainable:
+                layer.trainable = True
+            else:
+                layer.trainable = False
+
+
+
 
 #-------------------------------------------
 
@@ -56,35 +101,40 @@ def preprocess(imgs):
 @app.task(bind=True)
 def infer(self,fasta_file,**kwargs):
 
-    print(" input tensor array filename = {}".format(fasta_file))
+    print(" input image filename = {}".format(fasta_file))
 
     #
     # Check that the datafiles exist
     #
-    if(file_exists(fasta_file,'numpy array') is  True): 
+    if(file_exists(image_file,'numpy array') is  True): 
         print('found image array file')
     else:
         print('could not read image array file')
         quit()
 
 
-    # this network uses a custom loss function, so it is easier to load in two steps using JSON
-    #modelfile = 'pdx_unet_saved.h5'
-    #model = load_model(path+modelfile)
-    path = '/home/vagrant/arbor_nova/girder_worker_tasks/arbor_nova_tasks/arbor_tasks/fnlcr/'
-
     # first load the model structure, then restore the weights in the pretrained layers
     print('loading DL network definition')
-    json_file = open(path+'infer_pdx_model.json', 'r')
-    loaded_model_json = json_file.read()
-    json_file.close()
-    loaded_model = model_from_json(loaded_model_json)
-    print('loading DL network weights')
-    loaded_model.load_weights(path+"infer_model_weights_unet.h5")
+    conv_base = return_pretrained(model_name)
+    model = build_model(conv_base)
+    unfreeze_layers("", conv_base)
+    model = load_model(path + model_name + ".h5")
 
-    print('load input tensor')
-    imgs_infer = np.load(fasta_file)
-    imgs_infer = preprocess(imgs_infer)
+    test_image = image.load_img(image_file, target_size=(425, 256))
+
+    # Casting the image into an array
+    test_image = image.img_to_array(test_image)
+
+    # E xpanding the dimensions of the image
+    test_image = np.expand_dims(test_image, axis = 0)
+
+    # Dividing by 255
+    test_image = test_image / 255
+
+    """ Uncomment once machine is freed up """
+
+    # Predicting the type of the test image
+    result = model.predict(test_image)
     print('preform forward inferencing')
     predict_images = loaded_model.predict(imgs_infer)
     print('inferencing completed')

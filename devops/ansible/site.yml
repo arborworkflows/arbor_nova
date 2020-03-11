@@ -65,6 +65,8 @@
           - pathlib
           - scikit-image
           - alien
+          - torch
+          - torchvision
       become: true
       become_user: root
 

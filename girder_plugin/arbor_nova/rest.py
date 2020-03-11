@@ -8,6 +8,7 @@ from arbor_nova_tasks.arbor_tasks.fnlcr import polyA_v10
 from arbor_nova_tasks.arbor_tasks.fnlcr import blastn 
 from arbor_nova_tasks.arbor_tasks.fnlcr import infer 
 from arbor_nova_tasks.arbor_tasks.fnlcr import docker_polyA 
+from arbor_nova_tasks.arbor_tasks.fnlcr import infer_rhabdo 
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute
 from girder.api.rest import filtermodel, Resource
@@ -24,7 +25,8 @@ class ArborNova(Resource):
         self.route('POST', ('polya', ), self.polyA_v10)
         self.route('POST', ('docker_polya', ), self.docker_polyA)
         self.route('POST', ('blastn', ), self.blastn)
-        self.route('POST', ('infer', ), self.infer)
+        #self.route('POST', ('infer', ), self.infer)
+        self.route('POST', ('infer_rhabdo', ), self.infer_rhabdo)
 
     @access.token
     @filtermodel(model='job', plugin='jobs')
@@ -219,4 +221,26 @@ class ArborNova(Resource):
                 GirderFileId(fastaId), 
                 girder_result_hooks=[
                     GirderUploadToItem(outputId)
+                ])
+
+# ---DNN infer command line for FNLCR
+    @access.token
+    @filtermodel(model='job', plugin='jobs')
+    @autoDescribeRoute(
+        Description('perform forward inferencing using a pretrained network')
+        .param('imageId', 'The ID of the source, a TIF image file.')
+        .param('maskId', 'The ID of the output item where the output file will be uploaded.')
+        .errorResponse()
+        .errorResponse('Write access was denied on the parent item.', 403)
+        .errorResponse('Failed to upload output file.', 500)
+    )
+    def infer_rhabdo(
+            self, 
+            imageId, 
+            maskId
+    ):
+        result = infer_rhabdo.delay(
+                GirderFileId(imageId), 
+                girder_result_hooks=[
+                    GirderUploadToItem(maskId)
                 ])

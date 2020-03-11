@@ -9,6 +9,7 @@ import PolyA from './apps/PolyA.vue'
 import blastn from './apps/blastn.vue'
 import infer from './apps/infer.vue'
 import DockerPolyA from './apps/DockerPolyA.vue'
+import infer_rhabdo from './apps/infer_rhabdo.vue'
 
 Vue.use(Router)
 
@@ -58,6 +59,11 @@ export default new Router({
       path: '/infer',
       name: 'infer',
       component: infer,
+    },
+    {
+      path: '/infer_rhabdo',
+      name: 'infer_rhabdo',
+      component: infer_rhabdo,
     },
   ]
 })

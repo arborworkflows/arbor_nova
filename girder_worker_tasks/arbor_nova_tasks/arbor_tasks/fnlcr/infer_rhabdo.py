@@ -5,7 +5,8 @@ from tempfile import NamedTemporaryFile
 
 # included for the source python algorithm
 import os
-import torch
+
+#import torch
 import cv2
 
 import numpy as np
@@ -58,8 +59,9 @@ def infer_rhabdo(self,image_file,**kwargs):
 
     # load the model structure and restore the weights in the pretrained layers
     print('loading DL network definition')
-    loaded_model = torch.load(path+'car_seg_model.pth')
-    loaded_model.eval()
+    print('temporily disabled for testing')
+    #loaded_model = torch.load(path+'car_seg_model.pth')
+    #loaded_model.eval()
 
     print('load input tensor')
     img_infer = cv2.imread(image_file)
@@ -74,7 +76,7 @@ def infer_rhabdo(self,image_file,**kwargs):
     # NOTE: TIF can handle float pixels. do we need to convert to utin8 here ?
 
     #predict_image = (predict_image*256.0).astype('uint8')
-    predict_image = image_file
+    predict_image = img_infer
 
     # generate unique names for multiple runs.  Add extension so it is easier to use
     outname = NamedTemporaryFile(delete=False).name+'.tif'

@@ -72,7 +72,7 @@
           - scikit-image
           - alien
           - torch
-          - torchvision
+          - opencv-contrib-python
       become: true
       become_user: root
 

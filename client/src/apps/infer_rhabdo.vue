@@ -113,17 +113,17 @@ export default {
 
       const params = optionsToParameters({
         imageId: this.imageFile._id,
-        maskId: maskItem._id,
+        outputId: outputItem._id,
       });
       this.job = (await this.girderRest.post(
-        `arbor_nova/infer?${params}`,
+        `arbor_nova/infer_rhabdo?${params}`,
       )).data;
 
       await pollUntilJobComplete(this.girderRest, this.job, job => this.job = job);
 
       if (this.job.status === 3) {
         this.running = false;
-        this.result = (await this.girderRest.get(`item/${maskItem._id}/download`)).data;
+        this.result = (await this.girderRest.get(`item/${outputItem._id}/download`)).data;
 	this.runCompleted = true;
       }
       if (this.job.status === 4) {
@@ -136,7 +136,7 @@ export default {
         this.imageFileName = file.name;
 	//b64encodedFile = btoa(file)
         const uploader = new utils.Upload(file, {$rest: this.girderRest, parent: this.scratchFolder});
-        this.fastaFile = await uploader.start();
+        this.imageFile = await uploader.start();
       }
     },
 

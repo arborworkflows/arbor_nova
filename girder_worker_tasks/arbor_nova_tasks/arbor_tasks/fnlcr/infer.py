@@ -3,12 +3,15 @@ from girder_worker.utils import girder_job
 from tempfile import NamedTemporaryFile
 
 
+# **** turn off includes temporarily until finished with this app
+
 # included for the source python algorithm
-from tensorflow.keras.models import *
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.preprocessing.image import ImageDataGenerator, array_to_img,img_to_array, load_img
-from PIL import Image
-from infer_models import *
+#from tensorflow.keras.models import *
+#from tensorflow.keras.preprocessing import image
+#from tensorflow.keras.preprocessing.image import ImageDataGenerator, array_to_img,img_to_array, load_img
+#from PIL import Image
+#from infer_models import *
+
 import numpy as np
 import pathlib
 

@@ -23,6 +23,7 @@
               ref="linkerFile"
               @change="uploadLinkerFile($event.target.files[0])"
             >
+          </v-flex>
           <v-flex xs12>
             <v-btn
               block

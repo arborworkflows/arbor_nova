@@ -3,11 +3,11 @@
     <v-layout class="transform-view" row fill-height>
       <v-navigation-drawer permanent fixed style="width: 400px; min-width: 400px;">
         <v-toolbar dark flat color="primary">
-          <v-toolbar-title class="white--text">Histopathology Inference</v-toolbar-title>
+          <v-toolbar-title class="white--text">Rhabdomyosarcoma ROI Analysis</v-toolbar-title>
         </v-toolbar>
         <v-container fluid>
           <v-flex xs12>
-            <v-btn class="text-none" outline block @click='$refs.imageFile.click()'>{{ fastaFileName || 'UPLOAD input image file' }}</v-btn>
+            <v-btn class="text-none" outline block @click='$refs.imageFile.click()'>{{ fastaFileName || 'UPLOAD input ROI image' }}</v-btn>
             <input
               type="file"
               style="display: none"
@@ -44,14 +44,26 @@
       <v-layout column justify-start fill-height style="margin-left: 400px">
           <v-card class="ma-4">
             <v-card-text>
-              <b>Run a pretrained neural network on the input image.  
-		The image will be resized as needed before inferencing by the network.
+              <b>This application analyzes an ROI extracted from a whole slide image by executing a neural network that has
+		been pre-trained to segment rhabdomyosarcoma tissue subtypes in H&E stained ROIs extracted from  
+		whole slide images.  The application expects the input image to be in TIF, Jpeg, or PNG image formats.
+		The image will be resized as needed before being analyzed by the network.
               <br><br>
-		Once the input files are uploaded, click the "Go" button to begin execution.  Execution may take some time
-		depending on the size of the input files being provided.	
+		Once the input image is uploaded, please click the "Go" button to begin execution.  Execution may take some time
+		depending on the size of the input files being provided.  When the analysis is complete, the resulting segmentation
+		will be displayed below and will be available for downloading, using the download button.  
+              <br><br>
+		We are delighted that you are trying our early release system for rhabdomyosarcoma analysis. Thank you.  
+		If you have any questions while using our system, please feel free to email Dr. Yanling Liu at liuy5@mail.nih.gov.  
 		</b>
             </v-card-text>
           </v-card>
+          <div v-if="readyToRunState" xs12 class="text-xs-center mb-4 ml-4 mr-4">
+  	    <v-card class="mb-4 ml-4 mr-4">
+            <v-card-text>Uploaded Image</v-card-text>
+              <img :src="uploadedImageUrl" style="display: block; margin: auto">
+            </v-card>
+	</div>
         <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
           Running (Job Status {{ job.status }}) ...
         </div>
@@ -88,7 +100,10 @@ export default {
   data: () => ({
     imageFile: {},
     imageFileName: '',
+    imagePointer: '',
+    uploadedImageUrl: '',
     job: { status: 0 },
+    readyToDisplayInput: false,
     running: false,
     result: [],
     resultColumns: [],
@@ -113,6 +128,7 @@ export default {
     async run() {
       this.running = true;
       this.errorLog = null;
+
       // create a spot in Girder for the output of the REST call to be placed
       const outputItem = (await this.girderRest.post(
         `item?folderId=${this.scratchFolder._id}&name=result`,
@@ -136,9 +152,7 @@ export default {
 	// pull the URL of the output from girder when processing is completed. This is used
 	// as input to an image on the web interface
         this.result = (await this.girderRest.get(`item/${outputItem._id}/download`,{responseType:'blob'})).data;
-	// debug
- 	console.log('return type:',typeof(this.result));
-	console.log('result:',this.result);
+	// set this variable to display the resulting output image on the webpage 
         this.outputImageUrl = window.URL.createObjectURL(this.result);
 	this.runCompleted = true;
       }
@@ -152,6 +166,10 @@ export default {
         this.imageFileName = file.name;
         const uploader = new utils.Upload(file, {$rest: this.girderRest, parent: this.scratchFolder});
         this.imageFile = await uploader.start();
+        // display the uploaded image on the webpage
+        //this.imageBlob = (await this.girderRest.get(`item/${this.imageFile._id}/download`,{responseType:'blob'})).data;
+        //this.uploadedImageUrl = window.URL.createObjectURL(this.imageBlob);
+        //this.readyToDisplayInput = true;
       }
     },
 
@@ -164,9 +182,9 @@ export default {
         document.body.appendChild(link);
         link.click();
 	document.body.removeChild(link);
-	// the above saves a corrupted file, so try a different way
-	// unfortunately, this result comes out similarly corrupted...
-	saveAs(this.result,{type:"image/png"},"filesaver.png");
+	// the above downloaded an file, but there is an
+	// alternate way, if needed here as part of the FileSaver package:
+	//saveAs(this.result,{type:"image/png"},"filesaver.png");
     },
   }
 }

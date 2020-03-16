@@ -60,6 +60,11 @@
         </div>
         <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code>
         <template v-if="!running && job.status === 3">
+  	  <v-card class="mb-4 ml-4 mr-4">
+            <v-card-text>Segmentation Image</v-card-text>
+            <img :src="outputImageUrl" style="display: block; margin: auto">
+          </v-card>
+
         </template>
       </v-layout>
     </v-layout>
@@ -89,6 +94,7 @@ export default {
     resultColumns: [],
     resultString:  '',
     runCompleted: false,
+    outputImageUrl: '',
   }),
   asyncComputed: {
     scratchFolder() {
@@ -107,23 +113,33 @@ export default {
     async run() {
       this.running = true;
       this.errorLog = null;
+      // create a spot in Girder for the output of the REST call to be placed
       const outputItem = (await this.girderRest.post(
         `item?folderId=${this.scratchFolder._id}&name=result`,
       )).data
 
+      // build the params to be passed into the REST call
       const params = optionsToParameters({
         imageId: this.imageFile._id,
         outputId: outputItem._id,
       });
+      // start the job by passing parameters to the REST call
       this.job = (await this.girderRest.post(
         `arbor_nova/infer_rhabdo?${params}`,
       )).data;
 
+      // wait for the job to finish
       await pollUntilJobComplete(this.girderRest, this.job, job => this.job = job);
 
       if (this.job.status === 3) {
         this.running = false;
-        this.result = (await this.girderRest.get(`item/${outputItem._id}/download`)).data;
+	// pull the URL of the output from girder when processing is completed. This is used
+	// as input to an image on the web interface
+        this.result = (await this.girderRest.get(`item/${outputItem._id}/download`,{responseType:'blob'})).data;
+	// debug
+ 	console.log('return type:',typeof(this.result));
+	console.log('result:',this.result);
+        this.outputImageUrl = window.URL.createObjectURL(this.result);
 	this.runCompleted = true;
       }
       if (this.job.status === 4) {
@@ -134,21 +150,23 @@ export default {
       if (file) {
         this.runCompleted = false;
         this.imageFileName = file.name;
-	//b64encodedFile = btoa(file)
         const uploader = new utils.Upload(file, {$rest: this.girderRest, parent: this.scratchFolder});
         this.imageFile = await uploader.start();
       }
     },
 
     async downloadResults() {
-	// add base64 decoding of image contents
-	//b64decoded = atob(this.result)
-        const url = window.URL.createObjectURL(new Blob([this.result]));
+        const url = window.URL.createObjectURL(this.result);
+	console.log("url:",url)
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', 'infer_results.tif') //or any other extension;
+        link.setAttribute('download', 'infer_results.png') //or any other extension;
         document.body.appendChild(link);
         link.click();
+	document.body.removeChild(link);
+	// the above saves a corrupted file, so try a different way
+	// unfortunately, this result comes out similarly corrupted...
+	saveAs(this.result,{type:"image/png"},"filesaver.png");
     },
   }
 }

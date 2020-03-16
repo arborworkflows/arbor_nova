@@ -79,7 +79,7 @@ def infer_rhabdo(self,image_file,**kwargs):
     predict_image = img_infer
 
     # generate unique names for multiple runs.  Add extension so it is easier to use
-    outname = NamedTemporaryFile(delete=False).name+'.tif'
+    outname = NamedTemporaryFile(delete=False).name+'.png'
 
     # write the output object using openCV  
     print('writing output')

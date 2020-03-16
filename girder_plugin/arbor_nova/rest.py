@@ -25,7 +25,7 @@ class ArborNova(Resource):
         self.route('POST', ('polya', ), self.polyA_v10)
         self.route('POST', ('docker_polya', ), self.docker_polyA)
         self.route('POST', ('blastn', ), self.blastn)
-        #self.route('POST', ('infer', ), self.infer)
+        self.route('POST', ('infer', ), self.infer)
         self.route('POST', ('infer_rhabdo', ), self.infer_rhabdo)
 
     @access.token
@@ -222,6 +222,7 @@ class ArborNova(Resource):
                 girder_result_hooks=[
                     GirderUploadToItem(outputId)
                 ])
+        return result.job
 
 # ---DNN infer command line for FNLCR
     @access.token
@@ -244,3 +245,4 @@ class ArborNova(Resource):
                 girder_result_hooks=[
                     GirderUploadToItem(outputId)
                 ])
+        return result.job

@@ -35,7 +35,7 @@ def preprocess(img):
 
 #-------------------------------------------
 
-girder_job(title='infer_rhabdo')
+@girder_job(title='inferRhabdo')
 @app.task(bind=True)
 def infer_rhabdo(self,image_file,**kwargs):
 

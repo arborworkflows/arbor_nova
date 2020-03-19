@@ -58,7 +58,7 @@
 		</b>
             </v-card-text>
           </v-card>
-          <div v-if="readyToRunState" xs12 class="text-xs-center mb-4 ml-4 mr-4">
+          <div v-if="readyToDisplayInput" xs12 class="text-xs-center mb-4 ml-4 mr-4">
   	    <v-card class="mb-4 ml-4 mr-4">
             <v-card-text>Uploaded Image</v-card-text>
               <img :src="uploadedImageUrl" style="display: block; margin: auto">
@@ -101,6 +101,7 @@ export default {
     imageFile: {},
     imageFileName: '',
     imagePointer: '',
+    imageBlob: [],
     uploadedImageUrl: '',
     job: { status: 0 },
     readyToDisplayInput: false,
@@ -167,9 +168,11 @@ export default {
         const uploader = new utils.Upload(file, {$rest: this.girderRest, parent: this.scratchFolder});
         this.imageFile = await uploader.start();
         // display the uploaded image on the webpage
-        //this.imageBlob = (await this.girderRest.get(`item/${this.imageFile._id}/download`,{responseType:'blob'})).data;
-        //this.uploadedImageUrl = window.URL.createObjectURL(this.imageBlob);
-        //this.readyToDisplayInput = true;
+	console.log('displaying input image...');
+        this.imageBlob = (await this.girderRest.get(`file/${this.imageFile._id}/download`,{responseType:'blob'})).data;
+        this.uploadedImageUrl = window.URL.createObjectURL(this.imageBlob);
+	console.log('createObjURL returned: ',this.uploadedImageUrl);
+        this.readyToDisplayInput = true;
       }
     },
 

@@ -66,12 +66,9 @@
     - name: Install prereqs for tasks
       apt:
         name:
-          - keras 
-          - tensorflow
           - pathlib
           - scikit-image
           - alien
-          - torch
           - opencv-contrib-python
       become: true
       become_user: root
@@ -86,10 +83,10 @@
     - name: Install pytyon prereqs for tasks
       pip:
         name:
-          - keras 
-          - tensorflow
           - pathlib
           - scikit-image
+	  - torch
+	  - torchvision
         virtualenv: "{{ girder_virtualenv }}"
 
   tasks:

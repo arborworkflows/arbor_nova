@@ -4,7 +4,7 @@
 from arbor_nova_tasks.arbor_tasks.example import column_append
 from arbor_nova_tasks.arbor_tasks.app_support import pgls
 from arbor_nova_tasks.arbor_tasks.app_support import asr 
-from arbor_nova_tasks.arbor_tasks.fnlcr import polyA_v10 
+#from arbor_nova_tasks.arbor_tasks.fnlcr import polyA_v10 
 from arbor_nova_tasks.arbor_tasks.fnlcr import blastn 
 from arbor_nova_tasks.arbor_tasks.fnlcr import infer 
 from arbor_nova_tasks.arbor_tasks.fnlcr import docker_polyA 
@@ -22,7 +22,7 @@ class ArborNova(Resource):
         self.route('POST', ('csvColumnAppend', ), self.csv_column_append)
         self.route('POST', ('pgls', ), self.pgls)
         self.route('POST', ('asr', ), self.asr)
-        self.route('POST', ('polya', ), self.polyA_v10)
+        #self.route('POST', ('polya', ), self.polyA_v10)
         self.route('POST', ('docker_polya', ), self.docker_polyA)
         self.route('POST', ('blastn', ), self.blastn)
         self.route('POST', ('infer', ), self.infer)

@@ -47,9 +47,8 @@
               <b>This application analyzes an ROI extracted from a whole slide image by executing a neural network that has
 		been pre-trained to segment rhabdomyosarcoma tissue subtypes in H&E stained ROIs extracted from  
 		whole slide images.  The application expects the input image to be in TIF, Jpeg, or PNG image formats.
-		The image will be resized as needed before being analyzed by the network.
               <br><br>
-		Once the input image is uploaded, please click the "Go" button to begin execution.  Execution may take some time
+		Once the input image is displayed below, please click the "Go" button to begin execution.  Execution may take some time
 		depending on the size of the input files being provided.  When the analysis is complete, the resulting segmentation
 		will be displayed below and will be available for downloading, using the download button.  
               <br><br>
@@ -61,35 +60,42 @@
           <div v-if="readyToDisplayInput" xs12 class="text-xs-center mb-4 ml-4 mr-4">
   	    <v-card class="mb-4 ml-4 mr-4">
             <v-card-text>Uploaded Image</v-card-text>
-              <img :src="uploadedImageUrl" style="display: block; margin: auto">
+		{{ renderInputImage(uploadedImageUrl) }} 
             </v-card>
-	</div>
+	  </div>
+    	  <div ref="inputImageDiv" id ="openseadragon1" style="width:1000px;height:800px;border:1px solid black;float:left;"> </div>
         <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
-          Running (Job Status {{ job.status }}) ...
+          Running (Job Status {{ job.status }}) ... please wait for the output image to show below
         </div>
         <div v-if="runCompleted" xs12 class="text-xs-center mb-4 ml-4 mr-4">
           Job Complete  ... 
         </div>
-        <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code>
-        <template v-if="!running && job.status === 3">
+        <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code> 
+        <div v-if="!running && job.status === 3">
   	  <v-card class="mb-4 ml-4 mr-4">
             <v-card-text>Segmentation Image</v-card-text>
-            <img :src="outputImageUrl" style="display: block; margin: auto">
+		<script type="text/javascript">
+		</script>
+		{{ renderOutputImage(outputImageUrl) }} 
           </v-card>
-
-        </template>
+        </div>
+    	<div ref="outputImageDiv" id ="openseadragon2" style="width:1000px;height:800px;border:1px solid black;float:left;"> </div>
       </v-layout>
     </v-layout>
   </v-app>
 </template>
 
 <script>
+
+
 import { utils } from '@girder/components/src';
 import { csvParse } from 'd3-dsv';
 import scratchFolder from '../scratchFolder';
 import pollUntilJobComplete from '../pollUntilJobComplete';
 import optionsToParameters from '../optionsToParameters';
 import JsonDataTable from '../components/JsonDataTable';
+import OpenSeadragon from 'openseadragon';
+
 
 export default {
   name: 'infer_rhabdo',
@@ -111,6 +117,9 @@ export default {
     resultString:  '',
     runCompleted: false,
     outputImageUrl: '',
+    inputDisplayed:  false,
+    outputDisplayed:  false,
+    osd_viewer: [],
   }),
   asyncComputed: {
     scratchFolder() {
@@ -124,8 +133,56 @@ export default {
     readyToDownload() {
       return (this.runCompleted)
     },
+
   },
+
   methods: {
+
+    // method is added here to enable openSeadragon to render into a div defined in the vue template
+    // above.  This code is re-executed for each change, so the code is gated to only run once 
+    renderInputImage(imageurl) {
+       if (this.inputDisplayed == false) {
+          this.osd_viewer  =  OpenSeadragon( {
+	  element: this.$refs.inputImageDiv, 
+          prefixUrl: "",
+          tileSources: {
+            type: 'image',
+            url:   imageurl
+    	    }
+	});
+        console.log('openseadragon input finished')
+	this.inputDisplayed = true
+	}
+    },
+
+    // method is added here to enable openSeadragon to render the output image into a div defined in the vue template
+    // above.  This code is re-executed for each change, so the code is gated to only run once 
+    renderOutputImage(imageurl) {
+       if (this.outputDisplayed == false) {
+/*
+	this.osd_viewer.addTiledImage( {
+          tileSources: {
+            type: 'image',
+            url:   imageurl
+    	    },
+    		x: 1,
+    		y: 0,
+    		width: 1
+	});
+*/
+      var viewer2 =  OpenSeadragon( {
+	element: this.$refs.outputImageDiv, 
+        prefixUrl: "",
+        tileSources: {
+          type: 'image',
+          url:   imageurl
+    	  }
+	});
+        console.log('openseadragon output finished')
+	this.outputDisplayed = true
+	}
+    },
+
     async run() {
       this.running = true;
       this.errorLog = null;

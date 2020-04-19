@@ -6,7 +6,7 @@
     >
       <v-layout row wrap>
         <v-flex xs12 class="text-xs-center">
-          <img src="../assets/arbor_128px.png">
+          <img src="../assets/FNLCR-logo.png">
         </v-flex>
         <v-flex xs12>
           <span class="title">Applications</span>
@@ -50,48 +50,48 @@ export default {
   data: () => ({
     smallScreen: false,
     samples: [
-      {
-        label: 'Phylogenetic generalized least squares (PGLS)',
-        image: require('../assets/pgls.png'),
-        route: 'pgls',
-        description: 'A method for testing for correlations of two continuously distributed characters that vary across species.',
-      },
-      {
-        label: 'PhyloMap',
-        image: require('../assets/phylomap.png'),
-        route: 'phylomap',
-        description: 'Explore a phylogenetic tree and associated species location data.',
-      },
-      {   
-        label: 'Ancestral State Reconstruction',
-        image: require('../assets/asr.png'),
-        route: 'asr',
-        description: 'Explore the ancestral signal of a particular character across the tree',
-      },    
-      {   
-        label: 'PolyA tail',
-        image: require('../assets/polya.png'),
-        route: 'polya',
-        description: 'Search for Polyadenylation tails',
-      },    
-      {   
-        label: 'Blastn',
-        image: require('../assets/blastn.png'),
-        route: 'blastn',
-        description: 'Search similarity between FASTA files',
-      },    
-      {   
-        label: 'DNN Infer',
-        image: require('../assets/infer.png'),
-        route: 'infer',
-        description: 'Perform forward inferencing using a pretrained U-Net network',
-      },    
-      {   
-        label: 'Docker PolyA tail',
-        image: require('../assets/docker_polya.png'),
-        route: 'docker_polya',
-        description: 'Search for PolyA tails via docker',
-      },    
+//      {
+//        label: 'Phylogenetic generalized least squares (PGLS)',
+//        image: require('../assets/pgls.png'),
+//        route: 'pgls',
+//        description: 'A method for testing for correlations of two continuously distributed characters that vary across species.',
+//      },
+//      {
+//        label: 'PhyloMap',
+//        image: require('../assets/phylomap.png'),
+//        route: 'phylomap',
+//        description: 'Explore a phylogenetic tree and associated species location data.',
+//      },
+//      {   
+//        label: 'Ancestral State Reconstruction',
+//        image: require('../assets/asr.png'),
+//        route: 'asr',
+//        description: 'Explore the ancestral signal of a particular character across the tree',
+//      },    
+//      {   
+//        label: 'PolyA tail',
+//        image: require('../assets/polya.png'),
+//        route: 'polya',
+//        description: 'Search for Polyadenylation tails',
+//      },    
+//      {   
+//        label: 'Blastn',
+//        image: require('../assets/blastn.png'),
+//        route: 'blastn',
+//        description: 'Search similarity between FASTA files',
+//      },    
+//      {   
+//        label: 'DNN Infer',
+//        image: require('../assets/infer.png'),
+//        route: 'infer',
+//        description: 'Perform forward inferencing using a pretrained U-Net network',
+//      },    
+//      {   
+//        label: 'Docker PolyA tail',
+//        image: require('../assets/docker_polya.png'),
+//        route: 'docker_polya',
+//        description: 'Search for PolyA tails via docker',
+//      },    
       {   
         label: 'Rhabdo Segmentation',
         image: require('../assets/infer_rhabdo.png'),

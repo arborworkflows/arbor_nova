@@ -74,8 +74,6 @@
         <div v-if="!running && job.status === 3">
   	  <v-card class="mb-4 ml-4 mr-4">
             <v-card-text>Segmentation Image</v-card-text>
-		<script type="text/javascript">
-		</script>
 		{{ renderOutputImage(outputImageUrl) }} 
           </v-card>
         </div>
@@ -144,6 +142,7 @@ export default {
        if (this.inputDisplayed == false) {
           this.osd_viewer  =  OpenSeadragon( {
 	  element: this.$refs.inputImageDiv, 
+	  maxZoomPixelRatio: 4.0,
           prefixUrl: "",
           tileSources: {
             type: 'image',
@@ -158,20 +157,11 @@ export default {
     // method is added here to enable openSeadragon to render the output image into a div defined in the vue template
     // above.  This code is re-executed for each change, so the code is gated to only run once 
     renderOutputImage(imageurl) {
-       if (this.outputDisplayed == false) {
-/*
-	this.osd_viewer.addTiledImage( {
-          tileSources: {
-            type: 'image',
-            url:   imageurl
-    	    },
-    		x: 1,
-    		y: 0,
-    		width: 1
-	});
-*/
+       if ((this.outputDisplayed == false) & (this.outputImageUrl.length > 0)) {
+      console.log('output url:',imageurl)
       var viewer2 =  OpenSeadragon( {
 	element: this.$refs.outputImageDiv, 
+	maxZoomPixelRatio: 4.0,
         prefixUrl: "",
         tileSources: {
           type: 'image',

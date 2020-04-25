@@ -126,7 +126,7 @@
     - name: Clone arbor_nova
       git:
         repo: https://github.com/arborworkflows/arbor_nova.git
-        version: "master"
+        version: "d3m"
         dest: "{{ arbor_nova_directory }}"
 
     - name: Install yarn

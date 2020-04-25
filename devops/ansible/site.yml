@@ -45,6 +45,7 @@
     #      become: true
     #      become_user: root
 
+    #
     # remove the default R packages and install R 3.5 instead
 
     #- name: remove default R version

@@ -6,7 +6,7 @@
     >
       <v-layout row wrap>
         <v-flex xs12 class="text-xs-center">
-          <img src="../assets/arbor_128px.png">
+          <img src="../assets/darpa-purdue-logo.png">
         </v-flex>
         <v-flex xs12>
           <span class="title">Applications</span>
@@ -51,16 +51,16 @@ export default {
     smallScreen: false,
     samples: [
       {
-        label: 'Phylogenetic generalized least squares (PGLS)',
-        image: require('../assets/pgls.png'),
-        route: 'pgls',
-        description: 'A method for testing for correlations of two continuously distributed characters that vary across species.',
+        label: 'Explore Season4 Sensor Collected Traits',
+        image: require('../assets/terra_trait.png'),
+        route: 'terratrait',
+        description: 'Provide a day-by-day exploration of trait values across all cultivars',
       },
       {
         label: 'PhyloMap',
         image: require('../assets/phylomap.png'),
         route: 'phylomap',
-        description: 'Explore a phylogenetic tree and associated species location data.',
+        description: 'Explore the phylogenetic tree and the associated cultivar location data.',
       },
       {   
         label: 'Ancestral State Reconstruction',

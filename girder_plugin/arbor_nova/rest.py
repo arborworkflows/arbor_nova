@@ -4,6 +4,9 @@
 from arbor_nova_tasks.arbor_tasks.example import column_append
 from arbor_nova_tasks.arbor_tasks.app_support import pgls
 from arbor_nova_tasks.arbor_tasks.app_support import asr 
+from arbor_nova_tasks.arbor_tasks.app_support import terra_schema
+from arbor_nova_tasks.arbor_tasks.app_support import terra_trait_daily
+
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute
 from girder.api.rest import filtermodel, Resource
@@ -17,6 +20,8 @@ class ArborNova(Resource):
         self.route('POST', ('csvColumnAppend', ), self.csv_column_append)
         self.route('POST', ('pgls', ), self.pgls)
         self.route('POST', ('asr', ), self.asr)
+        self.route('POST', ('terraSchema', ), self.terra_csv_schema)
+        self.route('POST', ('terraTraitDaily', ), self.terra_csv_trait_daily)
 
     @access.token
     @filtermodel(model='job', plugin='jobs')
@@ -107,3 +112,48 @@ class ArborNova(Resource):
 
         return result.job
 
+
+    @access.token
+    @filtermodel(model='job', plugin='jobs')
+    @autoDescribeRoute(
+        Description('TerraSchema')
+        .param('outnameId', 'The ID of the output item where the schema file will be uploaded.')
+        .errorResponse()
+        .errorResponse('Terra_schema permission problem.', 403)
+        .errorResponse('Terra_schema internal error',500)
+    )
+    def terra_csv_schema(
+        self,
+        outnameId
+    ):
+        result = terra_schema.delay(
+            girder_result_hooks=[
+                GirderUploadToItem(outnameId)
+            ])
+        return result.job
+
+
+    @access.token
+    @filtermodel(model='job', plugin='jobs')
+    @autoDescribeRoute(
+        Description('TerraTraitDaily')
+        .param('selectedDay', 'The day of the growing season selected for observation.')
+        .param('selectedTrait', '(string) The name of the trait to return for that day. (e.g."canopy_heigth")') 
+        .param('outnameId', 'The ID of the output item where the data file will be uploaded.')
+        .errorResponse()
+        .errorResponse('Terra_daily permission problem.', 403)
+        .errorResponse('Terra_daily internal error',500)
+    )
+    def terra_csv_trait_daily(
+        self,
+        selectedDay,
+        selectedTrait,
+        outnameId
+    ):
+        result = terra_trait_daily.delay(
+            selectedDay, 
+            selectedTrait,
+            girder_result_hooks=[
+                GirderUploadToItem(outnameId)
+            ])
+        return result.job

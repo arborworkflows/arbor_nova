@@ -38,10 +38,16 @@
               <br><br>
             </v-card-text>
           </v-card>
+	  <div id="vis" ref="visRef"></div>
         <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
           Running (Job Status {{ job.status }}) ...
         </div>
         <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code>
+        <template v-if="!running && job.status === 3">
+          <v-card v-if="result.length > 0" class="mb-4 ml-4 mr-4">
+            <v-card-text>Trait Value on Selected Day</v-card-text>
+          </v-card>
+        </template>
         <template v-if="!running && job.status === 3">
           <v-card v-if="result.length > 0" class="mb-4 ml-4 mr-4">
             <v-card-text>Trait Value on Selected Day</v-card-text>
@@ -61,16 +67,17 @@ import scratchFolder from '../scratchFolder';
 import pollUntilJobComplete from '../pollUntilJobComplete';
 import optionsToParameters from '../optionsToParameters';
 import JsonDataTable from '../components/JsonDataTable';
+import vegaEmbed from 'vega-embed';
+
 
 export default {
-  name: 'pgls',
+  name: 'terra-trait',
   inject: ['girderRest'],
   components: {
     GirderAuth,
     JsonDataTable,
   },
   data: () => ({
-    tableFile: {},
     selectedDay: "10",
     selectedTrait: '',
     job: { status: 0 },
@@ -116,6 +123,21 @@ export default {
       if (this.job.status === 3) {
         this.running = false;
         this.result = csvParse((await this.girderRest.get(`item/${outname._id}/download`)).data);
+
+      // build the spec here.  Inside the method means that the data item will be available. 
+      var vegaLiteSpec = {
+        $schema: 'https://vega.github.io/schema/vega-lite/v2.0.json',
+        description: 'trait values across the field',
+        data: {values: this.result}, 
+        mark: {type:'rect', tooltip: {content: "data"}},
+        encoding: {
+          x: {field: 'column', type: 'ordinal'},
+          y: {field: 'range', type: 'ordinal'},
+          color: {field: this.selectedTrait , type: 'quantitative'}
+        }
+      };
+
+	vegaEmbed(this.$refs.visRef,vegaLiteSpec);
       }
       if (this.job.status === 4) {
         this.running = false;

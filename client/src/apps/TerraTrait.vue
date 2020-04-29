@@ -10,25 +10,50 @@
           <v-flex xs12>
 	    <label for="sDay">Enter the day in the season</label>
 	   <div id="dayDiv">
-              <input type="text" v-model="selectedDay">
+              <input type="text" v-model="selectedDayLeft">
 	   </div>
           </v-flex>
           <v-flex xs12>
-            <v-select label="Selected Trait to Display" v-model="selectedTrait" :items="traits" />
+            <v-select label="Selected Trait to Display" v-model="selectedTraitLeft" :items="traits" />
           </v-flex>
           <v-flex xs12>
             <v-btn
               block
               :class="{ primary: readyToRun }"
-              :flat="readyToRun"
-              :outline="!readyToRun"
-              :disabled="!readyToRun"
-              @click="run"
-            >
-              Go
+              :flat="readyToRunLeft"
+              :outline="!readyToRunLeft"
+              :disabled="!readyToRunLeft"
+              @click="runLeft" >
+              Draw Left Chart
             </v-btn>
           </v-flex>
         </v-container>
+ 	
+	<v-spacer></v-spacer>
+
+        <v-container fluid>
+          <v-flex xs12>
+	    <label for="sDayRight">Enter the day in the season</label>
+	   <div id="dayDivRight">
+              <input type="text" v-model="selectedDayRight">
+	   </div>
+          </v-flex>
+          <v-flex xs12>
+            <v-select label="Selected Trait to Display" v-model="selectedTraitRight" :items="traits" />
+          </v-flex>
+          <v-flex xs12>
+            <v-btn
+              block
+              :class="{ primary: readyToRun }"
+              :flat="readyToRunRight"
+              :outline="!readyToRunRight"
+              :disabled="!readyToRunRight"
+              @click="runRight" >
+              Draw Right Chart
+            </v-btn>
+          </v-flex>
+        </v-container>
+
       </v-navigation-drawer>
       <v-layout column justify-start fill-height style="margin-left: 400px">
           <v-card class="ma-4">
@@ -38,21 +63,14 @@
               <br><br>
             </v-card-text>
           </v-card>
-	  <div id="vis" ref="visRef"></div>
+	  <v-row  align="center" justify="center">
+	     <div id="vis" ref="visLeft"></div>
+	     <div id="vis" ref="visRight"></div>
+	  </v-row>
         <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
           Running (Job Status {{ job.status }}) ...
         </div>
         <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code>
-        <template v-if="!running && job.status === 3">
-          <v-card v-if="result.length > 0" class="mb-4 ml-4 mr-4">
-            <v-card-text>Trait Value on Selected Day</v-card-text>
-          </v-card>
-        </template>
-        <template v-if="!running && job.status === 3">
-          <v-card v-if="result.length > 0" class="mb-4 ml-4 mr-4">
-            <v-card-text>Trait Value on Selected Day</v-card-text>
-            <json-data-table :data="result" hide-actions/>
-          </v-card>
         </template>
       </v-layout>
     </v-layout>
@@ -78,13 +96,17 @@ export default {
     JsonDataTable,
   },
   data: () => ({
-    selectedDay: "10",
-    selectedTrait: '',
+    selectedDayLeft: "15",
+    selectedDayRight: "15",
+    selectedTraitLeft: '',
+    selectedTraitRight: '',
     job: { status: 0 },
     running: false,
-    traits: ["canopy_height","leaf_angle_mean","leaf_angle_alpha","leaf_angle_beta","leaf_angle_chi","single_xgboost","abserror_single_xgboost"],
-    result: [],
-    resultColumns: [],
+    traits: ["canopy_height","leaf_angle_mean","leaf_angle_alpha","leaf_angle_beta","leaf_angle_chi","single_xgboost","abserror_single_xgboost","single_dtree","abserror_single_dtree"],
+    resultLeft: [],
+    resultRight: [],
+    resultColumnsLeft: [],
+    resultColumnsRight: [],
   }),
   asyncComputed: {
     scratchFolder() {
@@ -92,26 +114,30 @@ export default {
     },
   },
   computed: {
-    readyToRun() {
-      return !!(this.selectedDay>0) &&
-        !!(this.selectedTrait.length>0); 
+    readyToRunLeft() {
+      return !!(this.selectedDayLeft>0) &&
+        !!(this.selectedTraitLeft.length>0); 
+    },
+    readyToRunRight() {
+      return !!(this.selectedDayRight>0) &&
+        !!(this.selectedTraitRight.length>0); 
     },
     loggedOut() {
       return this.girderRest.user === null;
     },
   },
   methods: {
-    async run() {
+    async runLeft() {
       this.running = true;
       this.errorLog = null;
       const outname = (await this.girderRest.post(
-        `item?folderId=${this.scratchFolder._id}&name=result`,
+        `item?folderId=${this.scratchFolder._id}&name=resultLeft`,
       )).data
 
       const params = optionsToParameters({
 	// convert the string entered for the day to a number
-        selectedDay: Number(this.selectedDay),
-        selectedTrait: this.selectedTrait,
+        selectedDay: Number(this.selectedDayLeft),
+        selectedTrait: this.selectedTraitLeft,
         outnameId: outname._id,
       });
       this.job = (await this.girderRest.post(
@@ -122,22 +148,63 @@ export default {
 
       if (this.job.status === 3) {
         this.running = false;
-        this.result = csvParse((await this.girderRest.get(`item/${outname._id}/download`)).data);
+        this.resultLeft = csvParse((await this.girderRest.get(`item/${outname._id}/download`)).data);
 
       // build the spec here.  Inside the method means that the data item will be available. 
       var vegaLiteSpec = {
         $schema: 'https://vega.github.io/schema/vega-lite/v2.0.json',
         description: 'trait values across the field',
-        data: {values: this.result}, 
+        data: {values: this.resultLeft}, 
         mark: {type:'rect', tooltip: {content: "data"}},
         encoding: {
           x: {field: 'column', type: 'ordinal'},
           y: {field: 'range', type: 'ordinal'},
-          color: {field: this.selectedTrait , type: 'quantitative'}
+          color: {field: this.selectedTraitLeft , type: 'quantitative'}
         }
       };
+	vegaEmbed(this.$refs.visLeft,vegaLiteSpec);
+      }
+      if (this.job.status === 4) {
+        this.running = false;
+      }
+    },
 
-	vegaEmbed(this.$refs.visRef,vegaLiteSpec);
+    async runRight() {
+      this.running = true;
+      this.errorLog = null;
+      const outname = (await this.girderRest.post(
+        `item?folderId=${this.scratchFolder._id}&name=resultRight`,
+      )).data
+
+      const params = optionsToParameters({
+	// convert the string entered for the day to a number
+        selectedDay: Number(this.selectedDayRight),
+        selectedTrait: this.selectedTraitRight,
+        outnameId: outname._id,
+      });
+      this.job = (await this.girderRest.post(
+        `arbor_nova/terraTraitDaily?${params}`,
+      )).data;
+
+      await pollUntilJobComplete(this.girderRest, this.job, job => this.job = job);
+
+      if (this.job.status === 3) {
+        this.running = false;
+        this.resultRight = csvParse((await this.girderRest.get(`item/${outname._id}/download`)).data);
+
+      // build the spec here.  Inside the method means that the data item will be available. 
+      var vegaLiteSpec = {
+        $schema: 'https://vega.github.io/schema/vega-lite/v2.0.json',
+        description: 'trait values across the field',
+        data: {values: this.resultRight}, 
+        mark: {type:'rect', tooltip: {content: "data"}},
+        encoding: {
+          x: {field: 'column', type: 'ordinal'},
+          y: {field: 'range', type: 'ordinal'},
+          color: {field: this.selectedTraitRight , type: 'quantitative'}
+        }
+      };
+	vegaEmbed(this.$refs.visRight,vegaLiteSpec);
       }
       if (this.job.status === 4) {
         this.running = false;

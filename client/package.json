@@ -23,6 +23,9 @@
     "sass-loader": "^7.1.0",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2",
+    "vega": "^5.11.1",
+    "vega-embed": "^6.6.0",
+    "vega-lite": "^4.11.0",
     "vue": "^2.6.6",
     "vue-router": "^3.0.1"
   },

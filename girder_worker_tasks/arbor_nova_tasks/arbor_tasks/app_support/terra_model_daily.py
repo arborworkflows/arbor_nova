@@ -3,16 +3,19 @@ from girder_worker.utils import girder_job
 from tempfile import NamedTemporaryFile
 
 import pandas as pd
+import numpy as np
+from sklearn.ensemble import GradientBoostingRegressor
 
 
 #--------- support routines for processing TERRA-Ref season measurements ----------------
 
 
-def addPlotMarker(plotlist,cultivar,rng,column,selectedFeatureName,featureValue):
+def addPlotMarker(plotlist,cultivar,rng,column,selectedFeatureName,featureValue,day):
     mark = {}
     mark['cultivar'] = cultivar
     mark['range'] = rng
     mark['column'] = column
+    mark['day'] = day
     mark[selectedFeatureName] = featureValue
     plotlist.append(mark)
 
@@ -20,14 +23,19 @@ def addPlotMarker(plotlist,cultivar,rng,column,selectedFeatureName,featureValue)
 #  measurement of a selectedFeature taken for each location in the field.  It is a way to watch the field develop
 # over time during the season.
 
-def renderCanopyHeightOnDay(dataFrm, minRange,minColumn, maxRange, maxColumn, selectedDay,selectedFeature):
+def renderFeatureOnDay(dataFrm, selectedDay,selectedFeature):
+    summary_df = dataFrm.describe()
+    minColumn = summary_df.loc['min','column']
+    minRange =  summary_df.loc['min','range']
+    maxColumn = summary_df.loc['max','column']
+    maxRange =  summary_df.loc['max','range']
 
-    # accumulate matching measturements here
-    plotlist = []
+    # if it is a string value, change the string to an integer
+    selectedDay = int(selectedDay)
 
     # first get rid of observations after the query day
     before_df = dataFrm.loc[dataFrm['day_offset'] <= selectedDay]
-    #print(before_df.shape)
+    print(before_df.shape)
 
     # group all the measurements so far by cultivar
     grouped = before_df.groupby(['range','column'])
@@ -41,19 +49,19 @@ def renderCanopyHeightOnDay(dataFrm, minRange,minColumn, maxRange, maxColumn, se
         recentlist.append(dataFrm.iloc[selected])
 
     # how many cultivars did we find that had a measurement on or before our day?
-    #print(len(recentlist),"cultivars have been measured on or before day",selectedDay)
+    print(len(recentlist),"cultivars have been measured on or before day",selectedDay)
     recent_df = pd.DataFrame(recentlist)
 
     # now fill out the entire field by querying the values at each location from the
-    # recent dataframe and filling in a plotting list.  This parameter list (plotlist) needs to be empty
+    # recent dataframe and filling in a plotting list.  This global list (plotlist) needs to be empty
     # before running this algorithm.
 
+    plotlist = []
     cultivarCount = 0
     measurementCount = 0
     # go once across the entire field by using range and column indices
     for rng in range(int(minRange),int(maxRange+1)):
         for col in range(int(minColumn),int(maxColumn+1)):
-            #print(rng,col)
             # find which cultivar is in this spot in the field
             CultivarListInThisSpot = dataFrm.loc[(dataFrm['range'] == rng) & (dataFrm['column']==col)]['cultivar']
             print
@@ -62,24 +70,32 @@ def renderCanopyHeightOnDay(dataFrm, minRange,minColumn, maxRange, maxColumn, se
             if len(CultivarListInThisSpot)> 0:
                 cultivarCount += 1
                 thisCultivar = CultivarListInThisSpot.values[0]
-                thisMeasurement = recent_df.loc[(recent_df['range'] == rng) & (recent_df['column'] == col)][selectedFeature]
-                # depending on the day, we might or might not have had a previous measurement, so check there was a measurement
-                # before plotting.  This filter prevents a run-time error trying to plot non-existent measurements.  See the
-                # "else" case below for when there is no previous measurement.
-                if len(thisMeasurement)>0:
-                    measurementCount += 1
-                    thisMeasurementValue = thisMeasurement.values[0]
-                    addPlotMarker(plotlist,thisCultivar,rng,col,selectedFeature,thisMeasurementValue)
-                else:
-                    # fill in empty entries for locations where there were no measurements. This happens more during
-                    # the early part of the season because measurements haven't been taken in some locations yet. This
-                    # way, the plot will always render the full field because all locations will have an entry, even
-                    # if it is zero because no measurements have been taken yet.
-                    addPlotMarker(plotlist,thisCultivar,rng,col,selectedFeature,0.0)
+                # catch exception because recent_df might be empty if day requested is before all measurments
+                try:
+                    thisMeasurement = recent_df.loc[(recent_df['range'] == rng) & (recent_df['column'] == col)][selectedFeature]
+                    thisMeasurementDay = recent_df.loc[(recent_df['range'] == rng) & (recent_df['column'] == col)]['day_offset']
+
+                    # depending on the day, we might or might not have had a previous measurement, so check there was a measurement
+                    # before plotting.  This filter prevents a run-time error trying to plot non-existent measurements.  See the
+                    # "else" case below for when there is no previous measurement.
+                    if len(thisMeasurement)>0:
+                        measurementCount += 1
+                        thisMeasurementValue = thisMeasurement.values[0]
+                        thisMeasurementDayValue = thisMeasurementDay.values[0]
+                        addPlotMarker(plotlist,thisCultivar,rng,col,selectedFeature,thisMeasurementValue,thisMeasurementDayValue)
+                    else:
+                        # fill in empty entries for locations where there were no measurements. This happens more during
+                        # the early part of the season because measurements haven't been taken in some locations yet. This
+                        # way, the plot will always render the full field because all locations will have an entry, even
+                        # if it is zero because no measurements have been taken yet.
+                        addPlotMarker(plotlist,thisCultivar,rng,col,selectedFeature,0.0,0)
+                except:
+                    # support the case where the date was so low, there were no measurements at all
+                    addPlotMarker(plotlist,thisCultivar,rng,col,selectedFeature,0.0,0)
 
     plotdf = pd.DataFrame(plotlist)
     #print('cultivars found:',cultivarCount)
-    print('measurements found:',measurementCount)
+    #print('measurements found:',measurementCount)
     #print('plotted',len(plotlist),'values')
     return plotdf
 
@@ -90,37 +106,32 @@ def renderCanopyHeightOnDay(dataFrm, minRange,minColumn, maxRange, maxColumn, se
 
 
 
-
-@girder_job(title='TerraTraitDaily')
+@girder_job(title='TerraModelDaily')
 @app.task(bind=True)
-def terra_trait_daily(
+def terra_model_daily(
     self,
     selectedDay,
     selectedTrait,
     **kwargs
 ):
 
-    # this is a mini version of the data file that is quick to read and write here
-    data_filename = 's4_height_and_models.csv'
+    # initialize with the output of the model 
+    data_filename = 'per_cultivar_model_output.csv'
+
     path = '/home/vagrant/arbor_nova/girder_worker_tasks/arbor_nova_tasks/arbor_tasks/app_support'
     #print('reading data file')
     traits_df = pd.read_csv(path+'/'+data_filename)
     #print('reading complete')
 
-    
-    # find the field boundaries of the data dynamically.  It would be faster to hardcode this
-    summary_df = traits_df.describe()
-    minColumn = summary_df.loc['min','column']
-    minRange =  summary_df.loc['min','range']
-    maxColumn = summary_df.loc['max','column']
-    maxRange =  summary_df.loc['max','range']
-
     # run the extraction of the trait values across the field at or as soon before the reqested day as possible
-    plotdf = renderCanopyHeightOnDay(traits_df,minRange,minColumn,maxRange,maxColumn,float(selectedDay),selectedTrait)    
+    result_df = renderFeatureOnDay(
+                traits_df,
+                selectedDay,
+                selectedTrait)
 
     # place the file in a temporary location so it is readable without a girder login
     outname = NamedTemporaryFile(delete=False).name+'.csv'
-    plotdf.to_csv(outname,index=False)
-    #print('writing complete')
+    result_df.to_csv(outname,index=False)
+    #print('writing daily complete')
     #print('terra_daily_trait filename:',outname )
     return outname 

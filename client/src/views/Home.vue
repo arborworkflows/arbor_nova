@@ -57,6 +57,12 @@ export default {
         description: 'Provide a day-by-day exploration of trait values across all cultivars',
       },
       {
+        label: 'Train a Model on Season4 Traits',
+        image: require('../assets/terra_sorghum.png'),
+        route: 'terramodel',
+        description: 'Fit a new model to observed trait measurements',
+      },
+      {
         label: 'PhyloMap',
         image: require('../assets/phylomap.png'),
         route: 'phylomap',

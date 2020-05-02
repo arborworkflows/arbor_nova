@@ -6,6 +6,8 @@ from arbor_nova_tasks.arbor_tasks.app_support import pgls
 from arbor_nova_tasks.arbor_tasks.app_support import asr 
 from arbor_nova_tasks.arbor_tasks.app_support import terra_schema
 from arbor_nova_tasks.arbor_tasks.app_support import terra_trait_daily
+from arbor_nova_tasks.arbor_tasks.app_support import terra_per_cultivar_model
+from arbor_nova_tasks.arbor_tasks.app_support import terra_model_daily
 
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute
@@ -22,6 +24,8 @@ class ArborNova(Resource):
         self.route('POST', ('asr', ), self.asr)
         self.route('POST', ('terraSchema', ), self.terra_csv_schema)
         self.route('POST', ('terraTraitDaily', ), self.terra_csv_trait_daily)
+        self.route('POST', ('terraModelDaily', ), self.terra_csv_model_daily)
+        self.route('POST', ('terraPerCultivarModel', ), self.terra_csv_per_cultivar_model)
 
     @access.token
     @filtermodel(model='job', plugin='jobs')
@@ -153,6 +157,65 @@ class ArborNova(Resource):
         result = terra_trait_daily.delay(
             selectedDay, 
             selectedTrait,
+            girder_result_hooks=[
+                GirderUploadToItem(outnameId)
+            ])
+        return result.job
+
+
+    @access.token
+    @filtermodel(model='job', plugin='jobs')
+    @autoDescribeRoute(
+        Description('TerraModelDaily')
+        .param('selectedDay', 'The day of the growing season selected for observation.')
+        .param('selectedTrait', '(string) The name of the trait to return for that day. (e.g."canopy_heigth")') 
+        .param('outnameId', 'The ID of the output item where the data file will be uploaded.')
+        .errorResponse()
+        .errorResponse('Terra_daily permission problem.', 403)
+        .errorResponse('Terra_daily internal error',500)
+    )
+    def terra_csv_model_daily(
+        self,
+        selectedDay,
+        selectedTrait,
+        outnameId
+    ):
+        result = terra_model_daily.delay(
+            selectedDay, 
+            selectedTrait,
+            girder_result_hooks=[
+                GirderUploadToItem(outnameId)
+            ])
+        return result.job
+
+
+
+    @access.token
+    @filtermodel(model='job', plugin='jobs')
+    @autoDescribeRoute(
+        Description('TerraPerCultivarModel')
+        .param('season', 'The season to model growth for') 
+        .param('estimators', 'How many estimators to use in the XGBoost model.')
+        .param('depth', 'How many decisions deep to investigate each option in XGBoost') 
+        .param('learn', 'what learning rate to use for the XGBoost algorithm') 
+        .param('outnameId', 'The ID of the output item where the data file will be uploaded.')
+        .errorResponse()
+        .errorResponse('Terra_daily permission problem.', 403)
+        .errorResponse('Terra_daily internal error',500)
+    )
+    def terra_csv_per_cultivar_model(
+        self,
+        season,
+        estimators,
+        depth,
+        learn,
+        outnameId
+    ):
+        result = terra_per_cultivar_model.delay(
+            season, 
+            estimators,
+            depth,
+            learn,
             girder_result_hooks=[
                 GirderUploadToItem(outnameId)
             ])

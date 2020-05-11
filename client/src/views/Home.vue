@@ -63,6 +63,18 @@ export default {
         description: 'Fit a new model to observed trait measurements',
       },
       {
+        label: 'Explore Pairwise Trait Correlation',
+        image: require('../assets/trait_correlation.png'),
+        route: 'terrascatter',
+        description: 'Scatterplot between two trait measurements',
+      },
+      {
+        label: 'Compare Trait differences across Cultivars',
+        image: require('../assets/cultivar_matrix.png'),
+        route: 'cultivarmatrix',
+        description: 'Plot specific trait differences across all the cultivars',
+      },
+      {
         label: 'PhyloMap',
         image: require('../assets/phylomap.png'),
         route: 'phylomap',

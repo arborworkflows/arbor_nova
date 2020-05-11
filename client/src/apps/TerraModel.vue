@@ -229,6 +229,12 @@ export default {
         this.resultModel = csvParse((await this.girderRest.get(`item/${outname._id}/download`)).data);
 	this.modelCompleted = true;
 
+     // loop through the array and fix the range,column to be integers
+      for(let i = 0; i < this.resultModel.length; i++){
+        this.resultModel[i].range = Number(this.resultModel[i].range);
+        this.resultModel[i].column = Number(this.resultModel[i].column);
+      }
+
       // build the spec here.  Inside the method means that the data item will be available. 
       var vegaLiteSpec = {
         $schema: 'https://vega.github.io/schema/vega-lite/v2.0.json',
@@ -270,6 +276,12 @@ export default {
       if (this.job.status === 3) {
         this.running = false;
         this.resultLeft = csvParse((await this.girderRest.get(`item/${outname._id}/download`)).data);
+
+      // loop through the array and fix the range,column to be integers
+      for(let i = 0; i < this.resultLeft.length; i++){
+        this.resultLeft[i].range = Number(this.resultLeft[i].range);
+        this.resultLeft[i].column = Number(this.resultLeft[i].column);
+      }
 
       // build the spec here.  Inside the method means that the data item will be available. 
       var vegaLiteSpec = {
@@ -316,6 +328,12 @@ export default {
       if (this.job.status === 3) {
         this.running = false;
         this.resultRight = csvParse((await this.girderRest.get(`item/${outname._id}/download`)).data);
+
+     // loop through the array and fix the range,column to be integers
+      for(let i = 0; i < this.resultRight.length; i++){
+        this.resultRight[i].range = Number(this.resultRight[i].range);
+        this.resultRight[i].column = Number(this.resultRight[i].column);
+      }
 
       // build the spec here.  Inside the method means that the data item will be available. 
       var vegaLiteSpec = {

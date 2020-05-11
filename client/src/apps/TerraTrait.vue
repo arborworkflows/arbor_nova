@@ -150,11 +150,17 @@ export default {
         this.running = false;
         this.resultLeft = csvParse((await this.girderRest.get(`item/${outname._id}/download`)).data);
 
+      // loop through the array and fix the range,column to be integers
+      for(let i = 0; i < this.resultLeft.length; i++){ 
+	this.resultLeft[i].range = Number(this.resultLeft[i].range);
+	this.resultLeft[i].column = Number(this.resultLeft[i].column);
+      }
+
       // build the spec here.  Inside the method means that the data item will be available. 
       var vegaLiteSpec = {
-        $schema: 'https://vega.github.io/schema/vega-lite/v2.0.json',
+        $schema: 'https://vega.github.io/schema/vega-lite/v4.8.1.json',
         description: 'trait values across the field',
-        data: {values: this.resultLeft}, 
+        data: { values: this.resultLeft },
         mark: {type:'rect', tooltip: {content: "data"}},
         encoding: {
           x: {field: 'column', type: 'ordinal'},
@@ -192,16 +198,26 @@ export default {
         this.running = false;
         this.resultRight = csvParse((await this.girderRest.get(`item/${outname._id}/download`)).data);
 
+      // loop through the array and fix the range,column to be integers
+      for(let i = 0; i < this.resultRight.length; i++){ 
+	this.resultRight[i].range = Number(this.resultRight[i].range);
+	this.resultRight[i].column = Number(this.resultRight[i].column);
+      }
+
       // build the spec here.  Inside the method means that the data item will be available. 
       var vegaLiteSpec = {
-        $schema: 'https://vega.github.io/schema/vega-lite/v2.0.json',
+        $schema: 'https://vega.github.io/schema/vega-lite/v4.8.1.json',
         description: 'trait values across the field',
         data: {values: this.resultRight}, 
-        mark: {type:'rect', tooltip: {content: "data"}},
+        mark: 'rect',
         encoding: {
           x: {field: 'column', type: 'ordinal'},
           y: {field: 'range', type: 'ordinal'},
-          color: {field: this.selectedTraitRight , type: 'quantitative'}
+          color: {field: this.selectedTraitRight , type: 'quantitative'},
+          "tooltip": [
+	    {"type": "ordinal", "field":"cultivar","title":"Cultivar"},
+	    {"type": "quantitative","field": this.selectedTraitRight, "title": this.selectedTraitRight},
+	  ]
         }
       };
 	vegaEmbed(this.$refs.visRight,vegaLiteSpec);

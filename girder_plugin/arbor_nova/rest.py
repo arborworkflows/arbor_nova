@@ -8,6 +8,9 @@ from arbor_nova_tasks.arbor_tasks.app_support import terra_schema
 from arbor_nova_tasks.arbor_tasks.app_support import terra_trait_daily
 from arbor_nova_tasks.arbor_tasks.app_support import terra_per_cultivar_model
 from arbor_nova_tasks.arbor_tasks.app_support import terra_model_daily
+from arbor_nova_tasks.arbor_tasks.app_support import terra_season
+from arbor_nova_tasks.arbor_tasks.app_support import terra_cultivar_matrix
+from arbor_nova_tasks.arbor_tasks.app_support import terra_one_cultivar
 
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute
@@ -26,6 +29,9 @@ class ArborNova(Resource):
         self.route('POST', ('terraTraitDaily', ), self.terra_csv_trait_daily)
         self.route('POST', ('terraModelDaily', ), self.terra_csv_model_daily)
         self.route('POST', ('terraPerCultivarModel', ), self.terra_csv_per_cultivar_model)
+        self.route('POST', ('terraSeason', ), self.terra_season)
+        self.route('POST', ('terraCultivarMatrix', ), self.terra_cultivar_matrix)
+        self.route('POST', ('terraOneCultivar', ), self.terra_one_cultivar)
 
     @access.token
     @filtermodel(model='job', plugin='jobs')
@@ -216,6 +222,84 @@ class ArborNova(Resource):
             estimators,
             depth,
             learn,
+            girder_result_hooks=[
+                GirderUploadToItem(outnameId)
+            ])
+        return result.job
+
+
+    @access.token
+    @filtermodel(model='job', plugin='jobs')
+    @autoDescribeRoute(
+        Description('TerraSeason')
+        .param('season', 'The season to model growth for') 
+        .param('outnameId', 'The ID of the output item where the data file will be uploaded.')
+        .errorResponse()
+        .errorResponse('Terra_season permission problem.', 403)
+        .errorResponse('Terra_season internal error',500)
+    )
+    def terra_season(
+        self,
+        season,
+        outnameId
+    ):
+        result = terra_season.delay(
+            season, 
+            girder_result_hooks=[
+                GirderUploadToItem(outnameId)
+            ])
+        return result.job
+
+
+    @access.token
+    @filtermodel(model='job', plugin='jobs')
+    @autoDescribeRoute(
+        Description('TerraCultivarMatrix')
+        .param('season', 'The season to model growth for') 
+        .param('count', 'How many cultivars to include in the output (up to dataset size)') 
+        .param('trait', 'what trait should be displayed in the cultivar x cultivar matrix?') 
+        .param('outnameId', 'The ID of the output item where the data file will be uploaded.')
+        .errorResponse()
+        .errorResponse('Terra_cultivar_matrix permission problem.', 403)
+        .errorResponse('Terra_cultivar_matrix internal error',500)
+    )
+    def terra_cultivar_matrix(
+        self,
+        season,
+        count,
+        trait,
+        outnameId
+    ):
+        result = terra_cultivar_matrix.delay(
+            season, 
+            count,
+            trait,
+            girder_result_hooks=[
+                GirderUploadToItem(outnameId)
+            ])
+        return result.job
+
+
+    @access.token
+    @filtermodel(model='job', plugin='jobs')
+    @autoDescribeRoute(
+        Description('TerraOneCultivar')
+        .param('season', 'The season report') 
+        .param('cultivar', 'The name of the single cultivar to return data for)') 
+        .param('outnameId', 'The ID of the output item where the data file will be uploaded.')
+        .errorResponse()
+        .errorResponse('Terra_one_cultivar permission problem.', 403)
+        .errorResponse('Terra_one_cultivar internal error',500)
+    )
+    def terra_one_cultivar(
+        self,
+        season,
+        cultivar,
+        outnameId
+    ):
+        result = terra_one_cultivar.delay(
+            season, 
+            cultivar,
             girder_result_hooks=[
                 GirderUploadToItem(outnameId)
             ])

@@ -118,19 +118,27 @@ export default {
   methods: {
 
     // do a REST call to get the measurements from the selected season
-    async rederCultivar1Data(cultivar) {
-      const outname = (await this.girderRest.post( `item?folderId=${this.scratchFolder._id}&name=selectedSeasonData`,)).data
+    async renderCultivar1Data(globalthis,cultivar) {
+      const outname = (await globalthis.girderRest.post( `item?folderId=${globalthis.scratchFolder._id}&name=selectedSeasonData`,)).data
       const params = optionsToParameters({
-        season: this.selectedSeason,
+        season: globalthis.selectedSeason,
 	cultivar: cultivar,
         outnameId: outname._id, });
       // and POST the data in the REST call that invokes a girder endpoint
-      this.job = (await this.girderRest.post( `arbor_nova/terraOneCultivar?${params}`,)).data;
-      await pollUntilJobComplete(this.girderRest, this.job, job => this.job = job);
-      var cultivarData = csvParse((await this.girderRest.get(`item/${outname._id}/download`)).data);
+      globalthis.job = (await globalthis.girderRest.post( `arbor_nova/terraOneCultivar?${params}`,)).data;
+      await pollUntilJobComplete(globalthis.girderRest, globalthis.job, job => globalthis.job = job);
+      var cultivarData = csvParse((await globalthis.girderRest.get(`item/${outname._id}/download`)).data);
       console.log('selected cultiver data has returned')
+
+
+      // loop through the data array and fix the day_offset to be integers
+      for(let i = 0; i < cultivarData.length; i++){ 
+        cultivarData[i].day_offset = Number(cultivarData[i].day_offset);
+      } 
+
+
       // render
-      var cult1Title = "values of "+this.selectedTrait + " for  cultivar "+ cultivar
+      var cult1Title = "values of "+globalthis.selectedTrait + " for  cultivar "+ cultivar
       var cult1spec = {
         $schema: 'https://vega.github.io/schema/vega-lite/v4.8.1.json',
      	description: 'trait values across the field',
@@ -138,17 +146,17 @@ export default {
       	width: 300,
        	height: 350,
        	data: {values: cultivarData},
-       	mark: {type:'rect', tooltip: {content: "data"}},
+       	mark: {type:'point', tooltip: {content: "data"}},
        	encoding: {
-            color: {field: this.selectedTrait, type: 'quantitative'},
+            color: {field: globalthis.selectedTrait, type: 'quantitative'},
        	    x: {field: 'day_offset', type: 'ordinal'},
-       	    y: {field: this.selectedTrait, type: 'quantitative'},
+       	    y: {field: globalthis.selectedTrait, type: 'quantitative'},
 	}
       };
       // Draw the values of the selected trait for all the measurements during the season
       // on this cultivar only
       console.log('got here')
-      //vegaEmbed(this.$refs.visRight,cult1Spec);
+      vegaEmbed(globalthis.$refs.visRight,cult1spec);
     },
 
 
@@ -213,13 +221,19 @@ export default {
 	// here is the embedding of the Vega-lite viz.  Note the promise-catching "then" clause, which adds a listener
 	// to the selection event.  The convention of eventname_store is used to store/retrieve data managed by vega.
 	// 
+        console.log('before the embed #1. this:',this)
+	var globalThis = this
+	
 	vegaEmbed(this.$refs.visLeft,vegaLiteSpec).then(function(result) {
+        	console.log('after the embed #2. this:',this)
+        	console.log('after the embed #2. globalthis:',globalThis)
 		result.view.addSignalListener('select',function(name,value) { 
 			console.log('value:',value); 
-
+        		console.log('inside the callback from embed #3. this:',this)
+        		console.log('after the embed #3. globalthis:',globalThis)
       		// now we know what was selected, get the data for these cultivars and render 
 
-      		this.renderCultivar1Data(value.cultivar1[0])
+      		globalThis.renderCultivar1Data(globalThis,value.cultivar1[0])
       		console.log('selected cultiver data has returned')
 	  });
 	});

@@ -7,6 +7,7 @@ import TerraTrait from './apps/TerraTrait.vue'
 import TerraModel from './apps/TerraModel.vue'
 import TerraScatter from './apps/TerraScatter.vue'
 import CultivarMatrix from './apps/TerraCultivarMatrix.vue'
+import ExploreCultivar from './apps/TerraExploreCultivar.vue'
 //import PhyloMap from './apps/PhyloMap.vue'
 import ASR from './apps/ASR.vue'
 
@@ -43,6 +44,11 @@ export default new Router({
       path: '/cultivarmatrix',
       name: 'cultivarmatrix',
       component: CultivarMatrix,
+    },
+    {
+      path: '/explorecultivar',
+      name: 'explorecultivar',
+      component: ExploreCultivar,
     },
 //    {
 //      path: '/pgls',

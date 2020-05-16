@@ -51,13 +51,13 @@ export default {
     smallScreen: false,
     samples: [
       {
-        label: 'Explore Season4 Sensor Collected Traits',
+        label: 'Explore Sensor Collected Traits',
         image: require('../assets/terra_trait.png'),
         route: 'terratrait',
         description: 'Provide a day-by-day exploration of trait values across all cultivars',
       },
       {
-        label: 'Train a Model on Season4 Traits',
+        label: 'Train a Model on Season 4 or 6 Data',
         image: require('../assets/terra_sorghum.png'),
         route: 'terramodel',
         description: 'Fit a new model to observed trait measurements',
@@ -75,17 +75,23 @@ export default {
         description: 'Plot specific trait differences across all the cultivars',
       },
       {
-        label: 'PhyloMap',
-        image: require('../assets/phylomap.png'),
-        route: 'phylomap',
-        description: 'Explore the phylogenetic tree and the associated cultivar location data.',
+        label: 'Explore a Single Cultivar',
+        image: require('../assets/explore_single_cultivar.png'),
+        route: 'explorecultivar',
+        description: 'Explore the measurements of a single cultivar',
       },
-      {   
-        label: 'Ancestral State Reconstruction',
-        image: require('../assets/asr.png'),
-        route: 'asr',
-        description: 'Explore the ancestral signal of a particular character across the tree',
-      },    
+      //{
+      //  label: 'PhyloMap',
+      //  image: require('../assets/phylomap.png'),
+      //  route: 'phylomap',
+      //  description: 'Explore the phylogenetic tree and the associated cultivar location data.',
+      //},
+      //{   
+      //  label: 'Ancestral State Reconstruction',
+      //  image: require('../assets/asr.png'),
+      //  route: 'asr',
+      //  description: 'Explore the ancestral signal of a particular character across the tree',
+      //},    
     ],
   }),
 }

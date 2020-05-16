@@ -118,7 +118,8 @@ def terra_model_daily(
     # initialize with the output of the model 
     data_filename = 'per_cultivar_model_output.csv'
 
-    path = '/home/vagrant/arbor_nova/girder_worker_tasks/arbor_nova_tasks/arbor_tasks/app_support'
+    #path = '/home/vagrant/arbor_nova/girder_worker_tasks/arbor_nova_tasks/arbor_tasks/app_support'
+    path = '.'
     #print('reading data file')
     traits_df = pd.read_csv(path+'/'+data_filename)
     #print('reading complete')

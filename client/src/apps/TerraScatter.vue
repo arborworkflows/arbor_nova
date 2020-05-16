@@ -156,7 +156,7 @@ export default {
       var vegaLiteSpec = {
         $schema: 'https://vega.github.io/schema/vega-lite/v4.8.1.json',
         description: 'trait values across the field',
-	title: 'Trail Correlation',
+	title: 'Correlation between '+this.selectedTraitRight+' and '+this.selectedTraitLeft,
 	width: 800,
 	height: 800,
         data: {values: this.resultRight}, 

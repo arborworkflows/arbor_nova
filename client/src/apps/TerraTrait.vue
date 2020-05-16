@@ -7,6 +7,11 @@
           <v-spacer/>
         </v-toolbar>
         <v-container fluid>
+
+          <v-flex xs12>
+            <v-select label="Select the Season to Model" v-model="selectedSeason" :items="seasons" />
+          </v-flex>
+
           <v-flex xs12>
 	    <label for="sDay">Enter the day in the season</label>
 	   <div id="dayDiv">
@@ -96,6 +101,8 @@ export default {
     JsonDataTable,
   },
   data: () => ({
+    seasons: ['Season 4','Season 6'],
+    selectedSeason: '',
     selectedDayLeft: "15",
     selectedDayRight: "15",
     selectedTraitLeft: '',
@@ -136,6 +143,7 @@ export default {
 
       const params = optionsToParameters({
 	// convert the string entered for the day to a number
+	season: this.selectedSeason,
         selectedDay: Number(this.selectedDayLeft),
         selectedTrait: this.selectedTraitLeft,
         outnameId: outname._id,
@@ -157,9 +165,10 @@ export default {
       }
 
       // build the spec here.  Inside the method means that the data item will be available. 
+      let titleText = this.selectedSeason+': '+this.selectedTraitLeft+' values across the field' 
       var vegaLiteSpec = {
         $schema: 'https://vega.github.io/schema/vega-lite/v4.8.1.json',
-        description: 'trait values across the field',
+        description: titleText, 
         data: { values: this.resultLeft },
         mark: {type:'rect', tooltip: {content: "data"}},
         encoding: {
@@ -184,6 +193,7 @@ export default {
 
       const params = optionsToParameters({
 	// convert the string entered for the day to a number
+	season: this.selectedSeason,
         selectedDay: Number(this.selectedDayRight),
         selectedTrait: this.selectedTraitRight,
         outnameId: outname._id,
@@ -205,9 +215,10 @@ export default {
       }
 
       // build the spec here.  Inside the method means that the data item will be available. 
+      let titleText = this.selectedSeason+': '+this.selectedTraitRight+' values across the field' 
       var vegaLiteSpec = {
         $schema: 'https://vega.github.io/schema/vega-lite/v4.8.1.json',
-        description: 'trait values across the field',
+        description: titleText, 
         data: {values: this.resultRight}, 
         mark: 'rect',
         encoding: {

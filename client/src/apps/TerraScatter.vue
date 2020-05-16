@@ -97,7 +97,7 @@ export default {
     running: false,
     runningModel: false,
     modelCompleted: false,
-    traits: ["canopy_height","leaf_angle_mean","leaf_angle_alpha","leaf_angle_beta","leaf_angle_chi","per_cultivar_gboost","abserror_per_cultivar_gboost","avg_error_per_cultivar_gboost"],
+    traits: ["canopy_height","leaf_angle_mean","leaf_angle_alpha","leaf_angle_beta","leaf_angle_chi","range","column","per_cultivar_gboost","abserror_per_cultivar_gboost","avg_error_per_cultivar_gboost"],
     resultLeft: [],
     resultRight: [],
     resultModel: [],
@@ -160,7 +160,7 @@ export default {
 	width: 800,
 	height: 800,
         data: {values: this.resultRight}, 
-        mark: {type:'point', tooltip: {content: "data"}},
+        mark: {type:'point', fill: "#4C78A8", tooltip: {content: "data"}},
         encoding: {
           x: {field: this.selectedTraitRight, type: 'quantitative'},
           y: {field: this.selectedTraitLeft, type: 'quantitative'},

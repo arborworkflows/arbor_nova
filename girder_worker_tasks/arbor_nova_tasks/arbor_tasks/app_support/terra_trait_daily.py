@@ -56,26 +56,31 @@ def renderCanopyHeightOnDay(dataFrm, minRange,minColumn, maxRange, maxColumn, se
             #print(rng,col)
             # find which cultivar is in this spot in the field
             CultivarListInThisSpot = dataFrm.loc[(dataFrm['range'] == rng) & (dataFrm['column']==col)]['cultivar']
-            print
             # return a Series of the cultivar names. If the square isn't empty, get the cultivar name from the list.
             # all cultivar names should be identical since we have selected multiple measurements (on different days) from the same location
             if len(CultivarListInThisSpot)> 0:
                 cultivarCount += 1
                 thisCultivar = CultivarListInThisSpot.values[0]
-                thisMeasurement = recent_df.loc[(recent_df['range'] == rng) & (recent_df['column'] == col)][selectedFeature]
-                # depending on the day, we might or might not have had a previous measurement, so check there was a measurement
-                # before plotting.  This filter prevents a run-time error trying to plot non-existent measurements.  See the
-                # "else" case below for when there is no previous measurement.
-                if len(thisMeasurement)>0:
-                    measurementCount += 1
-                    thisMeasurementValue = thisMeasurement.values[0]
-                    addPlotMarker(plotlist,thisCultivar,rng,col,selectedFeature,thisMeasurementValue)
-                else:
-                    # fill in empty entries for locations where there were no measurements. This happens more during
-                    # the early part of the season because measurements haven't been taken in some locations yet. This
-                    # way, the plot will always render the full field because all locations will have an entry, even
-                    # if it is zero because no measurements have been taken yet.
+                # if too early a day is picked, there might be no measurements, so catch this case and return zero
+                try:
+                    thisMeasurement = recent_df.loc[(recent_df['range'] == rng) & (recent_df['column'] == col)][selectedFeature]
+                    # depending on the day, we might or might not have had a previous measurement, so check there was a measurement
+                    # before plotting.  This filter prevents a run-time error trying to plot non-existent measurements.  See the
+                    # "else" case below for when there is no previous measurement.
+                    if len(thisMeasurement)>0:
+                        measurementCount += 1
+                        thisMeasurementValue = thisMeasurement.values[0]
+                        addPlotMarker(plotlist,thisCultivar,rng,col,selectedFeature,thisMeasurementValue)
+                    else:
+                        # fill in empty entries for locations where there were no measurements. This happens more during
+                        # the early part of the season because measurements haven't been taken in some locations yet. This
+                        # way, the plot will always render the full field because all locations will have an entry, even
+                        # if it is zero because no measurements have been taken yet.
+                        addPlotMarker(plotlist,thisCultivar,rng,col,selectedFeature,0.0)
+                except:
+                    # return zero in the case there were no actual measurements yet, so empty plot can be drawn
                     addPlotMarker(plotlist,thisCultivar,rng,col,selectedFeature,0.0)
+
 
     plotdf = pd.DataFrame(plotlist)
     #print('cultivars found:',cultivarCount)
@@ -95,14 +100,21 @@ def renderCanopyHeightOnDay(dataFrm, minRange,minColumn, maxRange, maxColumn, se
 @app.task(bind=True)
 def terra_trait_daily(
     self,
+    season,
     selectedDay,
     selectedTrait,
     **kwargs
 ):
 
-    # this is a mini version of the data file that is quick to read and write here
-    data_filename = 's4_height_and_models.csv'
-    path = '/home/vagrant/arbor_nova/girder_worker_tasks/arbor_nova_tasks/arbor_tasks/app_support'
+   # initialize with the proper season of data
+    if (season == 'Season 4'):
+        data_filename = 's4_height_and_models.csv'
+    elif (season == 'Season 6'):
+        data_filename = 's6_height_and_models.csv'
+    else:
+        print('unknown season');
+
+    path = '.'
     #print('reading data file')
     traits_df = pd.read_csv(path+'/'+data_filename)
     #print('reading complete')

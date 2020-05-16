@@ -56,7 +56,10 @@
           </v-card>
 	  <v-row  align="center" justify="center">
 	     <div id="visM" ref="visLeft"></div>
-	     <div id="visRgt" ref="visRight"></div>
+	     <v-column>
+	       <div id="visRgt" ref="visRight"></div>
+	       <div id="visRgtB" ref="visRightBelow"></div>
+	     </v-column>
 	  </v-row>
         <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
           Running (Job Status {{ job.status }}) ...
@@ -160,6 +163,48 @@ export default {
     },
 
 
+    // do a REST call to get the measurements from the selected season
+    async renderCultivar2Data(globalthis,cultivar) {
+      const outname = (await globalthis.girderRest.post( `item?folderId=${globalthis.scratchFolder._id}&name=selectedSeasonData`,)).data
+      const params = optionsToParameters({
+        season: globalthis.selectedSeason,
+	cultivar: cultivar,
+        outnameId: outname._id, });
+      // and POST the data in the REST call that invokes a girder endpoint
+      globalthis.job = (await globalthis.girderRest.post( `arbor_nova/terraOneCultivar?${params}`,)).data;
+      await pollUntilJobComplete(globalthis.girderRest, globalthis.job, job => globalthis.job = job);
+      var cultivarData = csvParse((await globalthis.girderRest.get(`item/${outname._id}/download`)).data);
+      console.log('selected cultiver data has returned')
+
+      // loop through the data array and fix the day_offset to be integers
+      for(let i = 0; i < cultivarData.length; i++){ 
+        cultivarData[i].day_offset = Number(cultivarData[i].day_offset);
+      } 
+
+      // render
+      var cult1Title = "values of "+globalthis.selectedTrait + " for  cultivar "+ cultivar
+      var cult1spec = {
+        $schema: 'https://vega.github.io/schema/vega-lite/v4.8.1.json',
+     	description: 'trait values across the field',
+      	title: cult1Title,
+      	width: 300,
+       	height: 350,
+       	data: {values: cultivarData},
+       	mark: {type:'point', tooltip: {content: "data"}},
+       	encoding: {
+            color: {field: globalthis.selectedTrait, type: 'quantitative'},
+       	    x: {field: 'day_offset', type: 'ordinal'},
+       	    y: {field: globalthis.selectedTrait, type: 'quantitative'},
+	}
+      };
+      // Draw the values of the selected trait for all the measurements during the season
+      // on this cultivar only
+      console.log('got here #2')
+      vegaEmbed(globalthis.$refs.visRightBelow,cult1spec);
+    },
+
+
+
     // this is called when the cultivar matrix is desired.  A Vega-Lite spec is used for the rendering.
     // The data for the rendering is retrieved from a girder REST endpoint 
 
@@ -210,8 +255,8 @@ export default {
   	},
         encoding: {
           color: {field: "difference", type: 'quantitative'},
-          x: {field: "cultivar1", type: 'ordinal'},
-          y: {field: "cultivar2", type: 'ordinal'},
+          x: {field: "cultivar2", type: 'ordinal'},
+          y: {field: "cultivar1", type: 'ordinal'},
 	 fillOpacity: {
             condition: {"selection": "select", "value": 1},
             value: 0.25
@@ -225,24 +270,19 @@ export default {
 	var globalThis = this
 	
 	vegaEmbed(this.$refs.visLeft,vegaLiteSpec).then(function(result) {
-        	console.log('after the embed #2. this:',this)
-        	console.log('after the embed #2. globalthis:',globalThis)
 		result.view.addSignalListener('select',function(name,value) { 
 			console.log('value:',value); 
-        		console.log('inside the callback from embed #3. this:',this)
-        		console.log('after the embed #3. globalthis:',globalThis)
       		// now we know what was selected, get the data for these cultivars and render 
-
-      		globalThis.renderCultivar1Data(globalThis,value.cultivar1[0])
-      		console.log('selected cultiver data has returned')
+      		globalThis.renderCultivar1Data(globalThis,value.cultivar1[0]).then(function() {
+      		    globalThis.renderCultivar2Data(globalThis,value.cultivar2[0]);
+      		console.log('selected cultiver data has returned')});
 	  });
-	});
-      }
+      });
+    }
       if (this.job.status === 4) {
         this.running = false;
       }
-    },
-
+  },
 
  }
 }

@@ -25,7 +25,7 @@ def terra_season(
     if (season == 'Season 4'):
         data_filename = 's4_height_and_models.csv'
     elif (season == 'Season 6'):
-        data_filename = 's6_full_height_and_leaf_day.csv'
+        data_filename = 's6_height_and_models.csv'
     else:
         print('unknown season');
 

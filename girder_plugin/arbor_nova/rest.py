@@ -147,6 +147,7 @@ class ArborNova(Resource):
     @filtermodel(model='job', plugin='jobs')
     @autoDescribeRoute(
         Description('TerraTraitDaily')
+        .param('season', 'select which season to explore (string name, e.t. "Season 6").')
         .param('selectedDay', 'The day of the growing season selected for observation.')
         .param('selectedTrait', '(string) The name of the trait to return for that day. (e.g."canopy_heigth")') 
         .param('outnameId', 'The ID of the output item where the data file will be uploaded.')
@@ -156,11 +157,13 @@ class ArborNova(Resource):
     )
     def terra_csv_trait_daily(
         self,
+        season,
         selectedDay,
         selectedTrait,
         outnameId
     ):
         result = terra_trait_daily.delay(
+            season,
             selectedDay, 
             selectedTrait,
             girder_result_hooks=[

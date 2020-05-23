@@ -112,6 +112,7 @@ def terra_model_daily(
     self,
     selectedDay,
     selectedTrait,
+    modelResults,
     **kwargs
 ):
 
@@ -120,9 +121,20 @@ def terra_model_daily(
 
     #path = '/home/vagrant/arbor_nova/girder_worker_tasks/arbor_nova_tasks/arbor_tasks/app_support'
     path = '.'
-    #print('reading data file')
-    traits_df = pd.read_csv(path+'/'+data_filename)
-    #print('reading complete')
+    #print('reading model output file ')
+    #traits_df = pd.read_csv(path+'/'+data_filename)
+
+    # instead of being read from a file, the data is passed live through the HTTP link, so multiple 
+    # users can run models simultaneously without interfering with each other (through file overwriting).
+    print('reading model results ')
+    print('type:',type(modelResults))
+    print('modelResults:',modelResults)
+    traits_df = modelResults['data'] 
+
+    # we are passing back the model results, so convert them to a dataframe for use
+    #print('processing model data')
+    #traits_df = pd.DataFrame(modelResults)
+    #print('completed.')
 
     # run the extraction of the trait values across the field at or as soon before the reqested day as possible
     result_df = renderFeatureOnDay(
@@ -133,6 +145,6 @@ def terra_model_daily(
     # place the file in a temporary location so it is readable without a girder login
     outname = NamedTemporaryFile(delete=False).name+'.csv'
     result_df.to_csv(outname,index=False)
-    #print('writing daily complete')
+    print('writing daily complete')
     #print('terra_daily_trait filename:',outname )
     return outname 

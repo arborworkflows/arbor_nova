@@ -86,6 +86,12 @@ export default {
         route: 'rankcultivars',
         description: 'Rank the cultivars according to trait values during the season',
       },
+      {
+        label: 'Trait Correlations',
+        image: require('../assets/correlation_matrix.png'),
+        route: 'correlation',
+        description: 'Examine correlation matrix across all traits ',
+      },
       //{
       //  label: 'PhyloMap',
       //  image: require('../assets/phylomap.png'),

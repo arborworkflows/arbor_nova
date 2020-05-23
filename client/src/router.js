@@ -9,6 +9,7 @@ import TerraScatter from './apps/TerraScatter.vue'
 import CultivarMatrix from './apps/TerraCultivarMatrix.vue'
 import ExploreCultivar from './apps/TerraExploreCultivar.vue'
 import RankCultivars from './apps/TerraTopK.vue'
+import TerraCorrelation from './apps/TerraCorrelation.vue'
 //import PhyloMap from './apps/PhyloMap.vue'
 import ASR from './apps/ASR.vue'
 
@@ -55,6 +56,11 @@ export default new Router({
       path: '/rankcultivars',
       name: 'rankcultivars',
       component: RankCultivars,
+    },
+    {
+      path: '/correlation',
+      name: 'correlation',
+      component: TerraCorrelation,
     },
 //    {
 //      path: '/pgls',

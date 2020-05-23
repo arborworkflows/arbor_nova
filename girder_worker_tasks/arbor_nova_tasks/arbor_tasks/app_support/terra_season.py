@@ -21,11 +21,15 @@ def terra_season(
     **kwargs
 ):
 
-    # initialize with the proper season of data
+   # initialize with the proper season of data
     if (season == 'Season 4'):
         data_filename = 's4_height_and_models.csv'
     elif (season == 'Season 6'):
         data_filename = 's6_height_and_models.csv'
+    elif (season == 'S4 Hand Measurements'):
+        data_filename = 's4_august_by_hand_30plus_v2.csv'
+    elif (season == 'S4 July Features'):
+        data_filename = 's4july_traits_and_models.csv'
     else:
         print('unknown season');
 

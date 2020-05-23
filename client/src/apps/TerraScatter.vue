@@ -8,7 +8,10 @@
         </v-toolbar>
         <v-container fluid>
           <v-flex xs12>
-            <v-select label="Select the Season to Model" v-model="selectedSeason" :items="seasons" />
+            <v-select 
+		label="Select the Season to Model" 
+		v-model="selectedSeason" :items="seasons"
+                @change="loadSeasonColumns" />
           </v-flex>
 
 	  <v-spacer></v-spacer>
@@ -87,16 +90,17 @@ export default {
     JsonDataTable,
   },
   data: () => ({
-    seasons: ['Season 4','Season 6'],
+    seasons: ['Season 4','Season 6','S4 Hand Measurements','S4 July Features'],
     selectedSeason: '',
+    seasonData: [],
     selectedTraitLeft: '',
     selectedTraitRight: '',
     selectedTraitColor: '',
+    traits: [],
     job: { status: 0 },
     running: false,
     runningModel: false,
     modelCompleted: false,
-    traits: ["canopy_height","leaf_angle_mean","leaf_angle_alpha","leaf_angle_beta","leaf_angle_chi","range","column","per_cultivar_gboost","abserror_per_cultivar_gboost","avg_error_per_cultivar_gboost"],
     resultLeft: [],
     resultRight: [],
     resultModel: [],
@@ -118,6 +122,43 @@ export default {
   },
 
   methods: {
+
+
+
+   async loadSeasonColumns() {
+       console.log('loading season to identify cultivars');
+      const outname = (await this.girderRest.post(
+         `item?folderId=${this.scratchFolder._id}&name=resultRight`,
+       )).data
+ 
+       const params = optionsToParameters({
+         // convert the string entered for the day to a number
+         season: this.selectedSeason,
+         outnameId: outname._id,
+       });
+       this.job = (await this.girderRest.post(
+         `arbor_nova/terraSeason?${params}`,
+       )).data;
+ 
+       await pollUntilJobComplete(this.girderRest, this.job, job => this.job = job);
+       let seasonData = csvParse((await this.girderRest.get(`item/${outname._id}/download`)).data);
+       var columnList = seasonData.columns
+       //console.log(columnList)
+       
+       // remove 'cultivar' from list if it is there. We only want to return numberic measurements for the
+       // traits for use in scatter plots or other visualizations.
+       
+       const index = columnList.indexOf('cultivar');
+       if (index > -1) {
+         columnList.splice(index, 1);
+       }
+
+       // list all available traits so we can customize the scatterplot matrix
+       this.traits = columnList
+     },
+
+
+
 
     // this is called when the right field display is desired.  A Vega-Lite spec is used for the rendering.
     // The data for the rendering is retrieved from a girder REST endpoint 
@@ -163,7 +204,11 @@ export default {
         encoding: {
           x: {field: this.selectedTraitRight, type: 'quantitative'},
           y: {field: this.selectedTraitLeft, type: 'quantitative'},
-          color: {field: this.selectedTraitColor , type: 'quantitative'}
+          color: {
+		field: this.selectedTraitColor , 
+		type: 'quantitative',
+		"scale": {"scheme":"lightmulti"}
+	  }
         }
       };
 	vegaEmbed(this.$refs.visRight,vegaLiteSpec);

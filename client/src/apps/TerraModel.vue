@@ -279,14 +279,17 @@ export default {
         `item?folderId=${this.scratchFolder._id}&name=resultLeft`,
       )).data
 
-      // eventually, we want to pass this.resultModel to be rendered instead of having a file read 
-      // by the python method
+      // Pass this.resultModel to be rendered instead of having a file read by the python method so multiple
+      // users can run models. 
 
+      // FIX: when this AJAX call is received on the Python side, the data is just the string "[object object]"
+
+      console.log(this.resultModel)
       const params = optionsToParameters({
 	// convert the string entered for the day to a number
         selectedDay: Number(this.selectedDayLeft),
         selectedTrait: this.selectedTraitLeft,
-	modelResults: {data: this.resultModel},
+	modelResults: {'data': this.resultModel},
         outnameId: outname._id,
       });
       this.job = (await this.girderRest.post(
@@ -407,17 +410,17 @@ export default {
  
         console.log(csvOutput);
 
-        const url = window.URL.createObjectURL(csvOutput);
-	console.log("url:",url)
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', 'model_results.csv') //or any other extension;
-        document.body.appendChild(link);
-        link.click();
-	document.body.removeChild(link);
+        //const url = window.URL.createObjectURL(csvOutput);
+	//console.log("url:",url)
+        //const link = document.createElement('a');
+        //link.href = url;
+        //link.setAttribute('download', 'model_results.csv') //or any other extension;
+        //document.body.appendChild(link);
+        //link.click();
+	//document.body.removeChild(link);
 	// the above downloaded an file, but there is an
 	// alternate way, if needed here as part of the FileSaver package:
-	//saveAs(this.result,{type:"image/png"},"filesaver.png");
+	saveAs(this.resultModel,{type:"text/csv"},"model_prediction.csv");
     },
 
   }

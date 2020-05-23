@@ -8,3 +8,4 @@ from .terra_season import terra_season
 from .terra_cultivar_matrix  import terra_cultivar_matrix
 from .terra_one_cultivar import terra_one_cultivar
 from .terra_selected_cultivars import terra_selected_cultivars
+from .terra_correlation import terra_correlation 

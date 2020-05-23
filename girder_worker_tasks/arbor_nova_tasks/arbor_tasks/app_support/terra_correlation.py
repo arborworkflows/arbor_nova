@@ -6,8 +6,8 @@ import pandas as pd
 import numpy as np
 
 
-#  This is based on terra_one_cultivar.  The only change is that a list of cultivars is passed in
-#  and data is returned if the cultivars are in the list.
+# This routine allows selection of a dataset, it uses PANDAS to perform one of several selected correlation analyses, 
+# and then returns the unrolled matrix, suitable for rendering using Vega-lite. 
 
 #--------- support routines for processing TERRA-Ref season measurements ----------------
 
@@ -17,23 +17,16 @@ import numpy as np
 
 
 
-@girder_job(title='TerraSelectedCultivars')
+@girder_job(title='TerraCorrelation')
 @app.task(bind=True)
-def terra_selected_cultivars(
+def terra_correlation(
     self,
     season,
-    cultivar,
+    correlation,
     **kwargs
 ):
 
-    print('selected cultivars:',cultivar)
-    try:
-       cultivar = cultivar.split(',')
-       print('selected cultivars:',cultivar)
-    except:
-       print('oops')
-
-    # initialize with the proper season of data
+   # initialize with the proper season of data
     if (season == 'Season 4'):
         data_filename = 's4_height_and_models.csv'
     elif (season == 'Season 6'):
@@ -51,11 +44,22 @@ def terra_selected_cultivars(
     traits_df = pd.read_csv(path+'/'+data_filename)
     #print('reading complete')
 
-    # filter for measurements of multiple cultivars by checking for membership in the list
-    filter_df = traits_df.loc[traits_df['cultivar'].isin(cultivar)]
+    # now see what correlation option was selected
+    if (correlation == 'Kendell Tau Correlation'):
+        correlation = 'kendell'
+    elif (correlation == 'Spearman Rank Correlation'):
+        correlation = 'spearman'
+    else:
+        correlation = 'pearson'
 
+
+    # now perform the correlation analysis, unroll the result, and rename the columns
+    corrMat = traits_df.corr(correlation).stack().reset_index()
+    renamedMat = corrMat.rename(columns={0: 'correlation', 'level_0': 'variable', 'level_1': 'variable2'})
+
+    
     # place the file in a temporary location so it is readable without a girder login
     outname = NamedTemporaryFile(delete=False).name+'.csv'
-    filter_df.to_csv(outname,index=False)
-    print('output one cultivar data complete')
+    renamedMat.to_csv(outname,index=False)
+    print('output correlation data complete')
     return outname 

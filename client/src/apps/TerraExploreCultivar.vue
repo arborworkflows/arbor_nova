@@ -92,7 +92,7 @@ export default {
     JsonDataTable,
   },
   data: () => ({
-    seasons: ['Season 4','Season 6'],
+    seasons: ['Season 4','Season 6','S4 Hand Measurements','S4 July Features'],
     selectedSeason: '',
     cultivars: ['PI553998','PI569264'],
     selectedCultivar: '', 

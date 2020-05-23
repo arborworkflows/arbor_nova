@@ -9,7 +9,11 @@
         <v-container fluid>
 
           <v-flex xs12>
-            <v-select label="Select the Season to Model" v-model="selectedSeason" :items="seasons" />
+            <v-select 
+		label="Select the Season to Model" 
+		v-model="selectedSeason" 
+		:items="seasons" 
+		@onChange=loadSeasonColumns />
           </v-flex>
 
           <v-flex xs12>
@@ -108,7 +112,7 @@ export default {
     selectedTraitRight: '',
     job: { status: 0 },
     running: false,
-    traits: ["canopy_height","leaf_angle_mean","leaf_angle_alpha","leaf_angle_beta","leaf_angle_chi","single_xgboost","abserror_single_xgboost","single_dtree","abserror_single_dtree"],
+    traits: [],
     resultLeft: [],
     resultRight: [],
     resultColumnsLeft: [],
@@ -122,10 +126,12 @@ export default {
   computed: {
     readyToRunLeft() {
       return !!(this.selectedDayLeft>0) &&
+	(this.selectedSeason.length>0) &&
         !!(this.selectedTraitLeft.length>0); 
     },
     readyToRunRight() {
       return !!(this.selectedDayRight>0) &&
+	(this.selectedSeason.length>0) &&
         !!(this.selectedTraitRight.length>0); 
     },
     loggedOut() {
@@ -133,6 +139,42 @@ export default {
     },
   },
   methods: {
+
+
+
+   async loadSeasonColumns() {
+       console.log('loading season to identify cultivars');
+      const outname = (await this.girderRest.post(
+         `item?folderId=${this.scratchFolder._id}&name=resultRight`,
+       )).data
+
+       const params = optionsToParameters({
+         // convert the string entered for the day to a number
+         season: this.selectedSeason,
+         outnameId: outname._id,
+       });
+       this.job = (await this.girderRest.post(
+         `arbor_nova/terraSeason?${params}`,
+       )).data;
+
+       await pollUntilJobComplete(this.girderRest, this.job, job => this.job = job);
+       let seasonData = csvParse((await this.girderRest.get(`item/${outname._id}/download`)).data);
+       var columns = seasonData.columns
+       //console.log(columns)
+
+       // remove 'cultivar' from list if it is there. We only want to return numberic measurements for the
+       // traits for use in scatter plots or other visualizations. 
+
+       const index = columns.indexOf('cultivar');
+       if (index > -1) {
+         columns.splice(index, 1);
+       }
+
+       // list all available traits so we can customize the visualization options
+       this.traits = columns 
+     },
+
+
     async runLeft() {
       this.running = true;
       this.errorLog = null;

@@ -71,10 +71,15 @@
       <v-layout column justify-start fill-height style="margin-left: 400px">
           <v-card class="ma-4">
             <v-card-text>
-              <b>Rank the cultivars.</b> Select a day within the growing season
-		and pick a trait from the selectors at the left.   Then select GO to explore how the cultivars 
-		compared on that selected trait at that time during the season.
+              <b>Rank trait measurements.</b> This app calculates the average value of measured traits and displays the top values.
+	      It is traditionally called "top-k" because you can select how many values to display, by selecting a value for K 
+	      (the number of rankings).  Since traits vary across the cultivars and across time, you are given the opportunity to 
+	      select a day in the season, to select for the analysis.  Once you select a day and a particular trait, the values for
+	      that trait across all instances of each cultivar are averaged and the cultivars are ranked according to this trait.  To
+	      change the number of cultivars to render (K), just drag the slider to the desired value and click the "DRAW" button.   
               <br><br>
+	      Two identical charts (left and right) are available to allow comparsion between different traits or the same trait
+	      at different times during the season. 
             </v-card-text>
           </v-card>
 	  <v-row  align="center" justify="center">
@@ -185,8 +190,8 @@ export default {
 	"title": titleText,
         "data": {"values": this.resultLeft}, 
         "width": 477,
-        "height": 477,
-        "mark": {"type": "bar", "tooltip": null},
+        "height": 677,
+        "mark": {"type": "bar", "tooltip": {"content": "data"}},
         "transform": [
           {
             "aggregate": [
@@ -215,7 +220,8 @@ export default {
             "field": "ranked_cultivar",
             "type": "ordinal",
             "axis": {"title": null}
-          }
+          },
+          "color": {"aggregate":"mean", "field": aggTraitName, "type":"quantitative", "scale":{"scheme":"yellowgreen"}}
         }
       };
 
@@ -266,8 +272,8 @@ export default {
 	"title": titleText,
         "data": {"values": this.resultRight}, 
         "width": 477,
-        "height": 477,
-        "mark": {"type": "bar", "tooltip": null},
+        "height": 677,
+        "mark": {"type": "bar", "tooltip": {"content": "data"}},
         "transform": [
           {
             "aggregate": [
@@ -296,7 +302,8 @@ export default {
             "field": "ranked_cultivar",
             "type": "ordinal",
             "axis": {"title": null}
-          }
+          },
+          "color": {"aggregate":"mean", "field": aggTraitName, "type":"quantitative", "scale":{"scheme":"yellowgreen"}}
         }
       };
 	vegaEmbed(this.$refs.visRight,vegaLiteSpec);

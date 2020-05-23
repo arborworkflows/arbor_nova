@@ -12,6 +12,7 @@ from arbor_nova_tasks.arbor_tasks.app_support import terra_season
 from arbor_nova_tasks.arbor_tasks.app_support import terra_cultivar_matrix
 from arbor_nova_tasks.arbor_tasks.app_support import terra_one_cultivar
 from arbor_nova_tasks.arbor_tasks.app_support import terra_selected_cultivars
+from arbor_nova_tasks.arbor_tasks.app_support import terra_correlation
 
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute
@@ -34,6 +35,7 @@ class ArborNova(Resource):
         self.route('POST', ('terraCultivarMatrix', ), self.terra_cultivar_matrix)
         self.route('POST', ('terraOneCultivar', ), self.terra_one_cultivar)
         self.route('POST', ('terraSelectedCultivars', ), self.terra_selected_cultivars)
+        self.route('POST', ('terraCorrelation', ), self.terra_correlation)
 
     @access.token
     @filtermodel(model='job', plugin='jobs')
@@ -334,6 +336,32 @@ class ArborNova(Resource):
         result = terra_selected_cultivars.delay(
             season, 
             cultivar,
+            girder_result_hooks=[
+                GirderUploadToItem(outnameId)
+            ])
+        return result.job
+
+
+    @access.token
+    @filtermodel(model='job', plugin='jobs')
+    @autoDescribeRoute(
+        Description('TerraCorrelation')
+        .param('season', 'The season report') 
+        .param('correlation', 'the type of correlation to perform (Pearson, Kendell Tau Correlation, Spearman Rank Correlation)') 
+        .param('outnameId', 'The ID of the output item where the data file will be uploaded.')
+        .errorResponse()
+        .errorResponse('Terra_correlation permission problem.', 403)
+        .errorResponse('Terra_correlation internal error',500)
+    )
+    def terra_correlation(
+        self,
+        season,
+        correlation,
+        outnameId
+    ):
+        result = terra_correlation.delay(
+            season, 
+            correlation,
             girder_result_hooks=[
                 GirderUploadToItem(outnameId)
             ])

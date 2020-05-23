@@ -95,6 +95,22 @@
           </v-flex>
         </v-container>
 
+        <v-container fluid>
+         <v-flex xs12>
+            <v-btn
+              block
+              :class="{ primary: readyToDownload }"
+              :flat="readyToDownload"
+              :outline="!readyToDownload"
+              :disabled="!readyToDownload"
+              @click="downloadResults"
+            >
+              Download Model Results 
+            </v-btn>
+          </v-flex>
+
+        </v-container>
+
       </v-navigation-drawer>
       <v-layout column justify-start fill-height style="margin-left: 400px">
           <v-card class="ma-4">
@@ -107,13 +123,13 @@
 		Please allow a few seconds to a few minutes for execution, depending on the model parameters.  When the model 
 		is finished, it will draw the entire field showing the average error between the measurements and the model
 		for each plot location across the season. 
-              <br><br>
+              <br></br>
 		You may change parameters and re-run the model as often as you wish. When the model is finished, 
 		you may browse how the model matched during a particular day of the season using the specific day and
 		 specific feature rendering tools. The controls for the selected day renderings are at left below the 
 		modeling parameters.   Click on the DRAW LEFT CHART or DRAW RIGHT CHART to render a feature at the 
 		selected day. 
-              <br><br>
+              <br></br>
             </v-card-text>
           </v-card>
 	  <v-row  align="center" justify="center">
@@ -125,8 +141,7 @@
           Running (Job Status {{ job.status }}) ...
         </div>
         <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code>
-        </template>
-      </v-layout>
+    </v-layout>
     </v-layout>
   </v-app>
 </template>
@@ -174,6 +189,9 @@ export default {
   asyncComputed: {
     scratchFolder() {
       return scratchFolder(this.girderRest);
+    },
+    readyToDownload() {
+      return (this.modelCompleted)
     },
   },
   computed: {
@@ -261,10 +279,14 @@ export default {
         `item?folderId=${this.scratchFolder._id}&name=resultLeft`,
       )).data
 
+      // eventually, we want to pass this.resultModel to be rendered instead of having a file read 
+      // by the python method
+
       const params = optionsToParameters({
 	// convert the string entered for the day to a number
         selectedDay: Number(this.selectedDayLeft),
         selectedTrait: this.selectedTraitLeft,
+	modelResults: {data: this.resultModel},
         outnameId: outname._id,
       });
       this.job = (await this.girderRest.post(
@@ -304,7 +326,7 @@ export default {
 
 
     // this is called when the right field display is desired.  A Vega-Lite spec is used for the rendering.
-    // The data for the rendering is retrieved from a girder REST endpoint (..terraTraitDaily)
+    // The data for the rendering is retrieved from a girder REST endpoint (..terraTraitDaily). 
 
     async runRight() {
       this.running = true;
@@ -313,10 +335,14 @@ export default {
         `item?folderId=${this.scratchFolder._id}&name=resultRight`,
       )).data
 
+      // similarly to the left rendering, we'd like to modify the API to receive the model results to allow multiple 
+      // executions simulaneously without overright. 
+      console.log(this.resultModel)
       const params = optionsToParameters({
 	// convert the string entered for the day to a number
         selectedDay: Number(this.selectedDayRight),
         selectedTrait: this.selectedTraitRight,
+	modelResults: {data: this.resultModel}, 
         outnameId: outname._id,
       });
       this.job = (await this.girderRest.post(
@@ -353,6 +379,47 @@ export default {
         this.running = false;
       }
     },
+
+
+    // The user has selected to download results, so convert the array to a CSV string and download it.
+    // The download is caused by 
+    async downloadResults() {
+
+
+	// iterate through the first row to find the column names
+        var csvOutput = ''
+	for (var key in this.resultModel[0]) {
+	  csvOutput += key+','
+	} 
+        csvOutput += "\n";
+
+        this.resultModel.forEach(function(row) {
+
+		for (var key in row) {
+    		// check if the property/key is defined in the object itself, not in parent
+    		if (row.hasOwnProperty(key)) {           
+        			//console.log(key, row[key]);
+				csvOutput += row[key]+','
+    			}
+		}
+            csvOutput += "\n";
+        });
+ 
+        console.log(csvOutput);
+
+        const url = window.URL.createObjectURL(csvOutput);
+	console.log("url:",url)
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'model_results.csv') //or any other extension;
+        document.body.appendChild(link);
+        link.click();
+	document.body.removeChild(link);
+	// the above downloaded an file, but there is an
+	// alternate way, if needed here as part of the FileSaver package:
+	//saveAs(this.result,{type:"image/png"},"filesaver.png");
+    },
+
   }
 }
 </script>

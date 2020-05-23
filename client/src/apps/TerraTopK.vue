@@ -3,7 +3,7 @@
     <v-layout class="transform-view" row fill-height>
       <v-navigation-drawer permanent fixed style="width: 400px; min-width: 400px;">
         <v-toolbar dark flat color="primary">
-          <v-toolbar-title class="white--text">Sensor Trait Explorer</v-toolbar-title>
+          <v-toolbar-title class="white--text">Top-K Ranking</v-toolbar-title>
           <v-spacer/>
         </v-toolbar>
         <v-container fluid>
@@ -11,6 +11,14 @@
           <v-flex xs12>
             <v-select label="Select the Season to Model" v-model="selectedSeason" :items="seasons" />
           </v-flex>
+
+  	  <v-subheader class="pl-0">How many rankings to show?</v-subheader>
+          <v-slider
+            v-model="topKslider"
+	    min=5
+	    max=50
+            thumb-label="always" >
+	  </v-slider>
 
           <v-flex xs12>
 	    <label for="sDay">Enter the day in the season</label>
@@ -63,8 +71,9 @@
       <v-layout column justify-start fill-height style="margin-left: 400px">
           <v-card class="ma-4">
             <v-card-text>
-              <b>Display Trait Values on selected days in the season.</b> Select a day within the growing season
-		and pick a trait from the selector at the right.   Then select GO.
+              <b>Rank the cultivars.</b> Select a day within the growing season
+		and pick a trait from the selectors at the left.   Then select GO to explore how the cultivars 
+		compared on that selected trait at that time during the season.
               <br><br>
             </v-card-text>
           </v-card>
@@ -102,6 +111,7 @@ export default {
   data: () => ({
     seasons: ['Season 4','Season 6'],
     selectedSeason: '',
+    topKslider: 10,
     selectedDayLeft: "15",
     selectedDayRight: "15",
     selectedTraitLeft: '',
@@ -163,19 +173,52 @@ export default {
 	this.resultLeft[i].column = Number(this.resultLeft[i].column);
       }
 
-      // build the spec here.  Inside the method means that the data item will be available. 
-      let titleText = this.selectedSeason+': '+this.selectedTraitLeft+' values across the field' 
-      var vegaLiteSpec = {
-        $schema: 'https://vega.github.io/schema/vega-lite/v4.8.1.json',
-        description: titleText, 
-        data: { values: this.resultLeft },
-        mark: {type:'rect', tooltip: {content: "data"}},
-        encoding: {
-          x: {field: 'column', type: 'ordinal'},
-          y: {field: 'range', type: 'ordinal'},
-          color: {field: this.selectedTraitLeft , type: 'quantitative'}
+     // we need to dynamically create a data column, so build the name according to 
+     // the trait we will be visualization
+
+     var aggTraitName = 'aggregate_'+this.selectedTraitLeft;
+     var titleText = 'Ranking '+ this.selectedSeason+': cultivars ranked by '+this.selectedTraitLeft+' on day ' +this.selectedDayLeft
+     var sliderValue = this.topKslider;
+     var vegaLiteSpec = {
+
+        "$schema": "https://vega.github.io/schema/vega-lite/v3.json",
+	"title": titleText,
+        "data": {"values": this.resultLeft}, 
+        "width": 477,
+        "height": 477,
+        "mark": {"type": "bar", "tooltip": null},
+        "transform": [
+          {
+            "aggregate": [
+              {"op": "mean", "field": this.selectedTraitLeft, "as": aggTraitName}
+            ],
+            "groupby": ["cultivar"]
+          },
+          {
+            "window": [{"op": "row_number", "as": "rank"}],
+            "sort": [{"field": aggTraitName, "order": "descending"}]
+          },
+          {
+            "calculate": "datum.rank < 20 ? datum.cultivar : 'All Others'",
+            "as": "ranked_cultivar"
+          }
+        ],
+        "encoding": {
+          "x": {
+            "aggregate": "mean",
+            "field": aggTraitName,
+            "type": "quantitative",
+            "axis": {"title": null}
+          },
+          "y": {
+            "sort": {"op": "mean", "field": aggTraitName, "order": "descending"},
+            "field": "ranked_cultivar",
+            "type": "ordinal",
+            "axis": {"title": null}
+          }
         }
       };
+
 	vegaEmbed(this.$refs.visLeft,vegaLiteSpec);
       }
       if (this.job.status === 4) {
@@ -214,20 +257,46 @@ export default {
       }
 
       // build the spec here.  Inside the method means that the data item will be available. 
-      let titleText = this.selectedSeason+': '+this.selectedTraitRight+' values across the field' 
+      var titleText = 'Ranking '+ this.selectedSeason+': cultivars ranked by '+this.selectedTraitRight+' on day ' +this.selectedDayRight
+      var aggTraitName = 'agg_'+this.selectedTraitRight;
+      var sliderValue = this.topKslider;
+      let globalThis = this;
       var vegaLiteSpec = {
-        $schema: 'https://vega.github.io/schema/vega-lite/v4.8.1.json',
-        description: titleText, 
-        data: {values: this.resultRight}, 
-        mark: 'rect',
-        encoding: {
-          x: {field: 'column', type: 'ordinal'},
-          y: {field: 'range', type: 'ordinal'},
-          color: {field: this.selectedTraitRight , type: 'quantitative'},
-          "tooltip": [
-	    {"type": "ordinal", "field":"cultivar","title":"Cultivar"},
-	    {"type": "quantitative","field": this.selectedTraitRight, "title": this.selectedTraitRight},
-	  ]
+        "$schema": "https://vega.github.io/schema/vega-lite/v3.json",
+	"title": titleText,
+        "data": {"values": this.resultRight}, 
+        "width": 477,
+        "height": 477,
+        "mark": {"type": "bar", "tooltip": null},
+        "transform": [
+          {
+            "aggregate": [
+              {"op": "mean", "field": this.selectedTraitRight, "as": aggTraitName}
+            ],
+            "groupby": ["cultivar"]
+          },
+          {
+            "window": [{"op": "row_number", "as": "rank"}],
+            "sort": [{"field": aggTraitName, "order": "descending"}]
+          },
+          {
+            "calculate": "datum.rank < 20 ? datum.cultivar : 'All Others'",
+            "as": "ranked_cultivar"
+          }
+        ],
+        "encoding": {
+          "x": {
+            "aggregate": "mean",
+            "field": aggTraitName,
+            "type": "quantitative",
+            "axis": {"title": null}
+          },
+          "y": {
+            "sort": {"op": "mean", "field": aggTraitName, "order": "descending"},
+            "field": "ranked_cultivar",
+            "type": "ordinal",
+            "axis": {"title": null}
+          }
         }
       };
 	vegaEmbed(this.$refs.visRight,vegaLiteSpec);

@@ -65,7 +65,6 @@
           Running (Job Status {{ job.status }}) ...
         </div>
         <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code>
-        </template>
       </v-layout>
     </v-layout>
   </v-app>
@@ -248,7 +247,7 @@ export default {
 	width: 800,
 	height: 800,
         data: {values: this.resultRight}, 
-        mark: {type:'rect', tooltip: {content: "data"}},
+        mark: {type:'rect', strokeWidth: 1, tooltip: {content: "data"}},
 	selection: {
     	    "highlight": {"type": "single", "empty": "none", "on": "mouseover"},
     	    "select": {"type": "single", fields:['cultivar1','cultivar2','difference']}
@@ -257,9 +256,13 @@ export default {
           color: {field: "difference", type: 'quantitative'},
           x: {field: "cultivar2", type: 'ordinal'},
           y: {field: "cultivar1", type: 'ordinal'},
+          stroke: {
+             "condition": {"test": {"and": [{"selection": "select"}, "length(data(\"select_store\"))"]}, "value": "black"},
+      "value": null
+         },
 	 fillOpacity: {
             condition: {"selection": "select", "value": 1},
-            value: 0.25
+            value: 0.5
          },
         }
       };

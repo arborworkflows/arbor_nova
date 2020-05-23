@@ -11,6 +11,7 @@ from arbor_nova_tasks.arbor_tasks.app_support import terra_model_daily
 from arbor_nova_tasks.arbor_tasks.app_support import terra_season
 from arbor_nova_tasks.arbor_tasks.app_support import terra_cultivar_matrix
 from arbor_nova_tasks.arbor_tasks.app_support import terra_one_cultivar
+from arbor_nova_tasks.arbor_tasks.app_support import terra_selected_cultivars
 
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute
@@ -32,6 +33,7 @@ class ArborNova(Resource):
         self.route('POST', ('terraSeason', ), self.terra_season)
         self.route('POST', ('terraCultivarMatrix', ), self.terra_cultivar_matrix)
         self.route('POST', ('terraOneCultivar', ), self.terra_one_cultivar)
+        self.route('POST', ('terraSelectedCultivars', ), self.terra_selected_cultivars)
 
     @access.token
     @filtermodel(model='job', plugin='jobs')
@@ -178,6 +180,7 @@ class ArborNova(Resource):
         Description('TerraModelDaily')
         .param('selectedDay', 'The day of the growing season selected for observation.')
         .param('selectedTrait', '(string) The name of the trait to return for that day. (e.g."canopy_heigth")') 
+        .param('modelResults', 'a list of dictionaries that represent the model results')
         .param('outnameId', 'The ID of the output item where the data file will be uploaded.')
         .errorResponse()
         .errorResponse('Terra_daily permission problem.', 403)
@@ -187,11 +190,13 @@ class ArborNova(Resource):
         self,
         selectedDay,
         selectedTrait,
+        modelResults,
         outnameId
     ):
         result = terra_model_daily.delay(
             selectedDay, 
             selectedTrait,
+            modelResults,
             girder_result_hooks=[
                 GirderUploadToItem(outnameId)
             ])
@@ -301,6 +306,32 @@ class ArborNova(Resource):
         outnameId
     ):
         result = terra_one_cultivar.delay(
+            season, 
+            cultivar,
+            girder_result_hooks=[
+                GirderUploadToItem(outnameId)
+            ])
+        return result.job
+
+    
+    @access.token
+    @filtermodel(model='job', plugin='jobs')
+    @autoDescribeRoute(
+        Description('TerraSelectCultivars')
+        .param('season', 'The season report') 
+        .param('cultivar', 'A list of cultivar names to return data for)') 
+        .param('outnameId', 'The ID of the output item where the data file will be uploaded.')
+        .errorResponse()
+        .errorResponse('Terra_selected_cultivar permission problem.', 403)
+        .errorResponse('Terra_selected_cultivar internal error',500)
+    )
+    def terra_selected_cultivars(
+        self,
+        season,
+        cultivar,
+        outnameId
+    ):
+        result = terra_selected_cultivars.delay(
             season, 
             cultivar,
             girder_result_hooks=[

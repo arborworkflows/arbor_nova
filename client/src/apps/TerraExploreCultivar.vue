@@ -19,8 +19,19 @@
 	  <v-spacer></v-spacer>
  	
           <v-flex xs12>
-            <v-autocomplete label="Selected Cultivar to Display" v-model="selectedCultivar" :items="cultivars" />
+            <v-autocomplete label="Selected Cultivar to Display" v-model="selectedCultivar" :items="cultivars" multiple />
           </v-flex>
+
+ 	<v-flex xs12 sm6>
+        	<v-select
+          	v-model="selectedTraits"
+          	:items=allTraits
+          	label="Select"
+          	multiple
+          	hint="Pick traits (5 or less)"
+          persistent-hint
+        ></v-select>
+      </v-flex>
 
           <v-flex xs12>
             <v-btn
@@ -37,16 +48,17 @@
 
 	<v-spacer></v-spacer>
 
-      </v-navigation-drawer>
+       </v-navigation-drawer>
       <v-layout column justify-start fill-height style="margin-left: 400px">
           <v-card class="ma-4">
             <v-card-text>
-              <b> Select a season and a cultivar to show the correlation plots between the cultivar's measurements 
-		  during the season.  A scatterplot is provided for each pair of measured traits. 
-              <br><br>
+              <b>Compare cultivar measurements.</b> Select a season and one or more cultivars to show the correlation plots between the cultivar's measurements 
+		  during the season.  A separate selector allows you to pick which features (up to 4 or 5 simulateneously) that you want to compare. Once you have selected the season, cultivar(s), and feature(s), select the DISPLAY button to draw the plots.    
+              <br></br>
 		  If two traits are "correlated" with each other, the marks in the plot will tend to make a pattern
-		  of dots leading up and to the right.  
-              <br><br>
+		  of dots leading up and to the right. If the traits vary inversely, the plotted points will travel down towards the
+		  right.  If the dots appear random, then the two traits in this plot are not strongly related.  
+              <br></br>
             </v-card-text>
           </v-card>
 	  <v-row  align="center" justify="center">
@@ -56,9 +68,8 @@
           Running (Job Status {{ job.status }}) ...
         </div>
         <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code>
-        </template>
       </v-layout>
-    </v-layout>
+      </v-layout>
   </v-app>
 </template>
 
@@ -85,6 +96,8 @@ export default {
     selectedSeason: '',
     cultivars: ['PI553998','PI569264'],
     selectedCultivar: '', 
+    selectedTraits: [],
+    allTraits: [],
     job: { status: 0 },
     running: false,
     runningModel: false,
@@ -98,6 +111,7 @@ export default {
   computed: {
     readyToRunModel() {
       return (this.selectedSeason.length>0) &&
+	(this.selectedTraits.length>0) &&
         (this.selectedCultivar.length>0) 
     },
   },
@@ -128,7 +142,7 @@ export default {
       let seasonData = csvParse((await this.girderRest.get(`item/${outname._id}/download`)).data);
       //console.log(seasonData)
 
-    // loop through the array and fix the range,column to be integers
+      // loop through the array and fix the range,column to be integers
       var cultivarList = []
       for(let i = 0; i < seasonData.length; i++){
         cultivarList.push(seasonData[i].cultivar)
@@ -136,6 +150,10 @@ export default {
       //console.log(cultivarList)
       // set the cultivar list so the UI is updated
       this.cultivars = cultivarList 
+      
+      // also list all available traits so we can customize the scatterplot matrix
+      this.allTraits = seasonData.columns
+
     },
 
 
@@ -159,7 +177,8 @@ export default {
         outnameId: outname._id, });
 
       // and POST the data in the REST call that invokes a girder endpoint
-      this.job = (await this.girderRest.post( `arbor_nova/terraOneCultivar?${params}`,)).data;
+      //this.job = (await this.girderRest.post( `arbor_nova/terraOneCultivar?${params}`,)).data;
+      this.job = (await this.girderRest.post( `arbor_nova/terraSelectedCultivars?${params}`,)).data;
       await pollUntilJobComplete(this.girderRest, this.job, job => this.job = job);
       var cultivarData = csvParse((await this.girderRest.get(`item/${outname._id}/download`)).data);
       console.log('selected cultiver data has returned')
@@ -173,16 +192,20 @@ export default {
       }
 
       // build the spec here.  Inside the method means that the data item will be available. 
-      let traitSubset = ['canopy_height','leaf_angle_alpha','leaf_angle_beta','leaf_angle_chi','day_offset']
+      //let traitSubset = ['canopy_height','leaf_angle_alpha','leaf_angle_beta','leaf_angle_chi','day_offset']
+
+      // the traits to display are selected by the user
+      console.log(this.selectedTraits)
+
       var vegaLiteSpec = {
 	  "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
 	  "repeat": {
-	    "row": traitSubset.reverse(), 
-	    "column": traitSubset 
+	    "row": this.selectedTraits, 
+	    "column": this.selectedTraits 
 	  },
 	  "spec": {
 	    "data": {"values": cultivarData}, 
-	    "mark":  {type:'point', fill: "#4C78A8", tooltip: {content: "data"}}, 
+	    "mark":  {type:'circle',  tooltip: {content: "data"}}, 
 	    "selection": {
 	      "brush": {
 	        "type": "interval",
@@ -210,7 +233,7 @@ export default {
 	        "condition": {
 	          "selection": "brush",
 	          "field": "cultivar",
-	          "type": "ordinal"
+	          "type": "nominal"
 	        },
 	        "value": "grey"
 	      }

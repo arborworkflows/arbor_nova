@@ -63,7 +63,6 @@
           Running (Job Status {{ job.status }}) ...
         </div>
         <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code>
-        </template>
       </v-layout>
     </v-layout>
   </v-app>

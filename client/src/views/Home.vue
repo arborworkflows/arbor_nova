@@ -80,6 +80,12 @@ export default {
         route: 'explorecultivar',
         description: 'Explore the measurements of a single cultivar',
       },
+      {
+        label: 'Rank the Cultivars',
+        image: require('../assets/topk.png'),
+        route: 'rankcultivars',
+        description: 'Rank the cultivars according to trait values during the season',
+      },
       //{
       //  label: 'PhyloMap',
       //  image: require('../assets/phylomap.png'),

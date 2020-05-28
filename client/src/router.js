@@ -6,10 +6,9 @@ import PGLS from './apps/PGLS.vue'
 //import PhyloMap from './apps/PhyloMap.vue'
 import ASR from './apps/ASR.vue'
 import PolyA from './apps/PolyA.vue'
-import blastn from './apps/blastn.vue'
-import infer from './apps/infer.vue'
-import DockerPolyA from './apps/DockerPolyA.vue'
-import infer_rhabdo from './apps/infer_rhabdo.vue'
+import PhyloSignal from './apps/PhyloSignal.vue'
+import FitDiscrete from './apps/FitDiscrete.vue'
+import FitContinuous from './apps/FitContinuous.vue'
 
 Vue.use(Router)
 
@@ -41,29 +40,19 @@ export default new Router({
       component: ASR,
     },
     {
-      path: '/polya',
-      name: 'polya',
-      component: PolyA,
+      path: '/phylosignal',
+      name: 'phylosignal',
+      component: PhyloSignal,
     },
     {
-      path: '/docker_polya',
-      name: 'docker_polya',
-      component: DockerPolyA,
+      path: '/fitdiscrete',
+      name: 'fitdiscrete',
+      component: FitDiscrete, 
     },
     {
-      path: '/blastn',
-      name: 'blastn',
-      component: blastn,
-    },
-    {
-      path: '/infer',
-      name: 'infer',
-      component: infer,
-    },
-    {
-      path: '/infer_rhabdo',
-      name: 'infer_rhabdo',
-      component: infer_rhabdo,
+      path: '/fitcontinuous',
+      name: 'fitcontinuous',
+      component: FitContinuous,
     },
   ]
 })

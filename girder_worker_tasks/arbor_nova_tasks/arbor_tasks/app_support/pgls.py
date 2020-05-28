@@ -77,5 +77,5 @@ plot(table[, ind_variable], table[, dep_variable],
     pch = 21, bg = "gray80", xlab = ind_variable, ylab = dep_variable)
 abline(res, lty = 2, lwd = 2)
 dev.off()
-''')
+''' )
     return modelfit_summary_file, plot_file

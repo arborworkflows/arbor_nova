@@ -11,6 +11,5 @@ class ArborNovaTasksGirderWorkerPlugin(GirderWorkerPluginABC):
         return [
             'arbor_nova_tasks.arbor_tasks.app_support',
             'arbor_nova_tasks.arbor_tasks.core',
-            'arbor_nova_tasks.arbor_tasks.fnlcr',
             'arbor_nova_tasks.arbor_tasks.example'
         ]

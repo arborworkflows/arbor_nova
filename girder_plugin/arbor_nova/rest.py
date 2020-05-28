@@ -4,11 +4,9 @@
 from arbor_nova_tasks.arbor_tasks.example import column_append
 from arbor_nova_tasks.arbor_tasks.app_support import pgls
 from arbor_nova_tasks.arbor_tasks.app_support import asr 
-from arbor_nova_tasks.arbor_tasks.fnlcr import polyA_v10 
-from arbor_nova_tasks.arbor_tasks.fnlcr import blastn 
-from arbor_nova_tasks.arbor_tasks.fnlcr import infer 
-from arbor_nova_tasks.arbor_tasks.fnlcr import docker_polyA 
-from arbor_nova_tasks.arbor_tasks.fnlcr import infer_rhabdo 
+from arbor_nova_tasks.arbor_tasks.app_support import phylosignal 
+from arbor_nova_tasks.arbor_tasks.app_support import fitdiscrete 
+from arbor_nova_tasks.arbor_tasks.app_support import fitcontinuous 
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute
 from girder.api.rest import filtermodel, Resource
@@ -22,11 +20,9 @@ class ArborNova(Resource):
         self.route('POST', ('csvColumnAppend', ), self.csv_column_append)
         self.route('POST', ('pgls', ), self.pgls)
         self.route('POST', ('asr', ), self.asr)
-        self.route('POST', ('polya', ), self.polyA_v10)
-        self.route('POST', ('docker_polya', ), self.docker_polyA)
-        self.route('POST', ('blastn', ), self.blastn)
-        self.route('POST', ('infer', ), self.infer)
-        self.route('POST', ('infer_rhabdo', ), self.infer_rhabdo)
+        self.route('POST', ('phylosignal', ), self.phylosignal)
+        self.route('POST', ('fitdiscrete', ), self.fitdiscrete)
+        self.route('POST', ('fitcontinuous', ), self.fitcontinuous)
 
     @access.token
     @filtermodel(model='job', plugin='jobs')
@@ -117,132 +113,101 @@ class ArborNova(Resource):
 
         return result.job
 
-# --- polyA python3 script for FNLCR
+
+# added PhyloSignal from app_support directory
+
     @access.token
     @filtermodel(model='job', plugin='jobs')
     @autoDescribeRoute(
-        Description('Calculate a Polyadenylation (PolyA) tail')
-        .param('fastaId', 'The ID of the input file.')
-        .param('linkerId', 'The ID of the linker input file.')
-        .param('transcriptId', 'The ID of the input file.')
-        .param('outputId', 'The ID of the output item where the output file will be uploaded.')
+        Description('phylosignal')
+        .param('treeFileId', 'The ID of the input tree file.')
+        .param('tableFileId', 'The ID of the input table file.')
+        .param('selectedColumn', 'The character to use for calculation of phylosginal.')
+        .param('method', 'Either lambda or K .')
+        .param('resultSummaryItemId', 'The ID of the output item where the model summary file will be uploaded.')
         .errorResponse()
         .errorResponse('Write access was denied on the parent item.', 403)
         .errorResponse('Failed to upload output file.', 500)
     )
-    def polyA_v10(
-            self, 
-            fastaId, 
-            linkerId, 
-            transcriptId,
-            outputId
+    def phylosignal(
+        self,
+        treeFileId,
+        tableFileId,
+        selectedColumn,
+        method,
+        resultSummaryItemId
     ):
-        result = polyA_v10.delay(
-                GirderFileId(fastaId), 
-                GirderFileId(linkerId),
-                GirderFileId(transcriptId),
-                girder_result_hooks=[
-                    GirderUploadToItem(outputId)
-                ])
+        result = phylosignal.delay(
+            GirderFileId(treeFileId),
+            GirderFileId(tableFileId),
+            selectedColumn,
+            method,
+            girder_result_hooks=[
+                GirderUploadToItem(resultSummaryItemId)
+            ])
         return result.job
 
-# --- polyA executed via docker for FNLCR
-    @access.token
-    @filtermodel(model='job', plugin='jobs')
-    @autoDescribeRoute(
-        Description('Calculate a Polyadenylation (PolyA) tail (via Jacks docker image')
-        .param('fastaId', 'The ID of the input file.')
-        .param('linkerId', 'The ID of the linker input file.')
-        .param('transcriptId', 'The ID of the input file.')
-        .param('outputId', 'The ID of the output item where the output file will be uploaded.')
-        .errorResponse()
-        .errorResponse('Write access was denied on the parent item.', 403)
-        .errorResponse('Failed to upload output file.', 500)
-    )
-    def docker_polyA(
-            self, 
-            fastaId, 
-            linkerId, 
-            transcriptId,
-            outputId
-    ):
-        result = docker_polyA.delay(
-                GirderFileId(fastaId), 
-                GirderFileId(linkerId),
-                GirderFileId(transcriptId),
-                girder_result_hooks=[
-                    GirderUploadToItem(outputId)
-                ])
-        return result.job
 
-# --- blastn command line for FNLCR
+# added FitDisrete from app_support directory
     @access.token
     @filtermodel(model='job', plugin='jobs')
     @autoDescribeRoute(
-        Description('run blastn to compare two fasta files')
-        .param('fastaId', 'The ID of the source file.')
-        .param('linkerId', 'The ID of the query file.')
-        .param('outputId', 'The ID of the output item where the output file will be uploaded.')
+        Description('fitdiscrete')
+        .param('treeFileId', 'The ID of the input tree file.')
+        .param('tableFileId', 'The ID of the input table file.')
+        .param('selectedColumn', 'The character to use for calculation of phylosginal.')
+        .param('model', 'select the model to use.')
+        .param('resultSummaryItemId', 'The ID of the output item where the model summary file will be uploaded.')
         .errorResponse()
         .errorResponse('Write access was denied on the parent item.', 403)
         .errorResponse('Failed to upload output file.', 500)
     )
-    def blastn(
-            self, 
-            fastaId, 
-            linkerId, 
-            outputId
+    def fitdiscrete(
+        self,
+        treeFileId,
+        tableFileId,
+        selectedColumn,
+        model,
+        resultSummaryItemId
     ):
-        result = blastn.delay(
-                GirderFileId(fastaId), 
-                GirderFileId(linkerId),
-                girder_result_hooks=[
-                    GirderUploadToItem(outputId)
-                ])
+        result = fitdiscrete.delay(
+            GirderFileId(treeFileId),
+            GirderFileId(tableFileId),
+            selectedColumn,
+            model,
+            girder_result_hooks=[
+                GirderUploadToItem(resultSummaryItemId)
+            ])
         return result.job
-
-# ---DNN infer command line for FNLCR
+   
+# added FitDisrete from app_support directory
     @access.token
     @filtermodel(model='job', plugin='jobs')
     @autoDescribeRoute(
-        Description('perform forward inferencing using a pretrained network')
-        .param('fastaId', 'The ID of the source, a numpy array file.')
-        .param('outputId', 'The ID of the output item where the output file will be uploaded.')
+        Description('fitcontinuous')
+        .param('treeFileId', 'The ID of the input tree file.')
+        .param('tableFileId', 'The ID of the input table file.')
+        .param('selectedColumn', 'The character to use for calculation of phylosginal.')
+        .param('model', 'select the model to use.')
+        .param('resultSummaryItemId', 'The ID of the output item where the model summary file will be uploaded.')
         .errorResponse()
         .errorResponse('Write access was denied on the parent item.', 403)
         .errorResponse('Failed to upload output file.', 500)
     )
-    def infer(
-            self, 
-            fastaId, 
-            outputId
+    def fitcontinuous(
+        self,
+        treeFileId,
+        tableFileId,
+        selectedColumn,
+        model,
+        resultSummaryItemId
     ):
-        result = infer.delay(
-                GirderFileId(fastaId), 
-                girder_result_hooks=[
-                    GirderUploadToItem(outputId)
-                ])
-        return result.job
-
-# ---DNN infer command line for FNLCR
-    @access.token
-    @filtermodel(model='job', plugin='jobs')
-    @autoDescribeRoute(
-        Description('perform forward inferencing using a pretrained network')
-        .param('imageId', 'The ID of the source, a TIF image file.')
-        .param('outputId', 'The ID of the output item where the output file will be uploaded.')
-        .errorResponse()
-        .errorResponse('Write access was denied on the parent item.', 403)
-        .errorResponse('Failed to upload output file.', 500)
-    )
-    def infer_rhabdo(
-            self, 
-            imageId, 
-            outputId
-    ):
-        result = infer_rhabdo.delay(
-                GirderFileId(imageId), 
-                girder_result_hooks=[
-                    GirderUploadToItem(outputId)
-                ])
+        result = fitcontinuous.delay(
+            GirderFileId(treeFileId),
+            GirderFileId(tableFileId),
+            selectedColumn,
+            model,
+            girder_result_hooks=[
+                GirderUploadToItem(resultSummaryItemId)
+            ])
         return result.job

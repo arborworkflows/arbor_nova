@@ -11,9 +11,8 @@
           <v-flex xs12>
             <v-select 
 		label="Select the Season to Model" 
-		v-model="selectedSeason" 
-		:items="seasons" 
-		@onChange=loadSeasonColumns />
+		v-model="selectedSeason" :items="seasons" 
+		@change=loadSeasonColumns />
           </v-flex>
 
           <v-flex xs12>

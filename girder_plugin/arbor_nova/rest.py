@@ -182,7 +182,7 @@ class ArborNova(Resource):
         Description('TerraModelDaily')
         .param('selectedDay', 'The day of the growing season selected for observation.')
         .param('selectedTrait', '(string) The name of the trait to return for that day. (e.g."canopy_heigth")') 
-        .param('modelResults', 'a list of dictionaries that represent the model results')
+        .param('modelResultId', 'The Girder Id of where the model results are stored.') 
         .param('outnameId', 'The ID of the output item where the data file will be uploaded.')
         .errorResponse()
         .errorResponse('Terra_daily permission problem.', 403)
@@ -192,13 +192,13 @@ class ArborNova(Resource):
         self,
         selectedDay,
         selectedTrait,
-        modelResults,
+        modelResultId,
         outnameId
     ):
         result = terra_model_daily.delay(
             selectedDay, 
             selectedTrait,
-            modelResults,
+            modelResultId,
             girder_result_hooks=[
                 GirderUploadToItem(outnameId)
             ])

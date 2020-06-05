@@ -74,12 +74,14 @@
               <b>Rank trait measurements.</b> This app calculates the average value of measured traits and displays the top values.
 	      It is traditionally called "top-k" because you can select how many values to display, by selecting a value for K 
 	      (the number of rankings).  Since traits vary across the cultivars and across time, you are given the opportunity to 
-	      select a day in the season, to select for the analysis.  Once you select a day and a particular trait, the values for
+	      select a day in the season, at which to run the visualization.  Once you select a day and a particular trait, the values for
 	      that trait across all instances of each cultivar are averaged and the cultivars are ranked according to this trait.  To
 	      change the number of cultivars to render (K), just drag the slider to the desired value and click the "DRAW" button.   
-              <br><br>
+              <br></br>
 	      Two identical charts (left and right) are available to allow comparsion between different traits or the same trait
 	      at different times during the season. 
+              <br></br>
+	      NOTE: The top-k slider doesn't work yet.  K is currently fixed for displaying the top ten cultivars. 
             </v-card-text>
           </v-card>
 	  <v-row  align="center" justify="center">

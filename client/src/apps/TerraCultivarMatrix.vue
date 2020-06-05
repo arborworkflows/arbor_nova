@@ -39,7 +39,7 @@
               :outline="!readyToRunRight"
               :disabled="!readyToRunRight"
               @click="runRight" >
-              Draw Scatterplot 
+              Draw Comparison Plot 
             </v-btn>
           </v-flex>
         </v-container>
@@ -49,9 +49,22 @@
           <v-card class="ma-4">
             <v-card-text>
               <b>Compare Cultivars</b> 
-              <br><br>
-		Inspiring descriptive text here.
-              <br><br>
+              <br></br>
+	      The app allows the exploration of pairs of cultivars randomly selected from a selected season.  A number of cultivars
+	      can be selected at random to make this analysis easier to explore.  Once a number of cultivars is selected (try a small 
+	      number first, like 10). A heatmap showing how the trait values compared between cultivars across the season is displayed.  
+              <br></br>
+	      You may select one of the squares of the heatmap, and the full season data of the selected trait for both cultivars will 
+	      be displayed on adjacenty scatterplots.  These scatterplots will appear either to the right or below the original heatmap,
+	      depending on the width of your display device.  You may continue to select different cultivar pairs and the detail scatterplots
+	      will update.  Please allow a few seconds for the scatterplots to update. 
+              <br></br>
+	      You may generate a comparison plot of all cultivars by entering a number at or higher than the different cultivars for that season.
+	      Just be warned that the full season cultivar plot may take a minute or two to render.  Selecting exact cultivar pairs for detailed 
+	      scatterplots will still work but will also be slow, and it is hard to pick exactly the desired pairing on the full matrix. 
+              <br></br>
+	      To save a copy of the heatmaps or scatterplots, just select the icon at the top right of the plot and select "Save as SVG" or 
+	      "Save as PNG" to keep a copy of the completed plot. 
             </v-card-text>
           </v-card>
 	  <v-row  align="center" justify="center">
@@ -88,7 +101,7 @@ export default {
     JsonDataTable,
   },
   data: () => ({
-    seasons: ['Season 4','Season 6','S4 Hand Measurements','S4 July Features'],
+    seasons: ['Season 4','Season 6'],
     selectedSeason: '',
     selectedSeasonData: [],
     selectedCultivarCount: '',

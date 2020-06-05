@@ -5,7 +5,7 @@ from tempfile import NamedTemporaryFile
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import GradientBoostingRegressor
-
+import json
 
 #--------- support routines for processing TERRA-Ref season measurements ----------------
 
@@ -112,24 +112,37 @@ def terra_model_daily(
     self,
     selectedDay,
     selectedTrait,
-    modelResults,
+    modelResultId,
     **kwargs
 ):
+
+    # ToDo: read the modelId item number and retrieve the particular model from Girder. This way multiple
+    # users can access the app simultaneously without over-writing each other.  In the meantime, we 
+    # will read a previously-written file on the server. 
+
+    print('received girder model Id:',modelResultId)
+    # ToDo: future use of girder
+    # import girder-client
+    # login to girder
+    # model = girderRestApi(get file attached to item by id)
 
     # initialize with the output of the model 
     data_filename = 'per_cultivar_model_output.csv'
 
     #path = '/home/vagrant/arbor_nova/girder_worker_tasks/arbor_nova_tasks/arbor_tasks/app_support'
     path = '.'
-    #print('reading model output file ')
-    #traits_df = pd.read_csv(path+'/'+data_filename)
+    fullfilepath = path+'/'+data_filename
+    print('reading model output file: ',fullfilepath)
+    traits_df = pd.read_csv(fullfilepath)
 
+    # Didn't work because of size of request: 
     # instead of being read from a file, the data is passed live through the HTTP link, so multiple 
     # users can run models simultaneously without interfering with each other (through file overwriting).
-    print('reading model results ')
-    print('type:',type(modelResults))
-    print('modelResults:',modelResults)
-    traits_df = modelResults['data'] 
+    #print('reading model results ')
+    #modelResults = json.loads(modelResults)
+    #print('type:',type(modelResults))
+    #print('modelResults:',modelResults)
+    #traits_df = modelResults['data'] 
 
     # we are passing back the model results, so convert them to a dataframe for use
     #print('processing model data')

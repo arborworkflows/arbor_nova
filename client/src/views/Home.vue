@@ -57,28 +57,28 @@ export default {
         description: 'Provide a day-by-day exploration of trait values across all cultivars',
       },
       {
-        label: 'Train a Model on Season 4 or 6 Data',
-        image: require('../assets/terra_sorghum.png'),
-        route: 'terramodel',
-        description: 'Fit a new model to observed trait measurements',
-      },
-      {
         label: 'Explore Pairwise Trait Correlation',
         image: require('../assets/trait_correlation.png'),
         route: 'terrascatter',
-        description: 'Scatterplot between two trait measurements',
+        description: 'Scatterplot between two continuous trait measurements',
       },
       {
-        label: 'Compare Trait differences across Cultivars',
-        image: require('../assets/cultivar_matrix.png'),
-        route: 'cultivarmatrix',
-        description: 'Plot specific trait differences across all the cultivars',
-      },
-      {
-        label: 'Explore a Single Cultivar',
+        label: 'Explore a Few Cultivars',
         image: require('../assets/explore_single_cultivar.png'),
         route: 'explorecultivar',
-        description: 'Explore the measurements of a single cultivar',
+        description: 'Explore the measurements of a few selected cultivars',
+      },
+      {
+        label: 'Trait Correlations',
+        image: require('../assets/correlation_matrix.png'),
+        route: 'correlation',
+        description: 'Examine correlation matrix across all traits ',
+      },
+      {
+        label: 'Compare Trait differences across Random Cultivars',
+        image: require('../assets/cultivar_matrix.png'),
+        route: 'cultivarmatrix',
+        description: 'Plot specific trait differences across some or all the cultivars',
       },
       {
         label: 'Rank the Cultivars',
@@ -87,10 +87,10 @@ export default {
         description: 'Rank the cultivars according to trait values during the season',
       },
       {
-        label: 'Trait Correlations',
-        image: require('../assets/correlation_matrix.png'),
-        route: 'correlation',
-        description: 'Examine correlation matrix across all traits ',
+        label: 'Train a Model on Season 4 or 6 Data',
+        image: require('../assets/terra_sorghum.png'),
+        route: 'terramodel',
+        description: 'Fit a new model to observed trait measurements',
       },
       //{
       //  label: 'PhyloMap',

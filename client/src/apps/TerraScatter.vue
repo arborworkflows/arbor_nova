@@ -54,9 +54,11 @@
               <b>Compare the correlation between two traits.</b>
               <br><br>
 		This app plots the values of two selected traits for each measurement during a season.  The purpose is to
-		look for any correlations, which would be indicated by a trend up and right within the chart.  An inverse
-		correlation would produce a trend of points leading down and right within the chart.  
-              <br><br>
+		look for any correlations. A positive correlation is indicated  by a trend  points going up and right within the chart.  
+		An inverse correlation would produce a trend of points leading down and right within the chart.  
+              <br></br>
+		NOTE: this rendering technique currently only works to compare two continuous traits.  If either trait selected is
+		categorical in value, the plot will be blank.  Please select traits with numeric values instead. 
             </v-card-text>
           </v-card>
 	  <v-row  align="center" justify="center">

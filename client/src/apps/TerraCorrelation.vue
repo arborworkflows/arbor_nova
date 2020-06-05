@@ -80,7 +80,7 @@ export default {
   data: () => ({
     seasons: ['Season 4','Season 6','S4 Hand Measurements','S4 July Features'],
     selectedSeason: '',
-    correlations: ['Pearson Correlation','Kendell Tau Correlation','Spearman Rank Correlation'],
+    correlations: ['Pearson Correlation','Kendall Tau Correlation','Spearman Rank Correlation'],
     selectedCorrelation: '', 
     job: { status: 0 },
     running: false,

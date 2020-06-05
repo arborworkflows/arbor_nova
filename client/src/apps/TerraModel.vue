@@ -130,6 +130,9 @@
 		modeling parameters.   Click on the DRAW LEFT CHART or DRAW RIGHT CHART to render a feature at the 
 		selected day. 
               <br></br>
+	        If you wish to save the results of the model fitting for further analysis, click on the "DOWNLOAD MODEL RESULTS"
+		button to download a CSV file of the sensor measurements as well as predictions made by the newly fit model  to 
+		match the measured  canopy_heights.
             </v-card-text>
           </v-card>
 	  <v-row  align="center" justify="center">
@@ -177,6 +180,7 @@ export default {
     job: { status: 0 },
     running: false,
     runningModel: false,
+    outnameModel: '',
     modelCompleted: false,
     traits: ["canopy_height","leaf_angle_mean","leaf_angle_alpha","leaf_angle_beta","leaf_angle_chi","per_cultivar_gboost","abserror_per_cultivar_gboost","avg_error_per_cultivar_gboost"],
     traitsModel: ["abserror_per_cultivar_gboost","avg_error_per_cultivar_gboost","abserror_per_cultivar_gboost"],
@@ -219,6 +223,7 @@ export default {
   },
   methods: {
     async runModel() {
+
       this.errorLog = null;
       this.runningModel = true;
       console.log('running model');
@@ -243,17 +248,23 @@ export default {
       console.log('model is finished');
 
       if (this.job.status === 3) {
+	// save the model results filename that comes back.  We will need access to the 
+	// model results again  later visualizations
+	this.outnameModel = outname;
+	console.log('model result girder id:',this.outnameModel._id);
         this.runningModel = false;
+	// get the model results back and parse them for visualization
         this.resultModel = csvParse((await this.girderRest.get(`item/${outname._id}/download`)).data);
 	this.modelCompleted = true;
 
-     // loop through the array and fix the range,column to be integers
+     // loop through the array and fix the range,column to be integers.  they come back as strings
+     // and this messes up the order of the rows & columns when rendered in vega-lite
       for(let i = 0; i < this.resultModel.length; i++){
         this.resultModel[i].range = Number(this.resultModel[i].range);
         this.resultModel[i].column = Number(this.resultModel[i].column);
       }
 
-      // build the spec here.  Inside the method means that the data item will be available. 
+      // build the spec here.  Inside this method means that the data item will be available. 
       var vegaLiteSpec = {
         $schema: 'https://vega.github.io/schema/vega-lite/v2.0.json',
         description: 'trait values across the field',
@@ -279,21 +290,25 @@ export default {
         `item?folderId=${this.scratchFolder._id}&name=resultLeft`,
       )).data
 
+
       // Pass this.resultModel to be rendered instead of having a file read by the python method so multiple
       // users can run models. 
 
       // FIX: when this AJAX call is received on the Python side, the data is just the string "[object object]"
 
-      console.log(this.resultModel)
+      // const stringifiedData  = JSON.stringify({'data': this.resultModel}) 
       const params = optionsToParameters({
 	// convert the string entered for the day to a number
         selectedDay: Number(this.selectedDayLeft),
         selectedTrait: this.selectedTraitLeft,
-	modelResults: {'data': this.resultModel},
+	modelResultId: this.outnameModel._id,
         outnameId: outname._id,
       });
       this.job = (await this.girderRest.post(
-        `arbor_nova/terraModelDaily?${params}`,
+	// we tried here to pass the model data back to the python method, but we don't know how to read it,
+	// so it will be easier to pass only the girder Id back and the python method can read the data from girder.
+        //`arbor_nova/terraModelDaily?${params}`, {'data': this.resultModel},
+        `arbor_nova/terraModelDaily?${params}`, 
       )).data;
 
       await pollUntilJobComplete(this.girderRest, this.job, job => this.job = job);
@@ -340,12 +355,11 @@ export default {
 
       // similarly to the left rendering, we'd like to modify the API to receive the model results to allow multiple 
       // executions simulaneously without overright. 
-      console.log(this.resultModel)
       const params = optionsToParameters({
 	// convert the string entered for the day to a number
         selectedDay: Number(this.selectedDayRight),
         selectedTrait: this.selectedTraitRight,
-	modelResults: {data: this.resultModel}, 
+	modelResultId: this.outnameModel._id,
         outnameId: outname._id,
       });
       this.job = (await this.girderRest.post(
@@ -388,7 +402,6 @@ export default {
     // The download is caused by 
     async downloadResults() {
 
-
 	// iterate through the first row to find the column names
         var csvOutput = ''
 	for (var key in this.resultModel[0]) {
@@ -408,19 +421,22 @@ export default {
             csvOutput += "\n";
         });
  
-        console.log(csvOutput);
+	// the csv seems to be created correctly
+        //console.log(csvOutput);
 
-        //const url = window.URL.createObjectURL(csvOutput);
-	//console.log("url:",url)
-        //const link = document.createElement('a');
-        //link.href = url;
-        //link.setAttribute('download', 'model_results.csv') //or any other extension;
-        //document.body.appendChild(link);
-        //link.click();
-	//document.body.removeChild(link);
+	//csvOutput = JSON.stringify(csvOutput)
+	console.log(csvOutput.split(0,50))
+        const url = window.URL.createObjectURL(new Blob([csvOutput]));
+	console.log("url:",url)
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'model_results.csv') //or any other extension;
+        document.body.appendChild(link);
+        link.click();
+	document.body.removeChild(link);
 	// the above downloaded an file, but there is an
 	// alternate way, if needed here as part of the FileSaver package:
-	saveAs(this.resultModel,{type:"text/csv"},"model_prediction.csv");
+	//saveAs(csvOutput,{type:"text/csv"},"model_prediction.csv");
     },
 
   }

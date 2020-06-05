@@ -45,8 +45,8 @@ def terra_correlation(
     #print('reading complete')
 
     # now see what correlation option was selected
-    if (correlation == 'Kendell Tau Correlation'):
-        correlation = 'kendell'
+    if (correlation == 'Kendall Tau Correlation'):
+        correlation = 'kendall'
     elif (correlation == 'Spearman Rank Correlation'):
         correlation = 'spearman'
     else:

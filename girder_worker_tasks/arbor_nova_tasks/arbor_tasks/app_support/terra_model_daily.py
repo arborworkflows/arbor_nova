@@ -2,6 +2,8 @@ from girder_worker.app import app
 from girder_worker.utils import girder_job
 from tempfile import NamedTemporaryFile
 
+import girder_client
+
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import GradientBoostingRegressor
@@ -126,12 +128,20 @@ def terra_model_daily(
     # login to girder
     # model = girderRestApi(get file attached to item by id)
 
-    # initialize with the output of the model 
-    data_filename = 'per_cultivar_model_output.csv'
+    gc = girder_client.GirderClient(apiUrl='http://localhost:8080/girder/api/v1')
+    login = gc.authenticate('anonymous', 'letmein')
+    filelist = []
+    for fileobj in gc.listFile(modelResultId):
+       filelist.append(fileobj['name']) 
+    firstfilename = filelist[0]
+    print('recovered model filename:',firstfilename)
+    fullfilepath = '/tmp/'+firstfilename
 
+    # initialize with the output of the model 
     #path = '/home/vagrant/arbor_nova/girder_worker_tasks/arbor_nova_tasks/arbor_tasks/app_support'
-    path = '.'
-    fullfilepath = path+'/'+data_filename
+    #data_filename = 'per_cultivar_model_output.csv'
+    #path = '.'
+    #fullfilepath = path+'/'+data_filename
     print('reading model output file: ',fullfilepath)
     traits_df = pd.read_csv(fullfilepath)
 

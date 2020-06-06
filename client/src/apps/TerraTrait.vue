@@ -103,7 +103,7 @@ export default {
     JsonDataTable,
   },
   data: () => ({
-    seasons: ['Season 4','Season 6'],
+    seasons: ['Season 4','Season 6','S4 Hand Measurements'],
     selectedSeason: '',
     selectedDayLeft: "15",
     selectedDayRight: "15",
@@ -213,7 +213,7 @@ export default {
         mark: {type:'rect', tooltip: {content: "data"}},
         encoding: {
           x: {field: 'column', type: 'ordinal'},
-          y: {field: 'range', type: 'ordinal'},
+          y: {field: 'range', type: 'nominal', sort: 'decending'},
           color: {field: this.selectedTraitLeft , type: 'quantitative'}
         }
       };
@@ -263,7 +263,7 @@ export default {
         mark: 'rect',
         encoding: {
           x: {field: 'column', type: 'ordinal'},
-          y: {field: 'range', type: 'ordinal'},
+          y: {field: 'range', type: 'nominal', sort: 'decending'},
           color: {field: this.selectedTraitRight , type: 'quantitative'},
           "tooltip": [
 	    {"type": "ordinal", "field":"cultivar","title":"Cultivar"},

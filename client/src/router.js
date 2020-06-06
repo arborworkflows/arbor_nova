@@ -10,6 +10,9 @@ import CultivarMatrix from './apps/TerraCultivarMatrix.vue'
 import ExploreCultivar from './apps/TerraExploreCultivar.vue'
 import RankCultivars from './apps/TerraTopK.vue'
 import TerraCorrelation from './apps/TerraCorrelation.vue'
+import Trelliscope from './apps/Trelliscope.vue'
+import TimeSeries  from './apps/TerraTimeSeries.vue'
+
 //import PhyloMap from './apps/PhyloMap.vue'
 import ASR from './apps/ASR.vue'
 
@@ -61,6 +64,16 @@ export default new Router({
       path: '/correlation',
       name: 'correlation',
       component: TerraCorrelation,
+    },
+    {
+      path: '/trelliscope',
+      name: 'trelliscope',
+      component: Trelliscope,
+    },
+    {
+      path: '/timeseries',
+      name: 'timeseries',
+      component: TimeSeries,
     },
 //    {
 //      path: '/pgls',

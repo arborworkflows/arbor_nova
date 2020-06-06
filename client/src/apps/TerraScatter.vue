@@ -194,7 +194,9 @@ export default {
         this.resultRight[i].column = Number(this.resultRight[i].column);
       }
 
-      // build the spec here.  Inside the method means that the data item will be available. 
+      // build the spec here.  Inside the method means that the data item will be available.   A 'selection'
+      // object is added to the spec allow zoom & pan of the scatterplot on desktop systems. 
+
       var vegaLiteSpec = {
         $schema: 'https://vega.github.io/schema/vega-lite/v4.8.1.json',
         description: 'trait values across the field',
@@ -202,6 +204,11 @@ export default {
 	width: 800,
 	height: 800,
         data: {values: this.resultRight}, 
+ 	"selection": {
+	    "grid": {
+	    "type": "interval", "bind": "scales"
+    	    }
+  	},
         mark: {type:'point', fill: "#4C78A8", tooltip: {content: "data"}},
         encoding: {
           x: {field: this.selectedTraitRight, type: 'quantitative'},

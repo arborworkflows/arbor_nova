@@ -140,8 +140,9 @@
 	     <div id="visL" ref="visLeft"></div>
 	     <div id="visR" ref="visRight"></div>
 	  </v-row>
-        <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
+        <div v-if="runningModel" xs12 class="text-xs-center mb-4 ml-4 mr-4">
           Running (Job Status {{ job.status }}) ...
+	  <v-progress-linear  :indeterminate="true" > </v-progress-circular>
         </div>
         <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code>
     </v-layout>
@@ -265,8 +266,10 @@ export default {
       }
 
       // build the spec here.  Inside this method means that the data item will be available. 
+      const chartTitle = 'Average error at each plot across the field during '+this.selectedSeason
       var vegaLiteSpec = {
         $schema: 'https://vega.github.io/schema/vega-lite/v2.0.json',
+        title: chartTitle,
         description: 'trait values across the field',
         data: {values: this.resultModel}, 
         mark: {type:'rect', tooltip: {content: "data"}},

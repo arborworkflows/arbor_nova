@@ -92,12 +92,12 @@ export default {
         route: 'rankcultivars',
         description: 'Rank the cultivars according to trait values during the season',
       },
-      //{
-      //  label: 'Trelliscope',
-      //  image: require('../assets/trelliscope.png'),
-      //  route: 'trelliscope',
-      //  description: 'Powerful searching and filtering interface on sensor and model results',
-      //},
+      {
+        label: 'Trelliscope',
+        image: require('../assets/trelliscope.png'),
+        route: 'trelliscope',
+        description: 'Powerful searching and filtering interface on sensor and model results',
+      },
       {
         label: 'Train a Model on Season 4 or 6 Data',
         image: require('../assets/terra_sorghum.png'),

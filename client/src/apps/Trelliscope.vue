@@ -31,11 +31,14 @@
 		No single machine learning model is best in all circumstances, so Trelliscope allows the user to explore the quality of fit
 		across the entire data space, with the ability to zoom into a particular area of the domain of the source data.  Multiple filters
 		can be enabled and disabled to facilitate this search. 
-		
+		<br></br>
+		The Trelliscope instance will open in a new tab in your internet browser or a new window.  You may leave
+		the new tab open as long as you like.  Hitting the "back" brower button will return this tab to the 
+		main app chooser screen.  
             </v-card-text>
           </v-card>
 	  <v-row  align="center" justify="center">
-	     <iframe height="1000" width="1200" src="http://10.0.2.15"></iframe>
+	    <image src="./trelliscope-2x2-with-writing.png">
 	  </v-row>
         <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
           Running (Job Status {{ job.status }}) ...
@@ -62,6 +65,18 @@ export default {
   components: {
     GirderAuth,
   },
+
+  created() {
+     const link = document.createElement('a');
+     link.href = "http://terraref.knowledgevis.com";
+        link.setAttribute('target', '_blank') // open in new tab/window 
+        link.setAttribute('rel', 'noopener noreferrer') // open in new tab/window 
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+  },
+
+
   data: () => ({
     seasons: ['Season 4'],
     selectedSeason: '',

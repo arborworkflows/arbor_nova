@@ -1,4 +1,3 @@
-
 from girder_worker.app import app
 from girder_worker.utils import girder_job
 from tempfile import NamedTemporaryFile
@@ -36,14 +35,14 @@ def asr(
 
   method <- "marginal"
   td <- make.treedata(tree, table)
-  td1 <- select_(td, as.name(selectedColumn))
+  td1 <- select(td, as.name(selectedColumn))
   dat <- td1$dat
-  type <- aRbor:::detectCharacterType(dat[[1]], cutoff = 0.2)
+  type <- detectCharacterType(dat[[1]], cutoff = 0.2)
 
-  if (type == "continuous") td1 <- checkNumeric(td1)
-  if (type == "discrete") td1 <- checkFactor(td1)
+  if (type == "continuous") td1 <- forceNumeric(td1)
+  if (type == "discrete") td1 <- forceFactor(td1)
 
-  output <- aceArbor(td1, charType = type, aceType = method)
+  output <- ace.treedata(td1, charType = type, aceType = method)
 
   TH <- max(branching.times(td$phy))
 

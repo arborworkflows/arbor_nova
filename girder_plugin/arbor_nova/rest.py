@@ -124,6 +124,7 @@ class ArborNova(Resource):
         .param('tableFileId', 'The ID of the input table file.')
         .param('selectedColumn', 'The character to use for calculation of phylosginal.')
         .param('method', 'Either lambda or K .')
+	.param('selectedDiscrete', 'The Discrete model type to use for calculation.')
         .param('resultSummaryItemId', 'The ID of the output item where the model summary file will be uploaded.')
         .errorResponse()
         .errorResponse('Write access was denied on the parent item.', 403)
@@ -135,6 +136,7 @@ class ArborNova(Resource):
         tableFileId,
         selectedColumn,
         method,
+	selectedDiscrete,
         resultSummaryItemId
     ):
         result = phylosignal.delay(
@@ -142,6 +144,7 @@ class ArborNova(Resource):
             GirderFileId(tableFileId),
             selectedColumn,
             method,
+	    selectedDiscrete,
             girder_result_hooks=[
                 GirderUploadToItem(resultSummaryItemId)
             ])

@@ -13,6 +13,7 @@ def phylosignal(
     table_file,
     selectedColumn,
     method,
+    selectedDiscrete,
     **kwargs
 ):
     from rpy2 import robjects
@@ -25,6 +26,7 @@ def phylosignal(
     env['selectedColumn'] = selectedColumn 
     env['method'] = method 
     env['results_file'] = results_file
+    env['selectedDiscrete'] = selectedDiscrete
     r('''
   require(ape)
   require(aRbor)
@@ -37,27 +39,37 @@ def phylosignal(
   td <- select(td, as.name(selectedColumn))
   phy <- td$dat
   dat <- td$dat
-  type <- aRbor:::detectCharacterType(dat[[1]], cutoff = 0.2)
-
+  type <- treeplyr::detectCharacterType(dat[[1]], cutoff = 0.2)
+ 
   if (type == "discrete") {
-    result <- physigArbor(td,charType=type,signalTest="pagelLambda")
+    result <- physigArbor(td,charType=type,signalTest="pagelLambda", discreteModelType=selectedDiscrete)
     analysisType <- "discrete lambda"
   }
   if (type == "continuous") {
-    if(method=="lambda") {
-      result <- physigArbor(td, charType=charType, signalTest="pagelLambda")
+    if(method=="Lambda") {
+      result <- physigArbor(td, charType=type, signalTest="pagelLambda")
       analysisType <- "continuous lambda"
     }
-  
+
     if (method=="K") {
-      result <- physigArbor(td, charType=charType, signalTest="Blomberg")
+      result <- physigArbor(td, charType=type, signalTest="Blomberg")
       analysisType <- "continuous K"
     }
+
   }
 
   result <- t(as.data.frame(unlist(result)))
-  rownames(result) <- NULL
-  write.csv(results, results_file)
+  rownames(result) <- analysisType
+  if(method == "Lambda"){
+    colnames(result) <- c("Log-Likelihood (Lambda fixed at 0)",
+                        "Log-Likelihood (Lambda estimated)",
+                        "Chi-Squared Test Statistic",
+                        "Chi-Squared P Value",
+                        "AICc Score (Lambda fixed at 0)",
+                        "AICc Score (Lambda Estimated)",
+                        "Lambda Value")
+  }
+  write.csv(result, results_file)
 '''
     )
 

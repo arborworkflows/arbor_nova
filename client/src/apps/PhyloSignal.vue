@@ -30,7 +30,10 @@
           <v-flex xs12>
             <v-select label="Select the Model method" v-model="selectedModel" :items="models" />
           </v-flex>
-          <v-flex xs12>
+	  <v-flex xs12>
+	    <v-select label="Select the Discrete model type (ignored if Continuous)" v-model="selectedDiscrete" :items="discreteModels" />
+          </v-flex>
+	    <v-flex xs12>
             <v-btn
               block
               :class="{ primary: readyToRun }"
@@ -59,6 +62,7 @@
           <v-card v-if="table.length > 0" class="mb-4 ml-4 mr-4">
             <v-card-text>{{ tableFileName }}</v-card-text>
             <json-data-table :data="table" />
+            <h1>{{ log(tableObject) }}</h1>
           </v-card>
         <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
           Running (Job Status {{ job.status }}) ...
@@ -69,6 +73,9 @@
             <v-card-text>Result summary</v-card-text>
             <json-data-table :data="result" hide-actions/>
           </v-card>
+	  <v-card>
+	    <v-card-text>Testing parse: {{ parsetest }}</v-card-text>
+	  </v-card>
         </template>
       </v-layout>
     </v-layout>
@@ -101,6 +108,8 @@ export default {
     selectedColumn: null,
     models: ['Lambda','K'],
     selectedModel: '',
+    discreteModels: ['ER','SYM','ARD'],
+    selectedDiscrete: '',
     result: [],
     resultColumns: [],
     plotUrl: '',
@@ -119,6 +128,10 @@ export default {
     },
   },
   methods: {
+   log(message) {
+     console.log('method call:',message);
+   },
+
     async run() {
       this.running = true;
       this.errorLog = null;
@@ -131,6 +144,7 @@ export default {
         treeFileId: this.treeFile._id,
         selectedColumn: this.selectedColumn,
         method: this.selectedModel,
+	selectedDiscrete: this.selectedDiscrete,
         resultSummaryItemId: resultSummaryItem._id,
       });
       this.job = (await this.girderRest.post(
@@ -142,7 +156,11 @@ export default {
       if (this.job.status === 3) {
         this.running = false;
         this.result = csvParse((await this.girderRest.get(`item/${resultSummaryItem._id}/download`)).data);
+	console.log('here is the TABLE:',this.result);
+	//console.log(this.result.);
         this.resultColumns = this.result.columns.map(d => ({text: d, value: d, sortable: false}));
+        //const parsetest = parse(this.result)
+        
       }
       if (this.job.status === 4) {
         this.running = false;

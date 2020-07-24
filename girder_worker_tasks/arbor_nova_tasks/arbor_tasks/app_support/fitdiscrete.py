@@ -23,7 +23,7 @@ def fitdiscrete(
     env['tree_file'] = tree_file
     env['table_file'] = table_file
     env['selectedColumn'] = selectedColumn 
-    env['model'] = model 
+    env['method'] = model 
     env['results_file'] = results_file
     r('''
   require(ape)

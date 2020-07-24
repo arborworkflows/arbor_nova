@@ -47,11 +47,11 @@
       <v-layout column justify-start fill-height style="margin-left: 400px">
           <v-card class="ma-4">
             <v-card-text>
-              <b> Add ancestral state reconstruction description here </b>
+              <b> Add FitContinuous description here </b>
               <br><br>
               1. Upload your table (.csv) and tree (Newick, .phy).
               <br><br>
-              2. Select the desired column to run an ASR based on 
+              2. Select the desired column to run a FitContinuous test on 
               <br><br>
               3. Click GO.
               <br>
@@ -104,7 +104,7 @@ export default {
     running: false,
     columns: [],
     selectedColumn: null,
-    models:['ER','ICU', 'Lego'],
+    models:['K','lambda'],
     selectedModel: '',
     result: [],
     resultColumns: [],
@@ -119,7 +119,8 @@ export default {
     readyToRun() {
       return !!this.treeFileName &&
         !!this.tableFileName &&
-        !!this.selectedColumn;
+        !!this.selectedColumn &&
+	!!this.selectedModel;
     },
   },
   methods: {

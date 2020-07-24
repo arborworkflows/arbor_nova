@@ -5,6 +5,8 @@ import '@/plugins/resonantgeo';
 import router from './router';
 import 'material-design-icons-iconfont/dist/material-design-icons.css';
 
+Vue.prototype.$log = console.log;
+
 new Vue({
   provide: GirderProvider,
   router,

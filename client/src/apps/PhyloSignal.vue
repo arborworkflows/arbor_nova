@@ -62,20 +62,93 @@
           <v-card v-if="table.length > 0" class="mb-4 ml-4 mr-4">
             <v-card-text>{{ tableFileName }}</v-card-text>
             <json-data-table :data="table" />
-            <h1>{{ log(tableObject) }}</h1>
           </v-card>
         <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
           Running (Job Status {{ job.status }}) ...
         </div>
         <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code>
         <template v-if="!running && job.status === 3">
-          <v-card v-if="result.length > 0" class="mb-4 ml-4 mr-4">
+	 
+	  <v-card v-if="this.selectedModel === 'Lambda'" class="mb-4 ml-4 mr-4">
+	    <v-card-text>
+		<b>Log-Likelihood (Lambda fixed at 0):</b>
+		<br></br>
+		{{ this.result[0]["Log-Likelihood (Lambda fixed at 0)"] }}
+		<br></br>
+		Here, lambda is fixed at 0 (meaning every species is statistically independent of every other species). This number represents the log-likelihood of lambda being 0. 
+	    </v-card-text>
+	  </v-card>
+	  <v-card v-if="this.selectedModel === 'Lambda'" class="mb-4 ml-4 mr-4">
+	    <v-card-text>
+		<b>Log-Likelihood (Lambda Estimated):</b>
+		<br></br>  
+		{{ this.result[0]["Log-Likelihood (Lambda estimated)"] }}
+		<br></br>
+		This result is similar to the one above, except that lambda is estimated and not fixed at 0.
+	    </v-card-text>
+	  </v-card>
+	  <v-card v-if="this.selectedModel === 'Lambda'" class="mb-4 ml-4 mr-4">
+	    <v-card-text>
+		<b>Chi-Squared Test Statistic:</b>  
+		<br></br>
+		{{ this.result[0]["Chi-Squared Test Statistic"] }}
+		<br></br>
+		This result is the test statistic obtained when a chi-square test is performed to compare the provided data to the expected chi-square distribution. 
+	    </v-card-text>
+	  </v-card>
+	  <v-card v-if="this.selectedModel === 'Lambda'" class="mb-4 ml-4 mr-4">
+	    <v-card-text>
+		<b>Chi-Square P Value:</b>
+		<br></br>  
+		{{ this.result[0]["Chi-Squared P Value"] }}
+		<br></br>
+		This is the p value obtained from the chi-square test described above.
+	    </v-card-text>
+	  </v-card>
+	  <v-card v-if="this.selectedModel === 'Lambda'" class="mb-4 ml-4 mr-4">
+	    <v-card-text>
+		<b>AICc Score (Lambda fixed at 0):</b>
+		<br></br> 
+		{{ this.result[0]["AICc Score (Lambda fixed at 0)"] }}
+		<br></br>
+		This AICc (AIC with a correction for small sample sizes) score is computed with lambda fixed at 0.
+	    </v-card-text>
+	  </v-card>
+	  <v-card v-if="this.selectedModel === 'Lambda'" class="mb-4 ml-4 mr-4">
+	    <v-card-text>
+		<b>AICc Score (Lambda Estimated):</b>
+		<br></br>  
+		{{ this.result[0]["AICc Score (Lambda Estimated)"] }}
+		<br></br>
+		This AICc score is similar to the one above, except lambda is estimated.
+	    </v-card-text>
+	  </v-card>
+	  <v-card v-if="this.selectedModel === 'Lambda'" class="mb-4 ml-4 mr-4">
+	    <v-card-text>
+		<b>Lambda Value:</b>  
+		<br></br>
+		{{ this.result[0]["Lambda Value"] }}
+		<br></br>
+		This is the lambda value used for  model fitting.
+	    </v-card-text>
+	  </v-card>
+
+	  <v-card v-if="this.selectedModel === 'K'">
+	    <v-card-text>
+		You picked K, you nerd
+	    </v-card-text>
+	  </v-card>
+
+	  <v-card v-if="result.length > 0" class="mb-4 ml-4 mr-4">
             <v-card-text>Result summary</v-card-text>
             <json-data-table :data="result" hide-actions/>
           </v-card>
-	  <v-card>
-	    <v-card-text>Testing parse: {{ parsetest }}</v-card-text>
-	  </v-card>
+
+	  <download-csv
+	    :data = "result"
+	    name = "PhyloSignal_Results.csv">
+	    Download results as CSV
+	  </download-csv>	
         </template>
       </v-layout>
     </v-layout>
@@ -109,7 +182,7 @@ export default {
     models: ['Lambda','K'],
     selectedModel: '',
     discreteModels: ['ER','SYM','ARD'],
-    selectedDiscrete: '',
+    selectedDiscrete: 'ER',
     result: [],
     resultColumns: [],
     plotUrl: '',
@@ -157,9 +230,8 @@ export default {
         this.running = false;
         this.result = csvParse((await this.girderRest.get(`item/${resultSummaryItem._id}/download`)).data);
 	console.log('here is the TABLE:',this.result);
-	//console.log(this.result.);
+	console.log('This is your method:',this.selectedModel);
         this.resultColumns = this.result.columns.map(d => ({text: d, value: d, sortable: false}));
-        //const parsetest = parse(this.result)
         
       }
       if (this.job.status === 4) {
@@ -188,7 +260,6 @@ export default {
         this.treeFile = await uploader.start();
       }
     },
-
 
   }
 }

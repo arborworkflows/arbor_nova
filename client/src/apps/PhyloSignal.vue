@@ -133,22 +133,56 @@
 	    </v-card-text>
 	  </v-card>
 
-	  <v-card v-if="this.selectedModel === 'K'">
+	  <v-card v-if="this.selectedModel === 'K'" class="mb-4 ml-4 mr-4">
 	    <v-card-text>
-		You picked K, you nerd
+		<b>Blomberg's K Value:</b>  
+		<br></br>
+		{{ this.result[0]["K"] }}
+		<br></br>
+		K is a descriptive statistic that gauges the amount of phylogenetic signal.
+	    </v-card-text>
+	  </v-card>
+	  <v-card v-if="this.selectedModel === 'K'" class="mb-4 ml-4 mr-4">
+	    <v-card-text>
+		<b>Mean observed variance of PICs:</b>  
+		<br></br>
+		{{ this.result[0]["vObs"] }}
+		<br></br>
+		This is the observed variance of phylogenetically independent contrasts (PICs).
+	    </v-card-text>
+	  </v-card>
+	  <v-card v-if="this.selectedModel === 'K'" class="mb-4 ml-4 mr-4">
+	    <v-card-text>
+		<b>Mean random variance of PICs:</b>  
+		<br></br>
+		{{ this.result[0]["vRnd"] }}
+		<br></br>
+		This is the random variance of PICs obtained through the use of tip shuffling randomization.
+	    </v-card-text>
+	  </v-card>
+	  <v-card v-if="this.selectedModel === 'K'" class="mb-4 ml-4 mr-4">
+	    <v-card-text>
+		<b>P value:</b>  
+		<br></br>
+		{{ this.result[0]["pVal"] }}
+		<br></br>
+		This is the p value that results from testing the difference between the observed vs random variance of PICs.
+	    </v-card-text>
+	  </v-card>
+	  <v-card v-if="this.selectedModel === 'K'" class="mb-4 ml-4 mr-4">
+	    <v-card-text>
+		<b>Z-score:</b>  
+		<br></br>
+		{{ this.result[0]["zScore"] }}
+		<br></br>
+		This is the z-score that results from testing the difference between the observed vs random variance of PICs.
 	    </v-card-text>
 	  </v-card>
 
 	  <v-card v-if="result.length > 0" class="mb-4 ml-4 mr-4">
             <v-card-text>Result summary</v-card-text>
             <json-data-table :data="result" hide-actions/>
-          </v-card>
-
-	  <download-csv
-	    :data = "result"
-	    name = "PhyloSignal_Results.csv">
-	    Download results as CSV
-	  </download-csv>	
+          </v-card>	
         </template>
       </v-layout>
     </v-layout>

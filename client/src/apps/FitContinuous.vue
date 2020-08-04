@@ -43,6 +43,23 @@
             </v-btn>
           </v-flex>
         </v-container>
+
+        <v-container fluid>
+         <v-flex xs12>
+            <v-btn
+              block
+              :class="{ primary: readyToDownload }"
+              :flat="readyToDownload"
+              :outline="!readyToDownload"
+              :disabled="!readyToDownload"
+              @click="downloadResults"
+            >
+              Download Model Results 
+            </v-btn>
+          </v-flex>
+        </v-container>
+
+
       </v-navigation-drawer>
       <v-layout column justify-start fill-height style="margin-left: 400px">
           <v-card class="ma-4">
@@ -122,6 +139,11 @@ export default {
         !!this.selectedColumn &&
 	!!this.selectedModel;
     },
+
+    readyToDownload() {
+      return (this.result.length>0 && !this.running && this.job.status===3)
+    },
+
   },
   methods: {
     async run() {
@@ -179,6 +201,44 @@ export default {
         this.treeFile = await uploader.start();
       }
     },
+
+
+    async downloadResults() {
+	// iterate through the first row to find the column names
+        var csvOutput = ''
+	for (var key in this.resultModel[0]) {
+	  csvOutput += key+','
+	} 
+        csvOutput += "\n";
+
+        this.result.forEach(function(row) {
+		for (var key in row) {
+    		// check if the property/key is defined in the object itself, not in parent
+    		if (row.hasOwnProperty(key)) {           
+        			//console.log(key, row[key]);
+				csvOutput += row[key]+','
+    			}
+		}
+            csvOutput += "\n";
+        });
+ 
+	// the csv seems to be created correctly
+        //console.log(csvOutput);
+	//csvOutput = JSON.stringify(csvOutput)
+	console.log(csvOutput.split(0,50))
+        const url = window.URL.createObjectURL(new Blob([csvOutput]));
+	console.log("url:",url)
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'model_results.csv') //or any other extension;
+        document.body.appendChild(link);
+        link.click();
+	document.body.removeChild(link);
+	// the above downloaded an file, but there is an
+	// alternate way, if needed here as part of the FileSaver package:
+	//saveAs(csvOutput,{type:"text/csv"},"model_prediction.csv");
+    },
+
   }
 }
 </script>

@@ -69,6 +69,15 @@ def phylosignal(
                         "AICc Score (Lambda Estimated)",
                         "Lambda Value")
   }
+
+  if(method == "K") {
+    colnames(result) <- c("K",
+			"vObs",
+			"vRnd",
+			"pVal",
+			"zScore")
+  }
+
   write.csv(result, results_file)
 '''
     )

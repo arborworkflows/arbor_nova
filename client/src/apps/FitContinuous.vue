@@ -206,7 +206,7 @@ export default {
     async downloadResults() {
 	// iterate through the first row to find the column names
         var csvOutput = ''
-	for (var key in this.resultModel[0]) {
+	for (var key in this.result[0]) {
 	  csvOutput += key+','
 	} 
         csvOutput += "\n";
@@ -228,15 +228,14 @@ export default {
 	console.log(csvOutput.split(0,50))
         const url = window.URL.createObjectURL(new Blob([csvOutput]));
 	console.log("url:",url)
+	// this is an old but still normal way to download a file, attach it to an 
+	// <a> tag and click the link.  We then remove the tag after downloaing. 
         const link = document.createElement('a');
         link.href = url;
         link.setAttribute('download', 'model_results.csv') //or any other extension;
         document.body.appendChild(link);
         link.click();
 	document.body.removeChild(link);
-	// the above downloaded an file, but there is an
-	// alternate way, if needed here as part of the FileSaver package:
-	//saveAs(csvOutput,{type:"text/csv"},"model_prediction.csv");
     },
 
   }

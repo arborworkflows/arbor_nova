@@ -66,7 +66,7 @@
             <v-card-text>
               <b> Add FitContinuous description here </b>
               <br><br>
-              1. Upload your table (.csv) and tree (Newick, .phy).
+              1. Upload your table (.csv) and tree (Newick, .phy). Note: tables are assumed to have species names as row names.
               <br><br>
               2. Select the desired column to run a FitContinuous test on 
               <br><br>
@@ -83,13 +83,17 @@
         </div>
         <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code>
         <template v-if="!running && job.status === 3">
+
+	  <v-card class ="mb-4 ml-4 mr-4">
+	    <v-card-text>
+		<b>Maximum-Likelihood Estimate:</b>
+		<br></br>
+		{{ this.result[0]["lnL"] }}
+	    </v-card-text>
+	  </v-card>
           <v-card v-if="result.length > 0" class="mb-4 ml-4 mr-4">
             <v-card-text>Result summary</v-card-text>
             <json-data-table :data="result" hide-actions/>
-          </v-card>
-          <v-card class="mb-4 ml-4 mr-4">
-            <v-card-text>Result plot</v-card-text>
-            <img :src="plotUrl" style="display: block; margin: auto">
           </v-card>
         </template>
       </v-layout>
@@ -121,7 +125,7 @@ export default {
     running: false,
     columns: [],
     selectedColumn: null,
-    models:['K','lambda'],
+    models:['BM','OU','EB','rate_trend','lambda','kappa','delta','mean_trend','white'],
     selectedModel: '',
     result: [],
     resultColumns: [],

@@ -37,7 +37,7 @@ def phylosignal(
 
   td <- make.treedata(tree, table)
   td <- select(td, as.name(selectedColumn))
-  phy <- td$dat
+  phy <- td$phy
   dat <- td$dat
   type <- treeplyr::detectCharacterType(dat[[1]], cutoff = 0.2)
  

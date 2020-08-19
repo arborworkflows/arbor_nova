@@ -123,7 +123,7 @@ class ArborNova(Resource):
         .param('treeFileId', 'The ID of the input tree file.')
         .param('tableFileId', 'The ID of the input table file.')
         .param('selectedColumn', 'The character to use for calculation of phylosginal.')
-        .param('method', 'Either lambda or K .')
+        .param('method', 'The method used for calculation.')
 	.param('selectedDiscrete', 'The Discrete model type to use for calculation.')
         .param('resultSummaryItemId', 'The ID of the output item where the model summary file will be uploaded.')
         .errorResponse()
@@ -151,7 +151,7 @@ class ArborNova(Resource):
         return result.job
 
 
-# added FitDisrete from app_support directory
+# added FitDiscrete from app_support directory
     @access.token
     @filtermodel(model='job', plugin='jobs')
     @autoDescribeRoute(
@@ -159,7 +159,8 @@ class ArborNova(Resource):
         .param('treeFileId', 'The ID of the input tree file.')
         .param('tableFileId', 'The ID of the input table file.')
         .param('selectedColumn', 'The character to use for calculation of phylosginal.')
-        .param('model', 'select the model to use.')
+        .param('model', 'The model to fit to the data.')
+	.param('selectedTransformation', 'The evolutionary model used to transform the tree.')
         .param('resultSummaryItemId', 'The ID of the output item where the model summary file will be uploaded.')
         .errorResponse()
         .errorResponse('Write access was denied on the parent item.', 403)
@@ -171,6 +172,7 @@ class ArborNova(Resource):
         tableFileId,
         selectedColumn,
         model,
+	selectedTransformation,
         resultSummaryItemId
     ):
         result = fitdiscrete.delay(
@@ -178,12 +180,13 @@ class ArborNova(Resource):
             GirderFileId(tableFileId),
             selectedColumn,
             model,
+	    selectedTransformation,
             girder_result_hooks=[
                 GirderUploadToItem(resultSummaryItemId)
             ])
         return result.job
    
-# added FitDisrete from app_support directory
+# added FitContinuous from app_support directory
     @access.token
     @filtermodel(model='job', plugin='jobs')
     @autoDescribeRoute(

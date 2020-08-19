@@ -30,6 +30,9 @@
           <v-flex xs12>
             <v-select label="Select a Model" v-model="selectedModel" :items="models" />
           </v-flex>
+	  <v-flex xs12>
+	    <v-select label="Select a Transformation" v-model="selectedTransformation" :items="transformation" />
+	  </v-flex>
           <v-flex xs12>
             <v-btn
               block
@@ -47,7 +50,7 @@
       <v-layout column justify-start fill-height style="margin-left: 400px">
           <v-card class="ma-4">
             <v-card-text>
-              <b> Add ancestral state reconstruction description here </b>
+              <b> Add fitDiscrete explanation here </b>
               <br><br>
               1. Upload your table (.csv) and tree (Newick, .phy).
               <br><br>
@@ -89,7 +92,7 @@ import optionsToParameters from '../optionsToParameters';
 import JsonDataTable from '../components/JsonDataTable';
 
 export default {
-  name: 'asr',
+  name: 'fitdiscrete',
   inject: ['girderRest'],
   components: {
     JsonDataTable,
@@ -104,8 +107,10 @@ export default {
     running: false,
     columns: [],
     selectedColumn: null,
-    models: ['ER','EasterEggForLuke..WhereAmI?'],
+    models: ['ER','SYM','ARD','meristic'],
     selectedModel: '',
+    transformation: ['none','EB','lambda','kappa','delta','white'],
+    selectedTransformation: '',
     result: [],
     resultColumns: [],
     plotUrl: '',
@@ -119,7 +124,8 @@ export default {
     readyToRun() {
       return !!this.treeFileName &&
         !!this.tableFileName &&
-        !!this.selectedColumn;
+        !!this.selectedColumn &&
+	!!this.selectedTransformation;
     },
   },
   methods: {
@@ -138,6 +144,7 @@ export default {
         treeFileId: this.treeFile._id,
         selectedColumn: this.selectedColumn,
 	model: this.selectedModel,
+	selectedTransformation: this.selectedTransformation,
         resultSummaryItemId: resultSummaryItem._id,
         plotItemId: plotItem._id,
       });

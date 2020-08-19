@@ -3,7 +3,7 @@ from girder_worker.app import app
 from girder_worker.utils import girder_job
 from tempfile import NamedTemporaryFile
 
-# implement the Phylosignal Algorithm, calling it from aRbor 
+# implement fitDiscrete from geiger 
 
 @girder_job(title='fitdiscrete')
 @app.task(bind=True)
@@ -13,6 +13,7 @@ def fitdiscrete(
     table_file,
     selectedColumn,
     model,
+    selectedTransformation,
     **kwargs
 ):
     from rpy2 import robjects
@@ -23,41 +24,27 @@ def fitdiscrete(
     env['tree_file'] = tree_file
     env['table_file'] = table_file
     env['selectedColumn'] = selectedColumn 
-    env['method'] = model 
+    env['model'] = model 
+    env['selectedTransformation'] = selectedTransformation
     env['results_file'] = results_file
     r('''
   require(ape)
-  require(aRbor)
   require(treeplyr)
+  require(geiger)
 
   tree <- read.tree(tree_file)
-  table <- read.csv(table_file, check.names = FALSE)
+  table <- read.csv(table_file, row.names = 1, check.names = FALSE)
 
-  td <- make.treedata(tree, table)
-  td <- select(td, as.name(selectedColumn))
-  phy <- td$dat
-  dat <- td$dat
-  type <- aRbor:::detectCharacterType(dat[[1]], cutoff = 0.2)
+  td <- treedata(tree, table)
+  df <- as.data.frame(td$data)
+  dat <- df[,selectedColumn, drop = FALSE]
+  phy <- td$phy
 
-  if (type == "discrete") {
-    result <- physigArbor(td,charType=type,signalTest="pagelLambda")
-    analysisType <- "discrete lambda"
-  }
-  if (type == "continuous") {
-    if(method=="lambda") {
-      result <- physigArbor(td, charType=charType, signalTest="pagelLambda")
-      analysisType <- "continuous lambda"
-    }
-  
-    if (method=="K") {
-      result <- physigArbor(td, charType=charType, signalTest="Blomberg")
-      analysisType <- "continuous K"
-    }
-  }
+  result <- fitDiscrete(phy, dat, model, selectedTransformation)
 
-  result <- t(as.data.frame(unlist(result)))
-  rownames(result) <- NULL
-  write.csv(results, results_file)
+  result <- t(as.data.frame(unlist(result$opt)))
+  rownames(result) <- "Primary results"
+  write.csv(result, results_file)
 '''
     )
 

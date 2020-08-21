@@ -13,6 +13,7 @@ def fitcontinuous(
     table_file,
     selectedColumn,
     model,
+    stdError,
     **kwargs
 ):
     from rpy2 import robjects
@@ -23,7 +24,8 @@ def fitcontinuous(
     env['tree_file'] = tree_file
     env['table_file'] = table_file
     env['selectedColumn'] = selectedColumn 
-    env['model'] = model 
+    env['model'] = model
+    env['stdError'] = stdError 
     env['results_file'] = results_file
     r('''
   require(ape)
@@ -40,10 +42,20 @@ def fitcontinuous(
   dat <- df[,selectedColumn, drop = FALSE]
   phy <- td$phy
 
-  result <- fitContinuous(phy, dat, SE = 0, model)
+  # stdError might come over as a character instead as a number
+  stderror <- as.numeric(stdError)
+  
+  # If the user inputs a non-number, conv_stderror will be NA
+  # In that case, just make SE = 0
+  if(is.na(stderror)) {
+	stderror <- 0
+  }
+
+  result <- fitContinuous(phy = phy, dat = dat, SE = stderror, model = model)
   
   result <- t(as.data.frame(unlist(result$opt)))
   rownames(result) <- "Primary results"
+  result <- cbind(result, stderror) # Just to double-check the SE
   write.csv(result, results_file)
 '''
     )

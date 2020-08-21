@@ -193,8 +193,9 @@ class ArborNova(Resource):
         Description('fitcontinuous')
         .param('treeFileId', 'The ID of the input tree file.')
         .param('tableFileId', 'The ID of the input table file.')
-        .param('selectedColumn', 'The character to use for calculation of phylosginal.')
-        .param('model', 'select the model to use.')
+        .param('selectedColumn', 'The character to use for calculation.')
+        .param('model', 'The model to use for calculation.')
+	.param('stdError', 'The standard error to use for calculation.')
         .param('resultSummaryItemId', 'The ID of the output item where the model summary file will be uploaded.')
         .errorResponse()
         .errorResponse('Write access was denied on the parent item.', 403)
@@ -206,6 +207,7 @@ class ArborNova(Resource):
         tableFileId,
         selectedColumn,
         model,
+	stdError,
         resultSummaryItemId
     ):
         result = fitcontinuous.delay(
@@ -213,6 +215,7 @@ class ArborNova(Resource):
             GirderFileId(tableFileId),
             selectedColumn,
             model,
+	    stdError,
             girder_result_hooks=[
                 GirderUploadToItem(resultSummaryItemId)
             ])

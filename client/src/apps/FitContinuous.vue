@@ -30,7 +30,10 @@
           <v-flex xs12>
             <v-select label="Select Model"  v-model="selectedModel" :items="models" />
           </v-flex>
-          <v-flex xs12>
+	  <v-flex style ="border: 2px black" xs12>
+	    <textarea style="width: 100%" v-model="stdError" placeholder="Input your standard error (Numeric value only)"></textarea>
+          </v-flex>
+	  <v-flex xs12>
             <v-btn
               block
               :class="{ primary: readyToRun }"
@@ -127,6 +130,7 @@ export default {
     selectedColumn: null,
     models:['BM','OU','EB','rate_trend','lambda','kappa','delta','mean_trend','white'],
     selectedModel: '',
+    stdError: '',
     result: [],
     resultColumns: [],
     plotUrl: '',
@@ -141,7 +145,8 @@ export default {
       return !!this.treeFileName &&
         !!this.tableFileName &&
         !!this.selectedColumn &&
-	!!this.selectedModel;
+	!!this.selectedModel &&
+	!!this.stdError;
     },
 
     readyToDownload() {
@@ -165,6 +170,7 @@ export default {
         treeFileId: this.treeFile._id,
         selectedColumn: this.selectedColumn,
 	model: this.selectedModel,
+	stdError: this.stdError,
         resultSummaryItemId: resultSummaryItem._id,
         plotItemId: plotItem._id,
       });

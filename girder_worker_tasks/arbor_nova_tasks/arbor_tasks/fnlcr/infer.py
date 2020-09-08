@@ -4,8 +4,9 @@ from tempfile import NamedTemporaryFile
 
 
 # included for the source python algorithm
-from keras.models import load_model
-from keras.models import model_from_json
+# commented out for RMS docker container
+#from keras.models import load_model
+#from keras.models import model_from_json
 from skimage.transform import resize
 from skimage.io import imsave
 import numpy as np

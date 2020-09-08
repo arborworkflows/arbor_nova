@@ -261,8 +261,8 @@ def _inference(model, image_path, BATCH_SIZE, num_classes, kernel, num_tta=1):
         height = image_working.shape[0]
         width = image_working.shape[1]
 
-        PATCH_OFFSET = IMAGE_SIZE * 8
-        SLIDE_OFFSET = IMAGE_SIZE // 4
+        PATCH_OFFSET = IMAGE_SIZE // 2
+        SLIDE_OFFSET = IMAGE_SIZE // 2
 
         heights = (height+ PATCH_OFFSET * 2 - IMAGE_SIZE) // SLIDE_OFFSET + 1
         widths = (width+ PATCH_OFFSET * 2 - IMAGE_SIZE) // SLIDE_OFFSET + 1

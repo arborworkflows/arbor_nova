@@ -68,8 +68,14 @@ ENCODER_WEIGHTS = 'imagenet'
 ACTIVATION = None
 DEVICE = 'cuda'
 
-# the weights file is in the same directory, so make this path reflect that
-WEIGHT_PATH = '/home/ubuntu/arbor_nova/girder_worker_tasks/arbor_nova_tasks/arbor_tasks/fnlcr/'
+# the weights file is in the same directory, so make this path reflect that.  If this is 
+# running in a docker container, then we should assume the weights are at the toplevel 
+# directory instead
+
+if os.getenv('DOCKER') == True:
+    WEIGHT_PATH = '/'
+else:
+    WEIGHT_PATH = '/home/ubuntu/arbor_nova/girder_worker_tasks/arbor_nova_tasks/arbor_tasks/fnlcr/'
 
 # these aren't used in the girder version, no files are directly written out 
 # by the routines written by FNLCR (Hyun Jung)

@@ -72,7 +72,7 @@ DEVICE = 'cuda'
 # running in a docker container, then we should assume the weights are at the toplevel 
 # directory instead
 
-if os.getenv('DOCKER') == True:
+if (os.getenv('DOCKER') == 'True') or (os.getenv('DOCKER') == 'True'):
     WEIGHT_PATH = '/'
 else:
     WEIGHT_PATH = '/home/ubuntu/arbor_nova/girder_worker_tasks/arbor_nova_tasks/arbor_tasks/fnlcr/'

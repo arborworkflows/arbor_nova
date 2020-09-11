@@ -68,7 +68,8 @@ export default {
 
   created() {
      const link = document.createElement('a');
-     link.href = "http://terraref.knowledgevis.com";
+     // link.href = "http://terraref.knowledgevis.com";
+     link.href = "http://localhost";
         link.setAttribute('target', '_blank') // open in new tab/window 
         link.setAttribute('rel', 'noopener noreferrer') // open in new tab/window 
         document.body.appendChild(link);

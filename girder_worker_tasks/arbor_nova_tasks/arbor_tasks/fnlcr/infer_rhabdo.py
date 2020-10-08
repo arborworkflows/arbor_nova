@@ -75,7 +75,7 @@ DEVICE = 'cuda'
 if (os.getenv('DOCKER') == 'True') or (os.getenv('DOCKER') == 'True'):
     WEIGHT_PATH = '/'
 else:
-    WEIGHT_PATH = '/home/ubuntu/arbor_nova/girder_worker_tasks/arbor_nova_tasks/arbor_tasks/fnlcr/'
+    WEIGHT_PATH = '/'
 
 # these aren't used in the girder version, no files are directly written out 
 # by the routines written by FNLCR (Hyun Jung)

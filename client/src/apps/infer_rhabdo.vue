@@ -145,7 +145,7 @@ export default {
 	  maxZoomPixelRatio: 4.0,
           prefixUrl: "images",
           tileSources: {
-            type: 'image',
+            type: 'images/',
             url:   imageurl
     	    }
 	});
@@ -162,7 +162,7 @@ export default {
       var viewer2 =  OpenSeadragon( {
 	element: this.$refs.outputImageDiv, 
 	maxZoomPixelRatio: 4.0,
-        prefixUrl: "images",
+        prefixUrl: "images/",
         tileSources: {
           type: 'image',
           url:   imageurl

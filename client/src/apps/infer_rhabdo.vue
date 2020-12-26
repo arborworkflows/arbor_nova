@@ -143,9 +143,9 @@ export default {
           this.osd_viewer  =  OpenSeadragon( {
 	  element: this.$refs.inputImageDiv, 
 	  maxZoomPixelRatio: 4.0,
-          prefixUrl: "images",
+          prefixUrl: "/static/arbornova/images/",
           tileSources: {
-            type: 'images/',
+            type: 'image',
             url:   imageurl
     	    }
 	});
@@ -162,7 +162,7 @@ export default {
       var viewer2 =  OpenSeadragon( {
 	element: this.$refs.outputImageDiv, 
 	maxZoomPixelRatio: 4.0,
-        prefixUrl: "images/",
+        prefixUrl: "/static/arbornova/images/",
         tileSources: {
           type: 'image',
           url:   imageurl

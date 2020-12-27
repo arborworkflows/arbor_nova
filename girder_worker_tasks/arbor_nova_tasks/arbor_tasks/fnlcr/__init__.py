@@ -3,4 +3,4 @@ from .docker_polyA import docker_polyA
 from .blastn import blastn
 #from .infer import infer 
 from .infer_rhabdo import infer_rhabdo
-
+from .infer_wsi import infer_wsi

@@ -10,6 +10,7 @@ import blastn from './apps/blastn.vue'
 import infer from './apps/infer.vue'
 import DockerPolyA from './apps/DockerPolyA.vue'
 import infer_rhabdo from './apps/infer_rhabdo.vue'
+import infer_wsi from './apps/infer_wsi.vue'
 
 Vue.use(Router)
 
@@ -64,6 +65,11 @@ export default new Router({
       path: '/infer_rhabdo',
       name: 'infer_rhabdo',
       component: infer_rhabdo,
+    },
+     {
+      path: '/infer_wsi',
+      name: 'infer_wsi',
+      component: infer_wsi,
     },
   ]
 })

@@ -101,6 +101,7 @@ EPSILON = 1e-6
 # what magnification should this pipeline run at
 ANALYSIS_MAGNIFICATION = 10
 THRESHOLD_MAGNIFICATION = 2.5
+ASSUMED_SOURCE_MAGNIFICATION = 20.0
 
 rot90 = albu.Rotate(limit=(90, 90), always_apply=True)
 rotn90 = albu.Rotate(limit=(-90, -90), always_apply=True)
@@ -310,11 +311,9 @@ def _inference(model, image_path, BATCH_SIZE, num_classes, kernel, num_tta=1):
     # IVG  has provided.
 
     if isNotANumber(metadata['magnification']):
-        print('warning: No magnfication value in source image. Unfortunately, a source magnification is needed for correct processing.')
-        print('this analysis will now stop.  Please provide an image that includes magnification information.  ')
-        metadata['magnification'] = 20.0
-        # exit with an error code
-        exit(1)
+        print('warning: No magnfication value in source image. Assuming the source image is at ,
+            ASSUMED_SOURCE_MAGNIFICATION,' magnification')
+        metadata['magnification'] = ASSUMED_SOURCE_MAGNIFICATION
         assumedMagnification = True
     else:
         assumedMagnification = False
@@ -331,12 +330,20 @@ def _inference(model, image_path, BATCH_SIZE, num_classes, kernel, num_tta=1):
     print('Basename String: ', basename_string)
 
     # generate a binary mask for the image
-
+    height_otsu = int(height_proc * THRESHOLD_MAGNIFICATION/ANALYSIS_MAGNIFICATION)
+    width_otsu = int(width_proc * THRESHOLD_MAGNIFICATION / ANALYSIS_MAGNIFICATION)
+    print('size of threshold mask:',height_otsu,width_otsu)
     myRegion = {'top': 0, 'left': 0, 'width': width_org, 'height': height_org}
-    threshold_source_image, mimetype = source.getRegion(format=large_image.tilesource.TILE_FORMAT_NUMPY,
+
+    if assumedMagnification:
+        # we have to manage the downsizing to the threshold magnification.
+        threshold_source_image, mimetype = source.getRegion(format=large_image.tilesource.TILE_FORMAT_NUMPY,
+                                                            region=myRegion,output={'maxWidth':width_otsu,'maxHeight':height_otsu})
+        print('used maxOutput for threshold size')
+    else:
+        threshold_source_image, mimetype = source.getRegion(format=large_image.tilesource.TILE_FORMAT_NUMPY,
                                                         region=myRegion,
                                                         scale={'magnification': THRESHOLD_MAGNIFICATION})
-
 
     print('OTSU image')
     print(type(threshold_source_image))
@@ -411,8 +418,8 @@ def _inference(model, image_path, BATCH_SIZE, num_classes, kernel, num_tta=1):
         inference_index = []
         position = 0
         stopcounter = 0
-        for i in range(heights-2):
-            for j in range(widths-2):
+        for i in range(heights-1):
+            for j in range(widths-1):
                 #test_patch = org_slide_ext[i * SLIDE_OFFSET: i * SLIDE_OFFSET + IMAGE_SIZE,
                 #             j * SLIDE_OFFSET: j * SLIDE_OFFSET + IMAGE_SIZE, 0:3]
 
@@ -426,7 +433,7 @@ def _inference(model, image_path, BATCH_SIZE, num_classes, kernel, num_tta=1):
                 myRegion = {'top': top_in_orig, 'left': left_in_orig, 'width': image_size_in_orig, 'height': image_size_in_orig}
                 rawtile, mimetype = source.getRegion(format=large_image.tilesource.TILE_FORMAT_NUMPY,
                                                        region=myRegion, scale={'magnification': ANALYSIS_MAGNIFICATION},
-                                                        fill="white")
+                                                        fill="white",output={'maxWidth':IMAGE_SIZE,'maxHeight':IMAGE_SIZE})
                 test_patch = rawtile[:,:,0:3]
                 #displayTileMetadata(test_patch,myRegion,i,j)
      
@@ -468,8 +475,8 @@ def _inference(model, image_path, BATCH_SIZE, num_classes, kernel, num_tta=1):
 
 
         patch_iter = 0
-        for i in range(heights - 2):
-            for j in range(widths-2):
+        for i in range(heights - 1):
+            for j in range(widths-1):
                 prob_map_seg[i * SLIDE_OFFSET: i * SLIDE_OFFSET + IMAGE_SIZE,
                 j * SLIDE_OFFSET: j * SLIDE_OFFSET + IMAGE_SIZE,:] \
                     += np.multiply(linedup_predictions[patch_iter, :, :, :], kernel)

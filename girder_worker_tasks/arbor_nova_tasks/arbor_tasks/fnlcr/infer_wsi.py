@@ -418,8 +418,8 @@ def _inference(model, image_path, BATCH_SIZE, num_classes, kernel, num_tta=1):
         inference_index = []
         position = 0
         stopcounter = 0
-        for i in range(heights-1):
-            for j in range(widths-1):
+        for i in range(heights-2):
+            for j in range(widths-2):
                 #test_patch = org_slide_ext[i * SLIDE_OFFSET: i * SLIDE_OFFSET + IMAGE_SIZE,
                 #             j * SLIDE_OFFSET: j * SLIDE_OFFSET + IMAGE_SIZE, 0:3]
 
@@ -475,8 +475,8 @@ def _inference(model, image_path, BATCH_SIZE, num_classes, kernel, num_tta=1):
 
 
         patch_iter = 0
-        for i in range(heights - 1):
-            for j in range(widths-1):
+        for i in range(heights - 2):
+            for j in range(widths-2):
                 prob_map_seg[i * SLIDE_OFFSET: i * SLIDE_OFFSET + IMAGE_SIZE,
                 j * SLIDE_OFFSET: j * SLIDE_OFFSET + IMAGE_SIZE,:] \
                     += np.multiply(linedup_predictions[patch_iter, :, :, :], kernel)

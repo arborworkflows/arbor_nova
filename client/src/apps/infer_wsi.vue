@@ -68,7 +68,10 @@
 		{{ renderInputImage(uploadedImageUrl) }} 
             </v-card>
 	  </div>
+        thumbnail of input image to be added here :-)
+      <!--
     	  <div ref="inputImageDiv" id ="openseadragon1" style="width:1000px;height:800px;border:1px solid black;float:left;"> </div>
+      -->
         <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
           Running (Job Status {{ job.status }}) ... please wait for the output image to show below
           <v-progress-linear indeterminate=True></v-progress-linear>

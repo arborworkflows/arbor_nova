@@ -311,7 +311,7 @@ def _inference(model, image_path, BATCH_SIZE, num_classes, kernel, num_tta=1):
     # IVG  has provided.
 
     if isNotANumber(metadata['magnification']):
-        print('warning: No magnfication value in source image. Assuming the source image is at ,
+        print('warning: No magnfication value in source image. Assuming the source image is at ',
             ASSUMED_SOURCE_MAGNIFICATION,' magnification')
         metadata['magnification'] = ASSUMED_SOURCE_MAGNIFICATION
         assumedMagnification = True

@@ -4,3 +4,4 @@ from .blastn import blastn
 #from .infer import infer 
 from .infer_rhabdo import infer_rhabdo
 from .infer_wsi import infer_wsi
+from .wsi_thumbnail import wsi_thumbnail

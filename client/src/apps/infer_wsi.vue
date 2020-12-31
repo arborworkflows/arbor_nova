@@ -62,16 +62,13 @@
            Image Upload in process...
            <v-progress-linear indeterminate=True></v-progress-linear>
         </div>
-          <div v-if="readyToDisplayInput" xs12 class="text-xs-center mb-4 ml-4 mr-4">
-  	    <v-card class="mb-4 ml-4 mr-4">
+        <div  xs12 class="text-xs-center mb-4 ml-4 mr-4">
+  	       <v-card class="mb-4 ml-4 mr-4">
             <v-card-text>Uploaded Image</v-card-text>
-		{{ renderInputImage(uploadedImageUrl) }} 
+               <img :src="inputImageUrl" style="display: block; margin: auto"> 
             </v-card>
-	  </div>
-        thumbnail of input image to be added here :-)
-      <!--
-    	  <div ref="inputImageDiv" id ="openseadragon1" style="width:1000px;height:800px;border:1px solid black;float:left;"> </div>
-      -->
+        </div>
+
         <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
           Running (Job Status {{ job.status }}) ... please wait for the output image to show below
           <v-progress-linear indeterminate=True></v-progress-linear>
@@ -83,7 +80,7 @@
         <div v-if="!running && job.status === 3">
   	  <v-card class="mb-4 ml-4 mr-4">
             <v-card-text>Segmentation Image</v-card-text>
-		{{ renderOutputImage(outputImageUrl) }} 
+		          {{ renderOutputImage(outputImageUrl) }} 
           </v-card>
         </div>
     	<div ref="outputImageDiv" id ="openseadragon2" style="width:1000px;height:800px;border:1px solid black;float:left;"> </div>
@@ -117,11 +114,13 @@ export default {
     job: { status: 0 },
     readyToDisplayInput: false,
     running: false,
+    thumbnail: [],
     result: [],
     resultColumns: [],
     resultString:  '',
     runCompleted: false,
     uploadInProgress: false,
+    inputImageUrl: '',
     outputImageUrl: '',
     inputDisplayed:  false,
     outputDisplayed:  false,
@@ -146,23 +145,45 @@ export default {
 
   methods: {
 
-    // method is added here to enable openSeadragon to render into a div defined in the vue template
-    // above.  This code is re-executed for each change, so the code is gated to only run once 
-    renderInputImage(imageurl) {
+    // method here to create and display a thumbnail of an arbitrarily large whole slilde image.
+    // This code is re-executed for each UI change, so the code is gated to only run once 
+
+    async renderInputImage() {
        if (this.inputDisplayed == false) {
-          this.osd_viewer  =  OpenSeadragon( {
-	  element: this.$refs.inputImageDiv, 
-	  maxZoomPixelRatio: 4.0,
-          prefixUrl: "/static/arbornova/images/",
-          tileSources: {
-            type: 'image',
-            url:   imageurl
-    	    }
-	});
-        console.log('openseadragon input finished')
-	this.inputDisplayed = true
-	}
+
+        // create a spot in Girder for the output of the REST call to be placed
+          const outputItem = (await this.girderRest.post(
+            `item?folderId=${this.scratchFolder._id}&name=thumbnail`,
+          )).data
+
+        // build the params to be passed into the REST call
+        const params = optionsToParameters({
+          imageId: this.imageFile._id,
+          outputId: outputItem._id,
+        });
+        // start the job by passing parameters to the REST call
+        this.job = (await this.girderRest.post(
+          `arbor_nova/wsi_thumbnail?${params}`,
+        )).data;
+
+          // wait for the job to finish
+          await pollUntilJobComplete(this.girderRest, this.job, job => this.job = job);
+
+          if (this.job.status === 3) {
+            this.running = false;
+            // pull the URL of the output from girder when processing is completed. This is used
+            // as input to an image on the web interface
+            this.thumbnail = (await this.girderRest.get(`item/${outputItem._id}/download`,{responseType:'blob'})).data;
+            // set this variable to display the resulting output image on the webpage 
+            this.inputImageUrl = window.URL.createObjectURL(this.thumbnail);
+          }
+
+          console.log('render input finished')
+	        this.inputDisplayed = true
+	     }
     },
+
+
 
     // method is added here to enable openSeadragon to render the output image into a div defined in the vue template
     // above.  This code is re-executed for each change, so the code is gated to only run once 
@@ -218,6 +239,8 @@ export default {
         this.running = false;
       }
     },
+
+
     async uploadImageFile(file) {
       if (file) {
         this.runCompleted = false;
@@ -228,25 +251,24 @@ export default {
         // display the uploaded image on the webpage
         this.uploadInProgress = false;
 	      console.log('displaying input image...');
-        this.imageBlob = (await this.girderRest.get(`file/${this.imageFile._id}/download`,{responseType:'blob'})).data;
-        this.uploadedImageUrl = window.URL.createObjectURL(this.imageBlob);
-	      console.log('createObjURL returned: ',this.uploadedImageUrl);
+        //this.imageBlob = (await this.girderRest.get(`file/${this.imageFile._id}/download`,{responseType:'blob'})).data;
+        //this.uploadedImageUrl = window.URL.createObjectURL(this.imageBlob);
+	      //console.log('createObjURL returned: ',this.uploadedImageUrl);
         this.readyToDisplayInput = true;
+        this.renderInputImage();
       }
     },
 
+    // download the segmentation image result when requested by the user
     async downloadResults() {
         const url = window.URL.createObjectURL(this.result);
-	console.log("url:",url)
+	      console.log("url:",url)
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', 'infer_results.png') //or any other extension;
+        link.setAttribute('download', 'infer_results.png') 
         document.body.appendChild(link);
         link.click();
-	document.body.removeChild(link);
-	// the above downloaded an file, but there is an
-	// alternate way, if needed here as part of the FileSaver package:
-	//saveAs(this.result,{type:"image/png"},"filesaver.png");
+	      document.body.removeChild(link);
     },
   }
 }

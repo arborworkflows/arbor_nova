@@ -39,6 +39,19 @@
               Download Results 
             </v-btn>
           </v-flex>
+          <v-flex xs12>
+            <v-btn
+              block
+              :class="{ primary: readyToDownload }"
+              :flat="readyToDownload"
+              :outline="!readyToDownload"
+              :disabled="!readyToDownload"
+              @click="reset"
+            >
+              Prepare For Another Image 
+            </v-btn>
+          </v-flex>
+
         </v-container>
       </v-navigation-drawer>
       <v-layout column justify-start fill-height style="margin-left: 400px">
@@ -50,7 +63,7 @@
               <br><br>
 		Once the input image is displayed below, please click the "Go" button to begin execution.  Execution may take some time
 		depending on the size of the input files being provided.  When the analysis is complete, the resulting segmentation
-		will be displayed below and will be available for downloading, using the download button.  
+		will be displayed below and will be available for downloading, using the download button. If you would like to segment additional images, please just click "Prepare for Another Image" in between each segmentation operation. This tells the system to reset and prepare to run again.
               <br><br>
 		We are delighted that you are trying our early release system for rhabdomyosarcoma analysis. Thank you.  
 		If you have any questions while using our system, please feel free to email Dr. Yanling Liu at liuy5@mail.nih.gov.  
@@ -63,9 +76,10 @@
 		{{ renderInputImage(uploadedImageUrl) }} 
             </v-card>
 	  </div>
-    	  <div ref="inputImageDiv" id ="openseadragon1" style="width:1000px;height:800px;border:1px solid black;float:left;"> </div>
+    	  <div ref="inputImageDiv" id ="openseadragon1" style="width:1000px;height:800px; margin: auto;"> </div>
         <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
           Running (Job Status {{ job.status }}) ... please wait for the output image to show below
+          <v-progress-linear indeterminate=True></v-progress-linear>
         </div>
         <div v-if="runCompleted" xs12 class="text-xs-center mb-4 ml-4 mr-4">
           Job Complete  ... 
@@ -77,7 +91,7 @@
 		{{ renderOutputImage(outputImageUrl) }} 
           </v-card>
         </div>
-    	<div ref="outputImageDiv" id ="openseadragon2" style="width:1000px;height:800px;border:1px solid black;float:left;"> </div>
+    	<div ref="outputImageDiv" id ="openseadragon2" style="width:1000px;height:800px; margin: auto"> </div>
       </v-layout>
     </v-layout>
   </v-app>
@@ -235,6 +249,15 @@ export default {
 	// the above downloaded an file, but there is an
 	// alternate way, if needed here as part of the FileSaver package:
 	//saveAs(this.result,{type:"image/png"},"filesaver.png");
+    },
+
+
+    // reload the page to allow the user to process another image.
+    // this clears all state and image displays. The scroll command
+    // resets the browser to the top of the page. 
+    reset() {
+      window.location.reload(true);
+      window.scrollTo(0,0);
     },
   }
 }

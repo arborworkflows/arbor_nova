@@ -361,7 +361,7 @@ def _inference(model, image_path, BATCH_SIZE, num_classes, kernel, num_tta=1):
     augmented = aug(image=otsu_seg, mask=otsu_seg)
     otsu_org = augmented['mask'] // 255
     print('rescaled threshold shape is:', otsu_org.shape)
-    imsave('otsu.png', (augmented['mask'] .astype('uint8')))
+    #imsave('otsu.png', (augmented['mask'] .astype('uint8')))
     print('Otsu segmentation finished')
 
     #otsu_org = _generate_th(source,height_org,width_org) // 255

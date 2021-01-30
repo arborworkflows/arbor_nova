@@ -3,6 +3,12 @@ from girder_worker.app import app
 from girder_worker.utils import girder_job
 from tempfile import NamedTemporaryFile
 
+# declared for subprocess to do GPU stuff.  Package 'billiard' comes with celery
+# and is a workaround for subprocess limitations on 'daemonic' processes.
+
+import billiard as multiprocessing
+from billiard import Queue, Process 
+
 
 #-------------------------------------------
 
@@ -17,7 +23,17 @@ def infer_wsi(self,image_file,**kwargs):
     DEVICE = 'cuda'
 
     print('perform forward inferencing')
-    predict_image = start_inference(image_file)
+
+    #predict_image = start_inference(image_file)
+  
+    # declare a subprocess that does the GPU allocation to keep the GPU memory from leaking
+    msg_queue = Queue()
+    gpu_process = Process(target=start_inference, args=(msg_queue,image_file))
+    gpu_process.start()
+    predict_image = msg_queue.get()
+    gpu_process.join()  
+
+
     predict_bgr = cv2.cvtColor(predict_image,cv2.COLOR_RGB2BGR)
     print('output conversion and inferencing complete')
 
@@ -559,7 +575,10 @@ def inference_image(model, image_path, BATCH_SIZE, num_classes):
     predict_image = _inference(model, image_path, BATCH_SIZE, num_classes, kernel, 1)
     return predict_image
 
-def start_inference(image_file):
+# this has been extended into a subprocess by adding the message queue argument and 
+# calling it via a Python multiprocessing.Process()
+
+def start_inference(msg_queue, image_file):
     reset_seed(1)
 
     best_prec1_valid = 0.
@@ -586,5 +605,9 @@ def start_inference(image_file):
 
     # return image data so girder toplevel task can write it out
     predict_image = inference_image(model,image_file, BATCH_SIZE, len(CLASS_VALUES))
-    return predict_image
+
+    # put the filename of the image in the message queue and return it to the main process
+    msg_queue.put(predict_image)
+    # not needed anymore, returning value through message queue
+    #return predict_image
 

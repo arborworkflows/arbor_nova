@@ -70,6 +70,12 @@
 		</b>
             </v-card-text>
           </v-card>
+           <div v-if="uploadIsHappening" xs12 class="text-xs-center mb-4 ml-4 mr-4">
+           Image Upload in process...
+           <v-progress-linear indeterminate=True></v-progress-linear>
+        </div>
+
+
           <div v-if="readyToDisplayInput" xs12 class="text-xs-center mb-4 ml-4 mr-4">
   	    <v-card class="mb-4 ml-4 mr-4">
             <v-card-text>Uploaded Image</v-card-text>
@@ -128,6 +134,7 @@ export default {
     resultColumns: [],
     resultString:  '',
     runCompleted: false,
+    uploadInProgress: false,
     outputImageUrl: '',
     inputDisplayed:  false,
     outputDisplayed:  false,
@@ -145,7 +152,9 @@ export default {
     readyToDownload() {
       return (this.runCompleted)
     },
-
+    uploadIsHappening() {
+      return (this.uploadInProgress)
+    },
   },
 
   methods: {
@@ -227,8 +236,10 @@ export default {
         this.runCompleted = false;
         this.imageFileName = file.name;
         const uploader = new utils.Upload(file, {$rest: this.girderRest, parent: this.scratchFolder});
+        this.uploadInProgress = true;
         this.imageFile = await uploader.start();
         // display the uploaded image on the webpage
+        this.uploadInProgress = false;
 	console.log('displaying input image...');
         this.imageBlob = (await this.girderRest.get(`file/${this.imageFile._id}/download`,{responseType:'blob'})).data;
         this.uploadedImageUrl = window.URL.createObjectURL(this.imageBlob);

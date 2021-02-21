@@ -6,6 +6,12 @@
           <v-toolbar-title class="white--text">Rhabdomyosarcoma ROI Analysis</v-toolbar-title>
         </v-toolbar>
         <v-container fluid>
+
+          <v-flex xs12>
+          <v-btn class="text-none" outline block >
+          Please Login Here</v-btn>
+          </v-flex>
+
           <v-flex xs12>
             <v-btn class="text-none" outline block @click='$refs.imageFile.click()'>{{ fastaFileName || 'UPLOAD input ROI image' }}</v-btn>
             <input
@@ -59,7 +65,8 @@
             <v-card-text>
               <b>This application analyzes an ROI extracted from a whole slide image by executing a neural network that has
 		been pre-trained to segment rhabdomyosarcoma tissue subtypes in H&E stained ROIs extracted from  
-		whole slide images.  The application expects the input image to be in TIF, Jpeg, or PNG image formats.
+		whole slide images.  The application expects the input image to be in TIF, Jpeg, or PNG image formats. Pyrmidal files are not 
+    supported by this app, only "ordinary" image files.  For pyramidal images, please see the Whole Slide Inferencing app. 
               <br><br>
 		Once the input image is displayed below, please click the "Go" button to begin execution.  Execution may take some time
 		depending on the size of the input files being provided.  When the analysis is complete, the resulting segmentation

@@ -7,6 +7,12 @@
           </v-toolbar>
           <v-spacer/>
           <v-container fluid>
+
+          <v-flex xs12>
+          <v-btn class="text-none" outline block >
+          Please Login Here</v-btn>
+          </v-flex>
+
           <v-flex xs12>
             <v-btn class="text-none" outline block @click='$refs.imageFile.click()'>{{ fastaFileName || 'UPLOAD Whole Slide Image' }}</v-btn>
             <input
@@ -59,7 +65,7 @@
             <v-card-text>
               <b>This application segments a whole slide image by executing a neural network that has
 		been pre-trained to segment rhabdomyosarcoma tissue subtypes in H&E stained   
-		whole slide images.  The application expects the input image to be in Aperio or similar WSI formats.
+		whole slide images.  Uploaded images can be in Aperio (.svs) format or they can be pyramidal TIF files.
               <br><br>
 		After selecting an image for upload, be patient during the upload process. Once the input image is displayed below, please click the "Go" button to begin execution.  Execution may take up to several minutes,
 		depending on the size of the input image being provided.  When the analysis is complete, the resulting segmentation

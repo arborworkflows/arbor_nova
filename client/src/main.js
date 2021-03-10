@@ -4,7 +4,6 @@ import GirderProvider from '@/plugins/girder';
 import '@/plugins/resonantgeo';
 import router from './router';
 import 'material-design-icons-iconfont/dist/material-design-icons.css';
-import {saveAs} from 'file-saver';
 
 new Vue({
   provide: GirderProvider,

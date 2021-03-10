@@ -93,17 +93,29 @@ export default {
 //        description: 'Search for PolyA tails via docker',
 //      },    
       {   
-        label: 'Rhabdo Segmentation',
-        image: require('../assets/infer_rhabdo.png'),
+        label: 'RMS Tissue Identification from H&E ROI',
+        image: require('../assets/RMS-ROI-segmentation.png'),
         route: 'infer_rhabdo',
         description: 'Segment an ROI from an H&E-stained Rhabdomyosarcoma image',
       },    
-          {   
+      {   
         label: 'Whole Slide RMS Segmentation',
-        image: require('../assets/infer_wsi.png'),
+        image: require('../assets/RMS-WSI-segmentation.png'),
         route: 'infer_wsi',
         description: 'Segment an entire H&E-stained Rhabdomyosarcoma WSI by uploading the slide for processing',
       },    
+      {   
+        label: 'TP53 Mutations',
+        image: require('../assets/TP53-mutation.png'),
+        route: 'tp53_mutation',
+        description: 'Segment for mutations of TP53 at the cellular level',
+      },   
+      {   
+        label: 'Tissue Microarray Classification',
+        image: require('../assets/TMIA classification.png'),
+        route: 'tmia_classification',
+        description: 'Classify biopsies in TMIA as positive/negative for RMS subtypes',
+      },   
     ],
   }),
 }

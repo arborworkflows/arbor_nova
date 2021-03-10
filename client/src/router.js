@@ -11,6 +11,8 @@ import infer from './apps/infer.vue'
 import DockerPolyA from './apps/DockerPolyA.vue'
 import infer_rhabdo from './apps/infer_rhabdo.vue'
 import infer_wsi from './apps/infer_wsi.vue'
+import tp53_mutation from './apps/tp53_mutation.vue'
+import tmia_classification from './apps/tmia_classification.vue'
 
 Vue.use(Router)
 
@@ -71,5 +73,16 @@ export default new Router({
       name: 'infer_wsi',
       component: infer_wsi,
     },
+    {
+      path: '/tp53_mutation',
+      name: 'tp53_mutation',
+      component: tp53_mutation,
+    }, 
+    {
+      path: '/tmia_classification',
+      name: 'tmia_classification',
+      component: tmia_classification,
+    },
+
   ]
 })

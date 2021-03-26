@@ -145,6 +145,7 @@ export default {
     outputImageUrl: '',
     inputDisplayed:  false,
     outputDisplayed:  false,
+    allocatedDevice: '',
     osd_viewer: [],
   }),
   asyncComputed: {
@@ -209,16 +210,28 @@ export default {
     // completes.
     async testAndRun() {
 
+      // create a spot in Girder for the output of the REST call to be placed
+      const outputItem = (await this.girderRest.post(
+        `item?folderId=${this.scratchFolder._id}&name=result`,
+      )).data
   
+    // build the params to be passed into the REST call
+      const params = optionsToParameters({
+        outputId: outputItem._id,
+      });
+
       // start the job by passing parameters to the REST call
       this.job = (await this.girderRest.post(
-        `arbor_nova/request_gpu`,
+        `arbor_nova/infer_rhabdo?${params}`,
       )).data;
 
       // wait for the job to finish
       await pollUntilJobComplete(this.girderRest, this.job, job => this.job = job);
 
-      this.result = (await this.girderRest.get(`item/${outputItem._id}/download`,{responseType:'blob'})).data;
+      this.result = (await  this.girderRest.get(`item/${outputItem._id}/download`,{responseType:'blob'})).data;
+
+      console.log('received from girder job:',this.result)
+      this.allocatedDevice = this.result
 
     },
 

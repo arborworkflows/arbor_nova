@@ -5,8 +5,7 @@ from girder_worker.utils import girder_job
 #---------------------------------------------
 
 import pymongo
-import pycuda.autoinit
-import pycuda.driver as cuda
+import torch
 from pymongo import MongoClient
 
 
@@ -108,13 +107,8 @@ class GPUManager():
     def discoverDevices(self):
         print('discovering devices')
         devicelist = []
-        for devicenum in range(cuda.Device.count()):
+        for devicenum in range(torch.cuda.device_count()):
             devicerecord = {'name':'cuda'+str(devicenum)}
-            device=cuda.Device(devicenum)
-            attrs=device.get_attributes()
-            # these lines add many bits of info about the GPU capabilities, not currently needed
-            #for key in attrs.keys():
-                #devicerecord[key] = attrs[key]
             devicelist.append(devicerecord)
         print(devicelist)
         return devicelist

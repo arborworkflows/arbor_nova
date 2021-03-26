@@ -308,12 +308,21 @@ class ArborNova(Resource):
     @filtermodel(model='job', plugin='jobs')
     @autoDescribeRoute(
         Description('request a gpu')
+        .param('outputId', 'The ID of the item containing the allocated device name ex "cuda0".')
         .errorResponse()
         .errorResponse('Write access was denied on the parent item.', 403)
-        .errorResponse('Failed to upload output file.', 500)
+        .errorResponse('Failed to upload output string.', 500)
     )
-    def request_gpu(self):
-        result = request_gpu.delay()
+    def request_gpu(
+            self,
+            outputId,
+
+    ):
+        result = request_gpu.delay(
+            girder_result_hooks=[
+                    GirderUploadToItem(outputId)
+                ]
+            )
         return result.job
 
 
@@ -323,16 +332,20 @@ class ArborNova(Resource):
     @autoDescribeRoute(
         Description('return a currently allocated GPU')
         .param('gpuname', 'The ID of the device name ex "cuda0".')
-        .param('status', 'The ID of the output item where the output file will be uploaded.')
+        .param('outputId', 'The ID of the item containing the status of the release')
         .errorResponse()
         .errorResponse('Write access was denied on the parent item.', 403)
         .errorResponse('Failed to upload output file.', 500)
     )
     def release_gpu(
             self,  
-            gpuname
+            gpuname,
+            outputId
     ):
         result = release_gpu.delay(
-              gpuname
+              gpuname,
+              girder_result_hooks=[
+                    GirderUploadToItem(outputId)
+                ]
             )
         return result.job

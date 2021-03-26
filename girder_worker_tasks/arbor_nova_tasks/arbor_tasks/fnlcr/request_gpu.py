@@ -6,8 +6,7 @@ from girder_worker.utils import girder_job
 #---------------------------------------------
 
 import pymongo
-import pycuda.autoinit
-import pycuda.driver as cuda
+import torch
 from pymongo import MongoClient
 
 class GPUManager():
@@ -108,10 +107,10 @@ class GPUManager():
     def discoverDevices(self):
         print('discovering devices')
         devicelist = []
-        for devicenum in range(cuda.Device.count()):
+        for devicenum in range(torch.cuda.device_count()):
             devicerecord = {'name':'cuda'+str(devicenum)}
-            device=cuda.Device(devicenum)
-            attrs=device.get_attributes()
+            #device=cuda.Device(devicenum)
+            #attrs=device.get_attributes()
             # these lines add many bits of info about the GPU capabilities, not currently needed
             #for key in attrs.keys():
                 #devicerecord[key] = attrs[key]
@@ -173,20 +172,20 @@ class GPUManager():
 @app.task(bind=True)
 def request_gpu(self,**kwargs):
 
+    import torch
+    gpucount = torch.cuda.device_count()
+    print('found',gpucount,'cuda devices')
 
-	gpucount = cuda.Device.count()
-	print('found',gpucount,'cuda devices')
-
-	gpumanager =  GPUManager()
-	(status,device) = gpumanager.request_device()
+    gpumanager =  GPUManager()
+    (status,device) = gpumanager.requestDevice()
 	# a GPU was available, return its name 
-	if status == 'Success':
-		print('reserved device:',device)
-		return device['name']
-	else:
+    if status == 'Success':
+        print('reserved device:',device)
+        return device['name']
+    else:
 	# return an empty string if we couldn't get a GPU
-		print('could not allocate GPU device')
-		return ''
+        print('could not allocate GPU device')
+        return ''
 
 
 

@@ -203,6 +203,25 @@ export default {
 	}
     },
 
+
+    // This tests for an available GPU and then calls run if the 
+    // GPU is available.  The GPU is returned after computation 
+    // completes.
+    async testAndRun() {
+
+  
+      // start the job by passing parameters to the REST call
+      this.job = (await this.girderRest.post(
+        `arbor_nova/request_gpu`,
+      )).data;
+
+      // wait for the job to finish
+      await pollUntilJobComplete(this.girderRest, this.job, job => this.job = job);
+
+      this.result = (await this.girderRest.get(`item/${outputItem._id}/download`,{responseType:'blob'})).data;
+
+    },
+
     async run() {
       this.running = true;
       this.errorLog = null;
@@ -227,17 +246,18 @@ export default {
 
       if (this.job.status === 3) {
         this.running = false;
-	// pull the URL of the output from girder when processing is completed. This is used
-	// as input to an image on the web interface
+	       // pull the URL of the output from girder when processing is completed. This is used
+	       // as input to an image on the web interface
         this.result = (await this.girderRest.get(`item/${outputItem._id}/download`,{responseType:'blob'})).data;
-	// set this variable to display the resulting output image on the webpage 
+	       // set this variable to display the resulting output image on the webpage 
         this.outputImageUrl = window.URL.createObjectURL(this.result);
-	this.runCompleted = true;
+	      this.runCompleted = true;
       }
       if (this.job.status === 4) {
         this.running = false;
       }
     },
+    
     async uploadImageFile(file) {
       if (file) {
         this.runCompleted = false;

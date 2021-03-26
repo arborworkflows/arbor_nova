@@ -11,6 +11,8 @@ from arbor_nova_tasks.arbor_tasks.fnlcr import docker_polyA
 from arbor_nova_tasks.arbor_tasks.fnlcr import infer_rhabdo 
 from arbor_nova_tasks.arbor_tasks.fnlcr import infer_wsi 
 from arbor_nova_tasks.arbor_tasks.fnlcr import wsi_thumbnail
+from arbor_nova_tasks.arbor_tasks.fnlcr import request_gpu
+from arbor_nova_tasks.arbor_tasks.fnlcr import release_gpu
 
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute
@@ -32,6 +34,8 @@ class ArborNova(Resource):
         self.route('POST', ('infer_rhabdo', ), self.infer_rhabdo)
         self.route('POST', ('infer_wsi', ), self.infer_wsi)
         self.route('POST', ('wsi_thumbnail', ), self.wsi_thumbnail)
+        self.route('POST', ('request_gpu', ), self.request_gpu)
+        self.route('POST', ('release_gpu', ), self.release_gpu)
 
     @access.token
     @filtermodel(model='job', plugin='jobs')
@@ -296,4 +300,39 @@ class ArborNova(Resource):
                 girder_result_hooks=[
                     GirderUploadToItem(outputId)
                 ])
+        return result.job
+
+
+    # --- generate a thumbnail from a pyramidal image
+    @access.token
+    @filtermodel(model='job', plugin='jobs')
+    @autoDescribeRoute(
+        Description('request a gpu')
+        .errorResponse()
+        .errorResponse('Write access was denied on the parent item.', 403)
+        .errorResponse('Failed to upload output file.', 500)
+    )
+    def request_gpu(self):
+        result = request_gpu.delay()
+        return result.job
+
+
+    # --- generate a thumbnail from a pyramidal image
+    @access.token
+    @filtermodel(model='job', plugin='jobs')
+    @autoDescribeRoute(
+        Description('return a currently allocated GPU')
+        .param('gpuname', 'The ID of the device name ex "cuda0".')
+        .param('status', 'The ID of the output item where the output file will be uploaded.')
+        .errorResponse()
+        .errorResponse('Write access was denied on the parent item.', 403)
+        .errorResponse('Failed to upload output file.', 500)
+    )
+    def release_gpu(
+            self,  
+            gpuname
+    ):
+        result = release_gpu.delay(
+              gpuname
+            )
         return result.job

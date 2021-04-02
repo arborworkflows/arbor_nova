@@ -134,6 +134,7 @@ export default {
     running: false,
     thumbnail: [],
     result: [],
+    stats: [],
     resultColumns: [],
     resultString:  '',
     runCompleted: false,
@@ -143,6 +144,7 @@ export default {
     inputDisplayed:  false,
     outputDisplayed:  false,
     osd_viewer: [],
+    imageStats: {},
   }),
   asyncComputed: {
     scratchFolder() {
@@ -231,10 +233,17 @@ export default {
         `item?folderId=${this.scratchFolder._id}&name=result`,
       )).data
 
+      // create a spot in Girder for the output of the REST call to be placed
+      const statsItem = (await this.girderRest.post(
+        `item?folderId=${this.scratchFolder._id}&name=stats`,
+      )).data
+      
+
       // build the params to be passed into the REST call
       const params = optionsToParameters({
         imageId: this.imageFile._id,
         outputId: outputItem._id,
+        statsId: statsItem._id
       });
       // start the job by passing parameters to the REST call
       this.job = (await this.girderRest.post(
@@ -246,12 +255,17 @@ export default {
 
       if (this.job.status === 3) {
         this.running = false;
-	// pull the URL of the output from girder when processing is completed. This is used
-	// as input to an image on the web interface
+	       // pull the URL of the output from girder when processing is completed. This is used
+	       // as input to an image on the web interface
         this.result = (await this.girderRest.get(`item/${outputItem._id}/download`,{responseType:'blob'})).data;
-	// set this variable to display the resulting output image on the webpage 
+	       // set this variable to display the resulting output image on the webpage 
         this.outputImageUrl = window.URL.createObjectURL(this.result);
-	this.runCompleted = true;
+
+        // get the stats returned
+        this.stats = (await this.girderRest.get(`item/${statsItem._id}/download`,{responseType:'text'})).data;
+        console.log('returned stats',this.stats)
+        console.log('parsed stats',this.stats.ARMS, this.stats.ERMS,this.stats.necrosis)
+        this.runCompleted = true;
       }
       if (this.job.status === 4) {
         this.running = false;

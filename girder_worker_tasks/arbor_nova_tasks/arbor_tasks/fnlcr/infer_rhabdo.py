@@ -19,14 +19,17 @@ def infer_rhabdo(self,image_file,**kwargs):
     DEVICE = 'cuda'
 
     print('perform forward inferencing')
-    #predict_image = start_inference(image_file)
 
-    # declare a subprocess that does the GPU allocation to keep the GPU memory from leaking
-    msg_queue = Queue()
-    gpu_process = Process(target=start_inference, args=(msg_queue,image_file))
-    gpu_process.start()
-    predict_image = msg_queue.get()
-    gpu_process.join()  
+    subprocess = False
+    if (subprocess):
+        # declare a subprocess that does the GPU allocation to keep the GPU memory from leaking
+        msg_queue = Queue()
+        gpu_process = Process(target=start_inference, args=(msg_queue,image_file))
+        gpu_process.start()
+        predict_image = msg_queue.get()
+        gpu_process.join()  
+    else:
+        predict_image = start_inference_mainthread(image_file)
 
 
     predict_bgr = cv2.cvtColor(predict_image,cv2.COLOR_RGB2BGR)
@@ -442,4 +445,34 @@ def start_inference(msg_queue, image_file):
     # not needed anymore, returning value through message queue
     #return predict_image
 
+def start_inference_mainthread(image_file):
+    reset_seed(1)
+
+    best_prec1_valid = 0.
+    torch.backends.cudnn.benchmark = True
+
+    #saved_weights_list = sorted(glob.glob(WEIGHT_PATH + '*.tar'))
+    saved_weights_list = [WEIGHT_PATH+'model_iou_0.4996_0.5897_epoch_45.pth.tar'] 
+    print(saved_weights_list)
+
+    # create segmentation model with pretrained encoder
+    model = smp.Unet(
+        encoder_name=ENCODER,
+        encoder_weights=ENCODER_WEIGHTS,
+        classes=len(CLASS_VALUES),
+        activation=ACTIVATION,
+        aux_params=None,
+    )
+
+    model = nn.DataParallel(model)
+    model = model.cuda()
+    print('load pretrained weights')
+    model = load_best_model(model, saved_weights_list[-1], best_prec1_valid)
+    print('Loading model is finished!!!!!!!')
+
+    # return image data so girder toplevel task can write it out
+    predict_image = inference_image(model,image_file, BATCH_SIZE, len(CLASS_VALUES))
+    
+    # not needed anymore, returning value through message queue
+    return predict_image
 

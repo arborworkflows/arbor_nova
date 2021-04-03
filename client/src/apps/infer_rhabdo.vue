@@ -7,6 +7,19 @@
         </v-toolbar>
         <v-container fluid>
 
+          <v-spacer/>
+          {{ girderRest.user ? girderRest.user.login : '' }}
+          <v-btn flat icon @click="girderRest.logout()">
+            <v-icon>$vuetify.icons.logout</v-icon>
+          </v-btn>
+          <v-dialog :value="loggedOut" persistent full-width max-width="600px">
+            <girder-auth
+              :register="false"
+              :key="girderRest.token"
+              :forgot-password-url="forgotPasswordUrl"
+            />
+          </v-dialog>
+
           <v-flex xs12>
           <v-btn class="text-none" outline block >
           Please Login Here</v-btn>
@@ -99,16 +112,24 @@
         </div>
         <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code> 
         <div v-if="!running && job.status === 3">
-  	  <v-card class="mb-4 ml-4 mr-4">
-            <v-card-text>Segmentation Image</v-card-text>
-		{{ renderOutputImage(outputImageUrl) }} 
-          </v-card>
-        </div>
-    	<div ref="outputImageDiv" id ="openseadragon2" style="width:1000px;height:800px; margin: auto"> </div>
+    	      <v-card class="mb-4 ml-4 mr-4">
+                <v-card-text>Segmentation Image</v-card-text>
+  		          {{ renderOutputImage(outputImageUrl) }} 
+            </v-card>
 
-      <v-row  align="center" justify="center" class="mt-20 mb-4 ml-4 mr-4">
-         <div id="visM" ref="visModel" class="mt-20 mb-4 ml-4 mr-4"></div>
-      </v-row>
+            <v-card class="mb-4 ml-4 mr-4">
+          	 <div ref="outputImageDiv" id ="openseadragon2" style="width:1000px;height:800px; margin: auto"> </div>
+            </v-card>
+
+            <v-card align="center" justify="center" class="mt-8 mb-4 ml-4 mr-4">
+               <div id="visM" ref="visModel" class="mt-20 mb-4 ml-4 mr-4"></div>
+            </v-card>
+            <v-card v-if="table.length > 0" class="mt-8 mb-4 ml-4 mr-4">
+                <v-card-text>Image Statistics</v-card-text>
+                <json-data-table :data="table" />
+            </v-card>
+
+        </div>
 
       </v-layout>
     </v-layout>
@@ -126,6 +147,7 @@ import optionsToParameters from '../optionsToParameters';
 import JsonDataTable from '../components/JsonDataTable';
 import OpenSeadragon from 'openseadragon';
 import vegaEmbed from 'vega-embed';
+import { Authentication as GirderAuth } from "@girder/components/src/components";
 
 
 
@@ -146,6 +168,7 @@ export default {
     running: false,
     result: [],
     stats: [],
+    table: [],
     resultColumns: [],
     resultString:  '',
     runCompleted: false,
@@ -252,6 +275,11 @@ export default {
         this.stats = (await this.girderRest.get(`item/${statsItem._id}/download`,{responseType:'text'})).data;
         console.log('returned stats',this.stats)
         console.log('parsed stats',this.stats.ARMS, this.stats.ERMS,this.stats.necrosis)
+        // copy this data to a state variable for rendering in a table
+        this.data = [this.stats]
+        this.data.columns = ['ARMS','ERMS','necrosis','stroma']
+        // render by updating the this.table model
+        this.table = this.data
 
 
         // render the image statistics below the image

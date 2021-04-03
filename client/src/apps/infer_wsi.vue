@@ -96,16 +96,27 @@
         </div>
         <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code> 
         <div v-if="!running && job.status === 3">
-  	  <v-card class="mb-4 ml-4 mr-4">
+  	     <v-card class="mb-4 ml-4 mr-4">
             <v-card-text>Segmentation Image</v-card-text>
 		          {{ renderOutputImage(outputImageUrl) }} 
           </v-card>
-        </div>
-    	<div ref="outputImageDiv" id ="openseadragon2" style="width:1000px;height:800px; margin: auto;"> </div>
 
-      <v-row  align="center" justify="center" class="mt-20 mb-4 ml-4 mr-4">
-         <div id="visM" ref="visModel" class="mt-20 mb-4 ml-4 mr-4"></div>
-      </v-row>
+          <v-card class="mb-4 ml-4 mr-4">  
+           <div ref="outputImageDiv" id ="openseadragon2" style="width:1000px;height:800px; margin: auto;"> </div>
+          </v-card>
+
+          <v-card  align="center" justify="center" class="mt-20 mb-4 ml-4 mr-4">
+             <div id="visM" ref="visModel" class="mt-20 mb-4 ml-4 mr-4"></div>
+          </v-card>
+
+          <v-card v-if="table.length > 0" class="mt-8 mb-4 ml-4 mr-4">
+            <v-card-text>Image Statistics</v-card-text>
+            <json-data-table :data="table" />
+          </v-card>
+
+        </div>
+
+
 
       </v-layout>
     </v-layout>
@@ -141,7 +152,9 @@ export default {
     running: false,
     thumbnail: [],
     result: [],
+    table: [],
     stats: [],
+    data: [],
     resultColumns: [],
     resultString:  '',
     runCompleted: false,
@@ -246,7 +259,6 @@ export default {
       const statsItem = (await this.girderRest.post(
         `item?folderId=${this.scratchFolder._id}&name=stats`,
       )).data
-      
 
       // build the params to be passed into the REST call
       const params = optionsToParameters({
@@ -274,6 +286,12 @@ export default {
         this.stats = (await this.girderRest.get(`item/${statsItem._id}/download`,{responseType:'text'})).data;
         console.log('returned stats',this.stats)
         console.log('parsed stats',this.stats.ARMS, this.stats.ERMS,this.stats.necrosis)
+
+        // copy this data to a state variable for rendering in a table
+        this.data = [this.stats]
+        this.data.columns = ['ARMS','ERMS','necrosis','stroma']
+        // render by updating the this.table model
+        this.table = this.data
 
         // render the image statistics below the image
 

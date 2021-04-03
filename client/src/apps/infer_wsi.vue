@@ -102,6 +102,11 @@
           </v-card>
         </div>
     	<div ref="outputImageDiv" id ="openseadragon2" style="width:1000px;height:800px; margin: auto;"> </div>
+
+      <v-row  align="center" justify="center" class="mt-20 mb-4 ml-4 mr-4">
+         <div id="visM" ref="visModel" class="mt-20 mb-4 ml-4 mr-4"></div>
+      </v-row>
+
       </v-layout>
     </v-layout>
   </v-app>
@@ -116,6 +121,8 @@ import pollUntilJobComplete from '../pollUntilJobComplete';
 import optionsToParameters from '../optionsToParameters';
 import JsonDataTable from '../components/JsonDataTable';
 import OpenSeadragon from 'openseadragon';
+import vegaEmbed from 'vega-embed';
+
 
 export default {
   name: 'infer_rhabdo',
@@ -218,11 +225,13 @@ export default {
           type: 'image',
           url:   imageurl
     	  }
-	});
-  console.log('openseadragon output finished')
-	this.outputDisplayed = true
-	}
-    },
+      	});
+        console.log('openseadragon output finished')
+      	this.outputDisplayed = true
+      	}
+      },
+
+
 
     async run() {
       this.running = true;
@@ -265,6 +274,63 @@ export default {
         this.stats = (await this.girderRest.get(`item/${statsItem._id}/download`,{responseType:'text'})).data;
         console.log('returned stats',this.stats)
         console.log('parsed stats',this.stats.ARMS, this.stats.ERMS,this.stats.necrosis)
+
+        // render the image statistics below the image
+
+        // build the spec here.  Inside the method means that the data item will be available. 
+        let titleString = 'Percentage of the slide positive for each tissue class'
+
+        var vegaLiteSpec = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+            "description": "A simple bar chart with embedded data.",
+             title: titleString,
+              "height": 450,
+              "width": 600,
+              "autosize": {
+                "type": "fit",
+                "contains": "padding"
+              },
+            "data": {
+              "values": [
+                {"Class": "ARMS","percent": this.stats.ARMS}, 
+                {"Class": "ERMS","percent": this.stats.ERMS}, 
+                {"Class": "Stroma","percent": this.stats.stroma}, 
+                {"Class": "Necrosis","percent": this.stats.necrosis}
+
+              ]
+            },
+           "layer": [{
+              "mark": "bar"
+            }, {
+              "mark": {
+                "type": "text",
+                "align": "center",
+                "baseline": "bottom",
+                "fontSize": 13,
+                "dx": 0
+              },
+              "encoding": {
+                "text": {"field": "percent", "type": "quantitative"}
+              }
+            }],
+            "encoding": {
+              "x": {"field": "Class", "type": "ordinal","title":"Tissue Classification"},
+              "y": {"field": "percent", "type": "quantitative","title":"Percent of tissue positive for each class"},
+              "color": {
+                  "field": "Class",
+                  "type":"nominal",
+                  "scale": {"domain":["ARMS","ERMS","Necrosis","Stroma"],"range": ["blue","red","yellow","lightgreen"]}
+                  }
+            }
+          };
+          // render the chart with options to save as PNG or SVG, but other options turned off
+          vegaEmbed(this.$refs.visModel,vegaLiteSpec,
+                 {padding: 10, actions: {export: true, source: false, editor: false, compiled: false}});
+
+
+
+
+
         this.runCompleted = true;
       }
       if (this.job.status === 4) {

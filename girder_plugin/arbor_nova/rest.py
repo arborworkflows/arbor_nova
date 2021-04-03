@@ -236,6 +236,7 @@ class ArborNova(Resource):
         Description('perform forward inferencing using a pretrained network')
         .param('imageId', 'The ID of the source, a TIF image file.')
         .param('outputId', 'The ID of the output item where the output file will be uploaded.')
+        .param('statsId', 'The ID of the output item where the output file will be uploaded.')
         .errorResponse()
         .errorResponse('Write access was denied on the parent item.', 403)
         .errorResponse('Failed to upload output file.', 500)
@@ -243,12 +244,15 @@ class ArborNova(Resource):
     def infer_rhabdo(
             self, 
             imageId, 
-            outputId
+            outputId,
+            statsId
     ):
         result = infer_rhabdo.delay(
                 GirderFileId(imageId), 
                 girder_result_hooks=[
-                    GirderUploadToItem(outputId)
+                    GirderUploadToItem(outputId),
+                    GirderUploadToItem(statsId),
+
                 ])
         return result.job
 

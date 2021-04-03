@@ -5,6 +5,7 @@ from tempfile import NamedTemporaryFile
 
 import billiard as multiprocessing
 from billiard import Queue, Process 
+import json
 
 #-------------------------------------------
 
@@ -43,8 +44,14 @@ def infer_rhabdo(self,image_file,**kwargs):
     cv2.imwrite(outname,predict_bgr)
     print('writing completed')
 
+    # new output of segmentation statistics in a string
+    statistics = generateStatsString(predict_image)
+    # generate unique names for multiple runs.  Add extension so it is easier to use
+    statoutname = NamedTemporaryFile(delete=False).name+'.json'
+    open(statoutname,"w").write(statistics)
+
     # return the name of the output file
-    return outname
+    return outname, statoutname
 
 
 
@@ -476,3 +483,35 @@ def start_inference_mainthread(image_file):
     # not needed anymore, returning value through message queue
     return predict_image
 
+
+# calculate the statistics for the image by converting to numpy and comparing masks against
+# the tissue classes. create masks for each class and count the number of pixels
+
+def generateStatsString(predict_image):
+    # ERMS=red, ARMS=blue. Stroma=green, Necrosis = RG (yellow)
+    img_arr = np.array(predict_image)
+    # calculate total pixels = height*width
+    total_pixels = img_arr.shape[0]*img_arr.shape[1]
+    # count the pixels in the non-zero masks
+    erms_count = np.count_nonzero((img_arr == [255, 0, 0]).all(axis = 2))
+    stroma_count = np.count_nonzero((img_arr == [0, 255, 0]).all(axis = 2)) 
+    arms_count = np.count_nonzero((img_arr == [0, 0, 255]).all(axis = 2)) 
+    necrosis_count = np.count_nonzero((img_arr == [255, 255, 0]).all(axis = 2)) 
+    print(f'erms {erms_count}, stroma {stroma_count}, arms {arms_count}, necrosis {necrosis_count}')
+    erms_percent = erms_count / total_pixels * 100.0
+    arms_percent = arms_count / total_pixels * 100.0
+    necrosis_percent = necrosis_count / total_pixels * 100.0
+    stroma_percent = stroma_count / total_pixels * 100.0
+    # pack output values into a string returned as a file
+    #statsString = 'ERMS:',erms_percent+'\n'+
+    #              'ARMS:',arms_percent+'\n'+
+    #              'stroma:',stroma_percent+'\n'+
+    #              'necrosis:',necrosis_percent+'\n'
+    statsDict = {'ERMS':erms_percent,
+                 'ARMS':arms_percent, 
+                 'stroma':stroma_percent, 
+                 'necrosis':necrosis_percent }
+    # convert dict to json string
+    print('statsdict:',statsDict)
+    statsString = json.dumps(statsDict)
+    return statsString

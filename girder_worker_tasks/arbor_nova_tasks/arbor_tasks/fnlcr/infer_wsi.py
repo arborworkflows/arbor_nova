@@ -661,7 +661,7 @@ def start_inference_mainthread(image_file):
 # the tissue classes. create masks for each class and count the number of pixels
 
 def generateStatsString(predict_image):
-    # ERMS=red, ARMS=blue. Stroma=green, Necrosis = RG
+    # ERMS=red, ARMS=blue. Stroma=green, Necrosis = RG (yellow)
     img_arr = np.array(predict_image)
     # calculate total pixels = height*width
     total_pixels = img_arr.shape[0]*img_arr.shape[1]

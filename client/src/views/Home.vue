@@ -5,13 +5,97 @@
       grid-list-xl
     >
       <v-layout row wrap>
+
+ <v-dialog
+        v-model="dialog"
+        width="500"
+        persistent
+      >  
+        <v-card>
+          <v-card-title class="headline grey lighten-2">
+            Research Use Policy
+          </v-card-title>
+  
+          <v-card-text>
+            The algorithms and software provided on this site are
+            intended for research purposes only.  This system has
+            not been reviewed and approved by the Food and Drug
+            Administration or any other US Federal agency for use
+            in clinical applications. 
+          </v-card-text>
+  
+          <v-divider></v-divider>
+  
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="primary"
+              text
+              @click="dialog = false"
+            >
+              I accept
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+
+      <v-dialog
+        v-model="loginDialog"
+        width="600"
+        persistent
+      >  
+        <v-card>
+          <v-card-title class="headline grey lighten-2">
+            User Login
+          </v-card-title>
+  
+          <v-text-field
+            label="Please enter your user login"
+            v-model="attemptedUserName"
+          >
+          </v-text-field>
+          <v-text-field
+             label="Please enter your password"
+             v-model="attemptedUserPassword"
+          >
+          </v-text-field>
+  
+          <v-divider></v-divider>
+  
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="primary"
+              text
+              @click="attemptGirderLogin"
+            >
+              Login
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+
         <v-flex xs12 class="text-xs-center">
           <img src="../assets/FNLCR-logo.png">
         </v-flex>
+
+          <v-flex xs12>
+          <v-btn
+              block
+              @click="loginButton"
+            >
+            {{ loginText }}
+            </v-btn>
+          </v-flex>
+
         <v-flex xs12>
           <span class="title">Applications</span>
         </v-flex>
-        <v-flex
+
+        
+        <v-flex v-if="loggedIn"
           v-for="(sample, i) in samples"
           :key="i"
           xs4
@@ -38,6 +122,7 @@
             </div>
           </v-card>
         </v-flex>
+
       </v-layout>
     </v-container>
   </div>
@@ -45,53 +130,23 @@
 </template>
 
 <script>
+
+import { utils } from '@girder/components/src';
+import optionsToParameters from '../optionsToParameters';
+
 export default {
   name: 'home',
+  inject: ['girderRest'],
   data: () => ({
     smallScreen: false,
+    dialog: false,
+    loginDialog: false,
+    username: '',
+    attemptedUserName: '',
+    attemptedUserPassword: '',
+    loginText: 'Please login here',
     samples: [
-//      {
-//        label: 'Phylogenetic generalized least squares (PGLS)',
-//        image: require('../assets/pgls.png'),
-//        route: 'pgls',
-//        description: 'A method for testing for correlations of two continuously distributed characters that vary across species.',
-//      },
-//      {
-//        label: 'PhyloMap',
-//        image: require('../assets/phylomap.png'),
-//        route: 'phylomap',
-//        description: 'Explore a phylogenetic tree and associated species location data.',
-//      },
-//      {   
-//        label: 'Ancestral State Reconstruction',
-//        image: require('../assets/asr.png'),
-//        route: 'asr',
-//        description: 'Explore the ancestral signal of a particular character across the tree',
-//      },    
-//      {   
-//        label: 'PolyA tail',
-//        image: require('../assets/polya.png'),
-//        route: 'polya',
-//        description: 'Search for Polyadenylation tails',
-//      },    
-//      {   
-//        label: 'Blastn',
-//        image: require('../assets/blastn.png'),
-//        route: 'blastn',
-//        description: 'Search similarity between FASTA files',
-//      },    
-//      {   
-//        label: 'DNN Infer',
-//        image: require('../assets/infer.png'),
-//        route: 'infer',
-//        description: 'Perform forward inferencing using a pretrained U-Net network',
-//      },    
-//      {   
-//        label: 'Docker PolyA tail',
-//        image: require('../assets/docker_polya.png'),
-//        route: 'docker_polya',
-//        description: 'Search for PolyA tails via docker',
-//      },    
+
       {   
         label: 'RMS Tissue Identification from H&E ROI',
         image: require('../assets/RMS-ROI-segmentation.png'),
@@ -118,8 +173,81 @@ export default {
       },   
     ],
   }),
+
+// start with a 'research use only' dialog the first time 
+// the page is rendered
+
+created () {
+  // ** test here they are not logged in.  If logged in, don't 
+  // show the dialog again.
+  console.log('not logged in. showing dialog')
+  if (this.username.length == 0) {
+      this.dialog = true  
+  }
+},
+
+// this is used to control the rendering of the apps and anything
+// else that isn't visible until the user has logged in
+computed: {
+    loggedIn() {
+      return this.username.length>0; 
+    },
+},
+
+
+methods: {
+
+ // when the user clicks the button to login, open the login dialog
+
+ loginButton() {
+  console.log("open dialog to login the user");
+  this.loginDialog = true
+ 
+  },
+
+  // the user has entered username and password, validate them
+  // against the server
+
+  fakeLogin() {
+   this.loginDialog = false
+   console.log('received login attempt')
+   console.log('user',this.attemptedUserName,'pw',this.attemptedUserPassword)
+   // **** check here that username is valid
+   this.username = this.attemptedUserName
+   this.loginText = 'Logged in as user: '+this.username
+  },
+
+  async attemptGirderLogin() {
+
+   console.log('received login attempt')
+   console.log('user',this.attemptedUserName,'pw',this.attemptedUserPassword)
+   // **** check here that username is valid
+
+   // build the params to be passed into the REST call
+   const params = optionsToParameters({
+                  username: this.attemptedUserName,
+                  password: this.attemptedUserPassword
+                });
+
+    console.log('attempting girder login')
+    // start the job by passing parameters to the REST call
+    await this.girderRest.get(
+      `user/authentication?${params}`);
+
+    console.log('received login info',this.girderRest.user.login)
+    this.username = this.attemptedUserName
+    this.loginText = 'Logged in as user: '+this.username
+    this.loginDialog = false
+
+  },
+
+ 
+ }  // end methods
+
 }
+
 </script>
+
 <style>
 .root {
   display: flex;
@@ -169,7 +297,7 @@ export default {
   position: absolute;
   bottom: 0px;
   width: 100%;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0,0,0,0.6);
   padding: 10px;
 }
 </style>

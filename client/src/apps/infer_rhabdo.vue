@@ -5,25 +5,8 @@
         <v-toolbar dark flat color="primary">
           <v-toolbar-title class="white--text">Rhabdomyosarcoma ROI Analysis</v-toolbar-title>
         </v-toolbar>
+        <v-spacer/>
         <v-container fluid>
-
-          <v-spacer/>
-          {{ girderRest.user ? girderRest.user.login : '' }}
-          <v-btn flat icon @click="girderRest.logout()">
-            <v-icon>$vuetify.icons.logout</v-icon>
-          </v-btn>
-          <v-dialog :value="loggedOut" persistent full-width max-width="600px">
-            <girder-auth
-              :register="false"
-              :key="girderRest.token"
-              :forgot-password-url="forgotPasswordUrl"
-            />
-          </v-dialog>
-
-          <v-flex xs12>
-          <v-btn class="text-none" outline block >
-          Please Login Here</v-btn>
-          </v-flex>
 
           <v-flex xs12>
             <v-btn class="text-none" outline block @click='$refs.imageFile.click()'>{{ fastaFileName || 'UPLOAD input ROI image' }}</v-btn>

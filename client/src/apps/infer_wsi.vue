@@ -4,14 +4,9 @@
       <v-navigation-drawer permanent fixed style="width: 400px; min-width: 400px;">
         <v-toolbar dark flat color="primary">
           <v-toolbar-title class="white--text">Whole Slide RMS Segmentation</v-toolbar-title>
-          </v-toolbar>
-          <v-spacer/>
-          <v-container fluid>
-
-          <v-flex xs12>
-          <v-btn class="text-none" outline block >
-          Please Login Here</v-btn>
-          </v-flex>
+        </v-toolbar>
+        <v-spacer/>
+        <v-container fluid>
 
           <v-flex xs12>
             <v-btn class="text-none" outline block @click='$refs.imageFile.click()'>{{ fastaFileName || 'UPLOAD Whole Slide Image' }}</v-btn>

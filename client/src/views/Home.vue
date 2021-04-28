@@ -39,7 +39,6 @@
         </v-card>
       </v-dialog>
 
-
       <v-dialog
         v-model="loginDialog"
         width="600"
@@ -49,7 +48,6 @@
           <v-card-title class="headline grey lighten-2">
             User Login
           </v-card-title>
-  
           <v-text-field
             label="Please enter your user login"
             v-model="attemptedUserName"
@@ -58,17 +56,16 @@
           <v-text-field
              label="Please enter your password"
              v-model="attemptedUserPassword"
+             type='password'
           >
           </v-text-field>
-  
           <v-divider></v-divider>
-  
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn
               color="primary"
               text
-              @click="attemptGirderLogin"
+              @click="girderComponentLoginWrapper"
             >
               Login
             </v-btn>
@@ -80,13 +77,19 @@
         <v-flex xs12 class="text-xs-center">
           <img src="../assets/FNLCR-logo.png">
         </v-flex>
-
           <v-flex xs12>
           <v-btn
               block
               @click="loginButton"
             >
             {{ loginText }}
+            </v-btn>
+
+          <v-btn
+              block
+              @click="logout"
+            >
+            Log out
             </v-btn>
           </v-flex>
 
@@ -133,6 +136,13 @@
 
 import { utils } from '@girder/components/src';
 import optionsToParameters from '../optionsToParameters';
+import { Authentication as GirderAuth } from "@girder/components/src/components";
+
+components: {
+    GirderAuth
+}
+
+
 
 export default {
   name: 'home',
@@ -141,9 +151,12 @@ export default {
     smallScreen: false,
     dialog: false,
     loginDialog: false,
+    girderLoginDialog: false,
     username: '',
     attemptedUserName: '',
     attemptedUserPassword: '',
+    token: '',
+    user: '',
     loginText: 'Please login here',
     samples: [
 
@@ -180,68 +193,106 @@ export default {
 created () {
   // ** test here they are not logged in.  If logged in, don't 
   // show the dialog again.
-  console.log('not logged in. showing dialog')
-  if (this.username.length == 0) {
+  this.username = localStorage.getItem('inferenceUser')
+  if (this.username == null) {
+      console.log('not logged in. showing dialog')
       this.dialog = true  
+  } else {
+   this.loginText = 'Logged in as user: '+this.username
   }
 },
 
 // this is used to control the rendering of the apps and anything
 // else that isn't visible until the user has logged in
 computed: {
-    loggedIn() {
-      return this.username.length>0; 
+ loggedIn() {
+      //var usertest = this.girderRest.user ? this.girderRest.user.login : ''
+      //console.log('loggedIn: current user:',this.username)
+      if (this.username == null) {
+        return false
+      } else {
+        return this.username.length>0
+      }
     },
 },
 
 
 methods: {
 
+
  // when the user clicks the button to login, open the login dialog
 
  loginButton() {
   console.log("open dialog to login the user");
   this.loginDialog = true
+  //this.girderLoginDialog = true
  
   },
 
-  // the user has entered username and password, validate them
-  // against the server
 
-  fakeLogin() {
-   this.loginDialog = false
-   console.log('received login attempt')
-   console.log('user',this.attemptedUserName,'pw',this.attemptedUserPassword)
-   // **** check here that username is valid
-   this.username = this.attemptedUserName
-   this.loginText = 'Logged in as user: '+this.username
-  },
 
-  async attemptGirderLogin() {
+ async girderComponentLoginWrapper() {
+    const response =  this.loginFromGirderComponents( this.attemptedUserName,this.attemptedUserPassword)
+ },
 
-   console.log('received login attempt')
-   console.log('user',this.attemptedUserName,'pw',this.attemptedUserPassword)
-   // **** check here that username is valid
 
-   // build the params to be passed into the REST call
-   const params = optionsToParameters({
-                  username: this.attemptedUserName,
-                  password: this.attemptedUserPassword
-                });
+async loginFromGirderComponents(username, password, otp = null) {
 
-    console.log('attempting girder login')
-    // start the job by passing parameters to the REST call
-    await this.girderRest.get(
-      `user/authentication?${params}`);
+    const GirderTokenLength = 64;
+    const OauthTokenPrefix = '#girderToken=';
+    const OauthTokenSuffix = '__';
 
-    console.log('received login info',this.girderRest.user.login)
-    this.username = this.attemptedUserName
-    this.loginText = 'Logged in as user: '+this.username
-    this.loginDialog = false
+    // Girder's custom headers
+    const GirderToken = 'Girder-Token';
+    const GirderOtp = 'Girder-OTP';
+    const GirderAuthorization = 'Girder-Authorization';
 
-  },
-
+    let auth;
+    const headers = {
+      [GirderToken]: null,
+    };
  
+    // try basic authentication  
+    headers[GirderAuthorization] = `Basic ${window.btoa(`${username}:${password}`)}`;
+
+    const resp = await this.girderRest.get('user/authentication', {
+    headers, auth, withCredentials: false,
+    })
+
+    if (resp.status == 200){
+      console.log('hooray, you are logged in')
+      this.username = this.attemptedUserName
+      this.loginDialog = false    
+      this.token = resp.data.authToken.token;
+      this.user = resp.data.user;
+      this.username = this.attemptedUserName
+      this.loginText = 'Logged in as user: '+this.username
+      // set a local storage that will be persistent across the page reload 
+      // this helps the app remember the user logged in when they come back to this
+      // Home.vue view
+      localStorage.setItem('inferenceUser',this.username)
+    } else {
+      console.log('sorry. try again')
+      localStorage.removeItem('inferenceUser')
+      this.username = ''
+    }
+    console.log('girder login response:',resp)
+    return resp;
+  },
+
+
+  async logout() {
+      if (!this.username) {
+        return;
+      } else {
+        this.token = null;
+        this.user = null;
+        this.username = null;
+        // remove from local storage so session is over in all pages
+        localStorage.removeItem('inferenceUser')
+      }
+    }
+
  }  // end methods
 
 }

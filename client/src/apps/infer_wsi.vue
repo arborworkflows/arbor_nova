@@ -82,10 +82,15 @@
             </v-card>
         </div>
 
-        <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
-          Running (Job Status {{ job.status }}) ... please wait for the output image to show below
+        <v-card v-if="running && job.status==0" xs12 class="text-xs-center mb-4 ml-4 mr-4">
+            Another user is currently using the system.  Please wait.  Your inferencing job should begin automatically when the previous job completes. 
+            <v-progress-linear indeterminate=True></v-progress-linear>
+        </v-card>
+        <v-card v-if="running && job.status == 2" xs12 class="text-xs-center mb-4 ml-4 mr-4">
+            Running (Job Status {{ job.status }}) ... please wait for the output image to show below
           <v-progress-linear indeterminate=True></v-progress-linear>
-        </div>
+        </v-card>
+
         <div v-if="runCompleted" xs12 class="text-xs-center mb-4 ml-4 mr-4">
           Job Complete  ... 
         </div>

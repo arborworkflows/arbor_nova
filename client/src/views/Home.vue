@@ -39,6 +39,42 @@
         </v-card>
       </v-dialog>
 
+
+      <v-dialog
+        v-model="loginGoogleDialog"
+        width="600"
+        persistent
+      >  
+        <v-card>
+          <v-card-title class="headline grey lighten-2">
+            Login using Google ID
+          </v-card-title>
+          <v-text-field
+            label="Please enter your Google acccount ID"
+            v-model="attemptedGoogleUserName"
+          >
+          </v-text-field>
+          <v-text-field
+             label="Please enter your Google account password"
+             v-model="attemptedGoogleUserPassword"
+             type='password'
+          >
+          </v-text-field>
+          <v-divider></v-divider>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="primary"
+              text
+              @click="cilogonComponentLoginWrapper"
+            >
+              Login
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+
       <v-dialog
         v-model="loginDialog"
         width="600"
@@ -78,6 +114,14 @@
           <img src="../assets/FNLCR-logo.png">
         </v-flex>
           <v-flex xs12>
+
+          <v-btn
+              block
+              @click="cilogonButton"
+            >
+            {{ cilogonText }}
+            </v-btn>
+
           <v-btn
               block
               @click="loginButton"
@@ -152,12 +196,17 @@ export default {
     dialog: false,
     loginDialog: false,
     girderLoginDialog: false,
+    loginGoogleDialog: false,
     username: '',
     attemptedUserName: '',
     attemptedUserPassword: '',
+    attemptedGoogleUserName: '',
+    attemptedGoogleUserPassword: '',
     token: '',
     user: '',
-    loginText: 'Please login here',
+    ADURL: '',
+    cilogonText: 'Login with Google Account here',
+    loginText: 'Login with local server account here',
     samples: [
 
       {   
@@ -206,8 +255,6 @@ created () {
 // else that isn't visible until the user has logged in
 computed: {
  loggedIn() {
-      //var usertest = this.girderRest.user ? this.girderRest.user.login : ''
-      //console.log('loggedIn: current user:',this.username)
       if (this.username == null) {
         return false
       } else {
@@ -216,6 +263,21 @@ computed: {
     },
 },
 
+
+asyncComputed: {
+  getURL() {
+    let test = async (girderRest) => {
+        // AD plugin API to fetch CI information/ returned URL(normally main app url) 
+        // from your configuration(girder configure page.) after you set them.
+        let inner = (await girderRest.get('/nciLogin/loginCallback', {})).data
+        return inner;
+      }
+      test(this.girderRest).then(res => {
+        // URL to CILogin page
+        this.ADURL = res;
+      })
+  }
+},
 
 methods: {
 
@@ -229,10 +291,18 @@ methods: {
  
   },
 
-
+cilogonButton() {
+  console.log("open CILogon dialog to login the user");
+  this.loginGoogleDialog = true
+  },
 
  async girderComponentLoginWrapper() {
     const response =  this.loginFromGirderComponents( this.attemptedUserName,this.attemptedUserPassword)
+ },
+
+
+ async cilogonComponentLoginWrapper() {
+    window.location = this.ADURL
  },
 
 
@@ -279,6 +349,7 @@ async loginFromGirderComponents(username, password, otp = null) {
     console.log('girder login response:',resp)
     return resp;
   },
+
 
 
   async logout() {

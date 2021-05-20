@@ -13,7 +13,7 @@ def terra_schema(
 
     # this is a mini version of the data file that is quick to read and write here
     schema_filename = 's4_schema.csv'
-    path = '.'
+    path = '/arbor_nova/girder_worker_tasks/data'
     #path = '/home/vagrant/arbor_nova/girder_worker_tasks/arbor_nova_tasks/arbor_tasks/app_support'
     print('reading data file')
     traits_df = pd.read_csv(path+'/'+schema_filename)

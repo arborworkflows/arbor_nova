@@ -109,7 +109,7 @@ def terra_per_cultivar_model(
     else:
         print('unknown season');
 
-    path ='.'
+    path = '/arbor_nova/girder_worker_tasks/data'
     #path = '/home/vagrant/arbor_nova/girder_worker_tasks/arbor_nova_tasks/arbor_tasks/app_support'
     #print('reading data file')
     traits_df = pd.read_csv(path+'/'+data_filename)

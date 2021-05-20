@@ -120,7 +120,7 @@ def terra_trait_daily(
         print('unknown season');
 
 
-    path = '.'
+    path = '/arbor_nova/girder_worker_tasks/data'
     #print('reading data file')
     traits_df = pd.read_csv(path+'/'+data_filename)
     #print('reading complete')

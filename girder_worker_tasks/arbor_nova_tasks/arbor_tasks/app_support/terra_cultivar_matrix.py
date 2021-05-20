@@ -94,7 +94,7 @@ def terra_cultivar_matrix(
         print('unknown season');
 
     #path = '/home/vagrant/arbor_nova/girder_worker_tasks/arbor_nova_tasks/arbor_tasks/app_support'
-    path = '.'
+    path = '/arbor_nova/girder_worker_tasks/data'
     #print('reading data file')
     traits_df = pd.read_csv(path+'/'+data_filename)
     #print('reading complete')

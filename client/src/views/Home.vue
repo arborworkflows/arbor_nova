@@ -112,16 +112,17 @@
 
         <v-flex xs12 class="text-xs-center">
           <img src="../assets/FNLCR-logo.png">
+          <img src="../assets/nci-oncogenomics-logo.png">
         </v-flex>
           <v-flex xs12>
-
+<!--
           <v-btn
               block
               @click="cilogonButton"
             >
             {{ cilogonText }}
             </v-btn>
-
+-->
           <v-btn
               block
               @click="loginButton"
@@ -206,7 +207,7 @@ export default {
     user: '',
     ADURL: '',
     cilogonText: 'Login with Google Account here',
-    loginText: 'Login with local server account here',
+    loginText: 'Please login here',
     samples: [
 
       {   
@@ -215,24 +216,25 @@ export default {
         route: 'infer_rhabdo',
         description: 'Segment an ROI from an H&E-stained Rhabdomyosarcoma image',
       },    
-      {   
-        label: 'Whole Slide RMS Segmentation',
-        image: require('../assets/RMS-WSI-segmentation.png'),
-        route: 'infer_wsi',
-        description: 'Segment an entire H&E-stained Rhabdomyosarcoma WSI by uploading the slide for processing',
-      },    
-      {   
-        label: 'TP53 Mutations',
-        image: require('../assets/TP53-mutation.png'),
-        route: 'tp53_mutation',
-        description: 'Segment for mutations of TP53 at the cellular level',
-      },   
-      {   
-        label: 'Tissue Microarray Classification',
-        image: require('../assets/TMIA classification.png'),
-        route: 'tmia_classification',
-        description: 'Classify biopsies in TMIA as positive/negative for RMS subtypes',
-      },   
+
+//      {   
+//        label: 'Whole Slide RMS Segmentation',
+//        image: require('../assets/RMS-WSI-segmentation.png'),
+//        route: 'infer_wsi',
+//        description: 'Segment an entire H&E-stained Rhabdomyosarcoma WSI by uploading the slide for processing',
+//      },    
+//      {   
+//        label: 'TP53 Mutations',
+//        image: require('../assets/TP53-mutation.png'),
+//        route: 'tp53_mutation',
+//        description: 'Segment for mutations of TP53 at the cellular level',
+//      },   
+//      {   
+//        label: 'Tissue Microarray Classification',
+//        image: require('../assets/TMIA classification.png'),
+//        route: 'tmia_classification',
+//        description: 'Classify biopsies in TMIA as positive/negative for RMS subtypes',
+//      },   
     ],
   }),
 
@@ -361,6 +363,7 @@ async loginFromGirderComponents(username, password, otp = null) {
         this.username = null;
         // remove from local storage so session is over in all pages
         localStorage.removeItem('inferenceUser')
+        this.loginText = 'Please login here'
       }
     }
 
@@ -389,6 +392,10 @@ async loginFromGirderComponents(username, password, otp = null) {
   overflow: hidden;
   cursor: pointer;
   box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+}
+
+.arborApp>div>div.v-image__image {
+  background-size: contain;
 }
 
 .linkOverlay {

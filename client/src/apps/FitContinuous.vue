@@ -30,7 +30,7 @@
           <v-flex xs12>
             <v-select label="Select Model"  v-model="selectedModel" :items="models" />
           </v-flex>
-	  <v-flex style ="border: 2px black" xs12>
+	  <v-flex xs12>
 	    <textarea style="width: 100%" v-model="stdError" placeholder="Input your standard error (Numeric value only)"></textarea>
           </v-flex>
 	  <v-flex xs12>

@@ -75,6 +75,9 @@
               2. Select the desired column and a method for the model to use.
               <br></br>
               3. Click GO.
+	      <br></br>
+	      <br></br>
+	      Source cited: Revell, L.J., L.J. Harmon, & D.C. Collar. Phylogenetic Signal, Evolutionary Process, and Rate. <i>Systematic Biology</i>, 57(4): 591-601.
             </v-card-text>
           </v-card>
           <v-card v-if="table.length > 0" class="mb-4 ml-4 mr-4">

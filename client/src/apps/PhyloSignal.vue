@@ -70,7 +70,7 @@
               <br></br>
 	      In this app, you can use either Pagel's Lambda or Blomberg's K to measure phylogenetic signal in a given trait. If the trait you are interested in is discrete, you can also choose between the following models: Equal Rates (ER), Symmetrical (SYM), or All Rates Different (ARD).
 	      <br></br>
-              1. Upload your table (.csv) and tree (Newick, .phy).
+              1. Upload your table (.csv) and tree (Newick, .phy). 
               <br></br>
               2. Select the desired column and a method for the model to use.
               <br></br>

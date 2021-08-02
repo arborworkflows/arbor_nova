@@ -46,18 +46,58 @@
             </v-btn>
           </v-flex>
         </v-container>
+
+	<v-container fluid>
+	    <v-flex xs12>
+		<v-btn
+		    block
+		    :class="{primary: readyToDownload }"
+		    :flat="readyToDownload"
+		    :outline="!readyToDownload"
+		    :disabled="!readyToDownload"
+		    @click="downloadResults"
+		>
+		Download Model Results
+		</v-btn>
+	    </v-flex>
+	</v-container>
+
       </v-navigation-drawer>
       <v-layout column justify-start fill-height style="margin-left: 400px">
           <v-card class="ma-4">
             <v-card-text>
-              <b> Add fitDiscrete explanation here </b>
+              <b>FitDiscrete</b> is an app that runs the fitDiscrete function in the R package geiger (Pennell et al., 2014). This function fits various likelihood models for discrete character evolution. It returns parameter estimates and a maximum likelihood estimate.
               <br><br>
               1. Upload your table (.csv) and tree (Newick, .phy).
               <br><br>
-              2. Select the desired column to run an ASR based on 
+              2. Select the desired column to run fitDiscrete on.
               <br><br>
-              3. Click GO.
+	      3. Select the desired Model and Transformation.
+	      <br>
+	      Models include: 
+	      <br>
+	      <ul>
+	      	<li>ER (Equal-Rates)</li>
+		<li>SYM (Symmetric)</li>
+		<li>ARD (All Rates Different)</li>
+		<li>meristic (transitions occur in a stepwise fashion without skipping intermediate steps)</li>
+	      </ul>
+	      <br>
+	      Transformations include: 
+	      <br>
+	      <ul>
+		<li>none (rate constancy)</li>
+		<li>EB (Early-burst)</li>
+		<li>lambda (transforms the tree so that lambda values near 0 cause the phylogeny to become more star-like, and a lambda value of 1 recovers the "none" model)</li>
+		<li>kappa (raises all branch lengths to an estimated power (kappa))</li>
+		<li>delta (raises all node depths to an estimated power (delta))</li>
+		<li>white (white-noise)</li>
+	      </ul>
               <br>
+	      4. Click GO.
+              <br><br>
+	      <br><br>
+	      Source cited: Pennel, M.W., J.M. Eastman, G.J. Slater, J.W. Brown, J.C. Uyeda, R.G. FitzJohn, M.E. Alfaro, & L.J. Harmon. 2014. geiger v2.0: an expanded suite of methods for fitting macroevolutionary models to phylogenetic trees. Bioinformatics 30: 2216-2218.
             </v-card-text>
           </v-card>
           <v-card v-if="table.length > 0" class="mb-4 ml-4 mr-4">
@@ -72,10 +112,6 @@
           <v-card v-if="result.length > 0" class="mb-4 ml-4 mr-4">
             <v-card-text>Result summary</v-card-text>
             <json-data-table :data="result" hide-actions/>
-          </v-card>
-          <v-card class="mb-4 ml-4 mr-4">
-            <v-card-text>Result plot</v-card-text>
-            <img :src="plotUrl" style="display: block; margin: auto">
           </v-card>
         </template>
       </v-layout>
@@ -127,7 +163,13 @@ export default {
         !!this.selectedColumn &&
 	!!this.selectedTransformation;
     },
+
+  readyToDownload() {
+    return (this.result.length>0 && !this.running && this.job.status===3)
   },
+
+ },
+
   methods: {
     async run() {
       this.running = true;
@@ -185,6 +227,36 @@ export default {
         this.treeFile = await uploader.start();
       }
     },
+
+   async downloadResults() {
+	// iterate through the first row to find the column names
+	var csvOutput = ''
+	for (var key in this.result[0]) {
+	    csvOutput += key+','
+	}
+	csvOutput += "\n";
+
+	this.result.forEach(function(row) {
+		for (var key in row) {
+		    if (row.hasOwnProperty(key)) {
+			csvOutput += row[key]+','
+		    }
+		}
+	csvOutput += "\n";
+   });
+
+   console.log(csvOutput.split(0,50))
+   const url = window.URL.createObjectURL(new Blob([csvOutput]));
+   console.log("url:",url)
+   // Attach it to an <a> tag and click the link. Then remove the tag
+   const link = document.createElement('a');
+   link.href = url;
+   link.setAttribute('download', 'model_results.csv')
+   document.body.appendChild(link);
+   link.click();
+   document.body.removeChild(link);
+  },
+
   }
 }
 </script>

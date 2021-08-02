@@ -67,17 +67,36 @@
       <v-layout column justify-start fill-height style="margin-left: 400px">
           <v-card class="ma-4">
             <v-card-text>
-              <b>FitContinuous</b> is an app that runs the FitContinuous function in the R package geiger(Pennell et al., 2014). It fits various likelihood models for continuous character evolution and returns parameter estimates and a maximum likelihood estimate.
+              <b>FitContinuous</b> is an app that runs the fitContinuous function in the R package geiger (Pennell et al., 2014). It fits various likelihood models for continuous character evolution and returns parameter estimates and a maximum likelihood estimate.
               <br><br>
               1. Upload your table (.csv) and tree (Newick, .phy). Note: tables are assumed to have species names as row names.
               <br><br>
-              2. Select the desired column to run a FitContinuous test on. 
+              2. Select the desired column to run fitContinuous on. 
               <br><br>
-              3. Click GO.
+	      3. Select the desired Model and input your standard error.
+	      <br>
+	      Models include:
+	      <br>
+ 	      <ul>
+		<li>BM (Brownian Motion)</li> 
+		<li>OU (Ornstein-Uhlenbeck)</li>
+		<li>EB (Early-Burst)</li>
+		<li>rate_trend (diffusion model with linear trend in rates through time)</li>
+		<li>lambda (one of the Pagel (1999) models that fits the extent to which the phylogeny predicts covariance among trait values for species)</li>
+		<li>kappa (character divergence is related to the number of speciation events between two species)</li>
+		<li>delta (time-dependent model of trait evolution)</li>
+		<li>mean_trend (sensible only for non-ultrametric trees; directional drift/trend toward smaller or larger values through time)</li>
+		<li>white (white-noise)</li>
+	      </ul>
+	      <br>
+              4. Click GO.
               <br><br>
 	      <br><br>
-	      Source cited: Pennel M.W., J.M. Eastman, G.J. Slater, J.W. Brown, J.C. Uyeda, R.G. FitzJohn, M.E. Alfaro, & L.J. Harmon. 2014. geiger v2.0: an expanded suite of methods for fitting macroevolutionary models to phylogenetic trees. Bioinformatics 30: 2216-2218.
-            </v-card-text>
+	      Sources cited: Pagel M. 1999. Inferring the historical patterns of biological evolution. Nature 401: 877-884.
+	      <br>
+	      Pennel, M.W., J.M. Eastman, G.J. Slater, J.W. Brown, J.C. Uyeda, R.G. FitzJohn, M.E. Alfaro, & L.J. Harmon. 2014. geiger v2.0: an expanded suite of methods for fitting macroevolutionary models to phylogenetic trees. Bioinformatics 30: 2216-2218.
+             
+	    </v-card-text>
           </v-card>
           <v-card v-if="table.length > 0" class="mb-4 ml-4 mr-4">
             <v-card-text>{{ tableFileName }}</v-card-text>

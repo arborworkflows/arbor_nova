@@ -67,14 +67,16 @@
       <v-layout column justify-start fill-height style="margin-left: 400px">
           <v-card class="ma-4">
             <v-card-text>
-              <b> Add FitContinuous description here </b>
+              <b>FitContinuous</b> is an app that runs the FitContinuous function in the R package geiger(Pennell et al., 2014). It fits various likelihood models for continuous character evolution and returns parameter estimates and a maximum likelihood estimate.
               <br><br>
               1. Upload your table (.csv) and tree (Newick, .phy). Note: tables are assumed to have species names as row names.
               <br><br>
-              2. Select the desired column to run a FitContinuous test on 
+              2. Select the desired column to run a FitContinuous test on. 
               <br><br>
               3. Click GO.
-              <br>
+              <br><br>
+	      <br><br>
+	      Source cited: Pennel M.W., J.M. Eastman, G.J. Slater, J.W. Brown, J.C. Uyeda, R.G. FitzJohn, M.E. Alfaro, & L.J. Harmon. 2014. geiger v2.0: an expanded suite of methods for fitting macroevolutionary models to phylogenetic trees. Bioinformatics 30: 2216-2218.
             </v-card-text>
           </v-card>
           <v-card v-if="table.length > 0" class="mb-4 ml-4 mr-4">

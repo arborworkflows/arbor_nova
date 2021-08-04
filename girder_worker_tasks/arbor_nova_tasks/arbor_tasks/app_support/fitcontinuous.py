@@ -27,10 +27,14 @@ def fitcontinuous(
     env['model'] = model
     env['stdError'] = stdError 
     env['results_file'] = results_file
+    env['plot_file'] = plot_file
     r('''
   require(ape)
   require(treeplyr)
   require(geiger)
+  require(phytools)
+
+  plotsize = 1000
 
   tree <- read.tree(tree_file)
   table <- read.csv(table_file, row.names = 1, check.names = FALSE)
@@ -52,12 +56,18 @@ def fitcontinuous(
   }
 
   result <- fitContinuous(phy = phy, dat = dat, SE = stderror, model = model)
-  
   result <- t(as.data.frame(unlist(result$opt)))
   rownames(result) <- "Primary results"
   result <- cbind(result, stderror) # Just to double-check the SE
   write.csv(result, results_file)
+
+  # Before the plot is made, dat needs to be named numbers
+  dat <- dat[,1]
+  names(dat) <- rownames(table)
+  png(plot_file, width = plotsize, height = plotsize)
+  phenogram(phy, dat, fsize=0.8, color = "darkgreen")
+  dev.off()
 '''
     )
 
-    return results_file 
+    return results_file, plot_file 

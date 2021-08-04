@@ -162,6 +162,7 @@ class ArborNova(Resource):
         .param('model', 'The model to fit to the data.')
 	.param('selectedTransformation', 'The evolutionary model used to transform the tree.')
         .param('resultSummaryItemId', 'The ID of the output item where the model summary file will be uploaded.')
+        .param('plotItemId', 'The ID of the output item where the plot file will be uploaded')
         .errorResponse()
         .errorResponse('Write access was denied on the parent item.', 403)
         .errorResponse('Failed to upload output file.', 500)
@@ -173,7 +174,8 @@ class ArborNova(Resource):
         selectedColumn,
         model,
 	selectedTransformation,
-        resultSummaryItemId
+        resultSummaryItemId,
+	plotItemId
     ):
         result = fitdiscrete.delay(
             GirderFileId(treeFileId),
@@ -182,7 +184,8 @@ class ArborNova(Resource):
             model,
 	    selectedTransformation,
             girder_result_hooks=[
-                GirderUploadToItem(resultSummaryItemId)
+                GirderUploadToItem(resultSummaryItemId),
+		GirderUploadToItem(plotItemId)
             ])
         return result.job
    
@@ -197,6 +200,7 @@ class ArborNova(Resource):
         .param('model', 'The model to use for calculation.')
 	.param('stdError', 'The standard error to use for calculation.')
         .param('resultSummaryItemId', 'The ID of the output item where the model summary file will be uploaded.')
+        .param('plotItemId', 'The ID of the output item where the plot file will be saved')
         .errorResponse()
         .errorResponse('Write access was denied on the parent item.', 403)
         .errorResponse('Failed to upload output file.', 500)
@@ -208,7 +212,8 @@ class ArborNova(Resource):
         selectedColumn,
         model,
 	stdError,
-        resultSummaryItemId
+        resultSummaryItemId,
+	plotItemId
     ):
         result = fitcontinuous.delay(
             GirderFileId(treeFileId),
@@ -217,6 +222,7 @@ class ArborNova(Resource):
             model,
 	    stdError,
             girder_result_hooks=[
-                GirderUploadToItem(resultSummaryItemId)
+                GirderUploadToItem(resultSummaryItemId),
+		GirderUploadToItem(plotItemId)
             ])
         return result.job

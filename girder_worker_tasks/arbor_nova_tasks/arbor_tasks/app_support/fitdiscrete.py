@@ -27,10 +27,12 @@ def fitdiscrete(
     env['model'] = model 
     env['selectedTransformation'] = selectedTransformation
     env['results_file'] = results_file
+    env['plot_file'] = plot_file
     r('''
   require(ape)
   require(treeplyr)
   require(geiger)
+  require(phytools)
 
   tree <- read.tree(tree_file)
   table <- read.csv(table_file, row.names = 1, check.names = FALSE)
@@ -42,10 +44,16 @@ def fitdiscrete(
 
   result <- fitDiscrete(phy, dat, model, selectedTransformation)
 
+  png(plot_file, width = 1000, height = 1000)
+  plot(result, show.zeros = FALSE, mar = rep(0,4), signif = 5)
+  dev.off()
+
   result <- t(as.data.frame(unlist(result$opt)))
   rownames(result) <- "Primary results"
   write.csv(result, results_file)
+
+  
 '''
     )
 
-    return results_file 
+    return results_file, plot_file

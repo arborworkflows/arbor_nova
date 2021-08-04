@@ -119,6 +119,10 @@
             <v-card-text>Result summary</v-card-text>
             <json-data-table :data="result" hide-actions/>
           </v-card>
+	  <v-card class ="mb-4 ml-4 mr-4">
+	     <v-card-text>Phenogram Plot</v-card-text>
+	     <img :src="plotUrl" style="display: block; margin: auto">
+	     </v-card>
         </template>
       </v-layout>
     </v-layout>

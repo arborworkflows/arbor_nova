@@ -3,15 +3,10 @@
     <v-layout class="transform-view" row fill-height>
       <v-navigation-drawer permanent fixed style="width: 400px; min-width: 400px;">
         <v-toolbar dark flat color="primary">
-          <v-toolbar-title class="white--text">TP53 Mutation in RMS</v-toolbar-title>
+          <v-toolbar-title class="white--text">MYOD1 Mutation Positive/Negative</v-toolbar-title>
           </v-toolbar>
           <v-spacer/>
           <v-container fluid>
-
-          <v-flex xs12>
-          <v-btn class="text-none" outline block >
-          Please Login Here</v-btn>
-          </v-flex>
 
           <v-flex xs12>
             <v-btn class="text-none" outline block @click='$refs.imageFile.click()'>{{ fastaFileName || 'UPLOAD Whole Slide Image' }}</v-btn>
@@ -64,12 +59,12 @@
           <v-card class="ma-4">
             <v-card-text>
               <b>This application segments a whole slide image by executing a neural network that has
-		been pre-trained to identify for TP53 mutations in rhabdomyosarcoma tissue subtypes in H&E stained   
+		been pre-trained to identify for MYOD1 mutations in rhabdomyosarcoma tissue subtypes in H&E stained   
 		whole slide images.  Uploaded images can be in Aperio (.svs) format or they can be pyramidal TIF files.
               <br><br>
 		After selecting an image for upload, be patient during the upload process. Once the input image is displayed below, please click the "Go" button to begin execution.  Execution may take up to several minutes,
-		depending on the size of the input image being provided.  When the analysis is complete, the resulting segmentation
-		will be displayed below and will be available for downloading, using the download button.  If you would like to segment additional images, please just click "Prepare for Another Image" in between each segmentation operation. This tells the system to reset and prepare to run again.  
+		depending on the size of the input image being provided.  When the analysis is complete, the resulting classification and confidence information 
+		will be displayed below and will be available for downloading, using the download button.  If you would like to classify additional images, please just click "Prepare for Another Image" in between each segmentation operation. This tells the system to reset and prepare to run again.  
               <br><br>
 		We are delighted that you are trying our early release system for rhabdomyosarcoma analysis. Thank you.  
 		If you have any questions while using our system, please feel free to email Dr. Yanling Liu at liuy5@mail.nih.gov.  
@@ -118,7 +113,7 @@ import JsonDataTable from '../components/JsonDataTable';
 import OpenSeadragon from 'openseadragon';
 
 export default {
-  name: 'tp53_mutation',
+  name: 'myod1',
   inject: ['girderRest'],
   components: {
     JsonDataTable,

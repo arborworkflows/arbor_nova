@@ -217,24 +217,24 @@ export default {
         description: 'Segment an ROI from an H&E-stained Rhabdomyosarcoma image',
       },    
 
-//      {   
-//        label: 'Whole Slide RMS Segmentation',
-//        image: require('../assets/RMS-WSI-segmentation.png'),
-//        route: 'infer_wsi',
-//        description: 'Segment an entire H&E-stained Rhabdomyosarcoma WSI by uploading the slide for processing',
-//      },    
-//      {   
-//        label: 'TP53 Mutations',
-//        image: require('../assets/TP53-mutation.png'),
-//        route: 'tp53_mutation',
-//        description: 'Segment for mutations of TP53 at the cellular level',
-//      },   
-//      {   
-//        label: 'Tissue Microarray Classification',
-//        image: require('../assets/TMIA classification.png'),
-//        route: 'tmia_classification',
-//        description: 'Classify biopsies in TMIA as positive/negative for RMS subtypes',
-//      },   
+     {   
+       label: 'Whole Slide RMS Segmentation',
+       image: require('../assets/RMS-WSI-segmentation.png'),
+       route: 'infer_wsi',
+       description: 'Segment an entire H&E-stained Rhabdomyosarcoma WSI by uploading the slide for processing',
+     },    
+     {   
+       label: 'MyoD1 Positive/Negative',
+       image: require('../assets/myod1.png'),
+       route: 'myod1',
+       description: 'Predict MYOD1 Positive/Negative from an H&E WSI',
+     },   
+     {   
+       label: 'Survivability',
+       image: require('../assets/survivability.png'),
+       route: 'survivability',
+       description: 'Predict survivability from an H&E WSI',
+     },   
     ],
   }),
 

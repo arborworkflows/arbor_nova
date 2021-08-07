@@ -3,15 +3,10 @@
     <v-layout class="transform-view" row fill-height>
       <v-navigation-drawer permanent fixed style="width: 400px; min-width: 400px;">
         <v-toolbar dark flat color="primary">
-          <v-toolbar-title class="white--text">RMS Tissue Microarray Classification</v-toolbar-title>
+          <v-toolbar-title class="white--text">RMS Survivability Classification</v-toolbar-title>
           </v-toolbar>
           <v-spacer/>
           <v-container fluid>
-
-          <v-flex xs12>
-          <v-btn class="text-none" outline block >
-          Please Login Here</v-btn>
-          </v-flex>
 
           <v-flex xs12>
             <v-btn class="text-none" outline block @click='$refs.imageFile.click()'>{{ fastaFileName || 'UPLOAD Whole Slide Image' }}</v-btn>
@@ -63,12 +58,13 @@
       <v-layout column justify-start fill-height style="margin-left: 400px">
           <v-card class="ma-4">
             <v-card-text>
-              <b>This application classifies and compiles results for tissue microarray biopsies for RMS. 
-		A neural network has been trained to classify each biopsy for postive for ARMS, ERMS, or as normal tissue.
+              <b>
+		An ensemble model, constructed by combining a set of neural network models, has been trained to generate a risk prediction from an H&E whole slide.
+    This application runs the model on an uploaded image to generate risk categories derived from our research cohort. 
 		Uploaded images can be in Aperio (.svs) format or they can be pyramidal TIF files.
               <br><br>
-		After selecting an image for upload, be patient during the upload process. Once the input image is displayed below, please click the "Go" button to begin execution.  Execution may take up to several minutes,
-		depending on the size of the input image being provided.  When the analysis is complete, the resulting segmentation
+		After selecting an image for upload, please be patient during the upload process. Once the input image is displayed below, please click the "Go" button to begin execution.  Execution may take up to several minutes,
+		depending on the size of the input image being provided.  When the analysis is complete, the analysis result
 		will be displayed below and will be available for downloading, using the download button.  If you would like to segment additional images, please just click "Prepare for Another Image" in between each segmentation operation. This tells the system to reset and prepare to run again.  
               <br><br>
 		We are delighted that you are trying our early release system for rhabdomyosarcoma analysis. Thank you.  
@@ -118,7 +114,7 @@ import JsonDataTable from '../components/JsonDataTable';
 import OpenSeadragon from 'openseadragon';
 
 export default {
-  name: 'tmia_classification',
+  name: 'survivability',
   inject: ['girderRest'],
   components: {
     JsonDataTable,

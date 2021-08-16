@@ -85,7 +85,13 @@ export default {
         image: require('../assets/fitContinuous_app.png'),
         route: 'fitcontinuous',
         description: 'Fit a model to continuous character values',
-      },    
+      },
+      {
+	label: 'Phylogenetically Independent Contrasts (PIC)',
+	image: require('../assets/pic_app.png'),
+	route: 'pic',
+	decription: 'Test for evolutionary correlations',
+      },
     ],
   }),
 }

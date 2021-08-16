@@ -6,7 +6,8 @@ from arbor_nova_tasks.arbor_tasks.app_support import pgls
 from arbor_nova_tasks.arbor_tasks.app_support import asr 
 from arbor_nova_tasks.arbor_tasks.app_support import phylosignal 
 from arbor_nova_tasks.arbor_tasks.app_support import fitdiscrete 
-from arbor_nova_tasks.arbor_tasks.app_support import fitcontinuous 
+from arbor_nova_tasks.arbor_tasks.app_support import fitcontinuous
+from arbor_nova_tasks.arbor_tasks.app_support import pic 
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute
 from girder.api.rest import filtermodel, Resource
@@ -23,6 +24,7 @@ class ArborNova(Resource):
         self.route('POST', ('phylosignal', ), self.phylosignal)
         self.route('POST', ('fitdiscrete', ), self.fitdiscrete)
         self.route('POST', ('fitcontinuous', ), self.fitcontinuous)
+        self.route('POST', ('pic', ), self.pic)
 
     @access.token
     @filtermodel(model='job', plugin='jobs')
@@ -221,6 +223,41 @@ class ArborNova(Resource):
             selectedColumn,
             model,
 	    stdError,
+            girder_result_hooks=[
+                GirderUploadToItem(resultSummaryItemId),
+		GirderUploadToItem(plotItemId)
+            ])
+        return result.job
+
+# added PIC from app_support directory
+    @access.token
+    @filtermodel(model='job', plugin='jobs')
+    @autoDescribeRoute(
+        Description('PIC')
+        .param('treeFileId', 'The ID of the input tree file.')
+        .param('tableFileId', 'The ID of the input table file.')
+        .param('independentVariable', 'The independent variable for use in calculation.')
+        .param('dependentVariable', 'The dependent variable for use in calculation.')
+        .param('resultSummaryItemId', 'The ID of the output item where the model summary file will be uploaded.')
+        .param('plotItemId', 'The ID of the output item where the plot file will be saved')
+        .errorResponse()
+        .errorResponse('Write access was denied on the parent item.', 403)
+        .errorResponse('Failed to upload output file.', 500)
+    )
+    def pic(
+        self,
+        treeFileId,
+        tableFileId,
+        independentVariable,
+        dependentVariable,
+        resultSummaryItemId,
+	plotItemId
+    ):
+        result = pic.delay(
+            GirderFileId(treeFileId),
+            GirderFileId(tableFileId),
+            independentVariable,
+            dependentVariable,
             girder_result_hooks=[
                 GirderUploadToItem(resultSummaryItemId),
 		GirderUploadToItem(plotItemId)

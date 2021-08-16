@@ -9,6 +9,7 @@ import PolyA from './apps/PolyA.vue'
 import PhyloSignal from './apps/PhyloSignal.vue'
 import FitDiscrete from './apps/FitDiscrete.vue'
 import FitContinuous from './apps/FitContinuous.vue'
+import PIC from './apps/PIC.vue'
 
 Vue.use(Router)
 
@@ -53,6 +54,11 @@ export default new Router({
       path: '/fitcontinuous',
       name: 'fitcontinuous',
       component: FitContinuous,
+    },
+    {
+      path: '/pic',
+      name: 'pic',
+      component: PIC,
     },
   ]
 })

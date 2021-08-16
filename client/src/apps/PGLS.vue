@@ -4,18 +4,6 @@
       <v-navigation-drawer permanent fixed style="width: 400px; min-width: 400px;">
         <v-toolbar dark flat color="primary">
           <v-toolbar-title class="white--text">PGLS</v-toolbar-title>
-          <v-spacer/>
-          {{ girderRest.user ? girderRest.user.login : '' }}
-          <v-btn flat icon @click="girderRest.logout()">
-            <v-icon>$vuetify.icons.logout</v-icon>
-          </v-btn>
-          <v-dialog :value="loggedOut" persistent full-width max-width="600px">
-            <girder-auth
-              :register="false"
-              :key="girderRest.token"
-              :forgot-password-url="forgotPasswordUrl"
-            />
-          </v-dialog>
         </v-toolbar>
         <v-container fluid>
           <v-flex xs12>

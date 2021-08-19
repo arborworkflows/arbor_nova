@@ -210,12 +210,6 @@ export default {
     loginText: 'Please login here',
     samples: [
 
-      {   
-        label: 'RMS Tissue Identification from H&E ROI',
-        image: require('../assets/RMS-ROI-segmentation.png'),
-        route: 'infer_rhabdo',
-        description: 'Segment an ROI from an H&E-stained Rhabdomyosarcoma image',
-      },    
 
      {   
        label: 'Whole Slide RMS Segmentation',

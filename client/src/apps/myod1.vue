@@ -134,7 +134,7 @@ export default {
     runCompleted: false,
     uploadInProgress: false,
     inputImageUrl: '',
-    outputImageUrl: '',
+    outputUrl: '',
     inputDisplayed:  false,
     outputDisplayed:  false,
     osd_viewer: [],
@@ -198,24 +198,6 @@ export default {
 
 
 
-    // method is added here to enable openSeadragon to render the output image into a div defined in the vue template
-    // above.  This code is re-executed for each change, so the code is gated to only run once 
-    renderOutputImage(imageurl) {
-       if ((this.outputDisplayed == false) & (this.outputImageUrl.length > 0)) {
-      console.log('output url:',imageurl)
-      var viewer2 =  OpenSeadragon( {
-	       element: this.$refs.outputImageDiv, 
-	       maxZoomPixelRatio: 4.0,
-         prefixUrl: "/static/arbornova/images/",
-         tileSources: {
-          type: 'image',
-          url:   imageurl
-    	  }
-	});
-  console.log('openseadragon output finished')
-	this.outputDisplayed = true
-	}
-    },
 
     async run() {
       this.running = true;
@@ -233,7 +215,7 @@ export default {
       });
       // start the job by passing parameters to the REST call
       this.job = (await this.girderRest.post(
-        `arbor_nova/infer_wsi?${params}`,
+        `arbor_nova/myod1?${params}`,
       )).data;
 
       // wait for the job to finish
@@ -241,12 +223,12 @@ export default {
 
       if (this.job.status === 3) {
         this.running = false;
-	// pull the URL of the output from girder when processing is completed. This is used
-	// as input to an image on the web interface
+	      // pull the URL of the output from girder when processing is completed. This is used
+	      // as input to an image on the web interface
         this.result = (await this.girderRest.get(`item/${outputItem._id}/download`,{responseType:'blob'})).data;
-	// set this variable to display the resulting output image on the webpage 
-        this.outputImageUrl = window.URL.createObjectURL(this.result);
-	this.runCompleted = true;
+	      // set this variable to display the resulting output image on the webpage 
+        this.outputUrl = window.URL.createObjectURL(this.result);
+	      this.runCompleted = true;
       }
       if (this.job.status === 4) {
         this.running = false;

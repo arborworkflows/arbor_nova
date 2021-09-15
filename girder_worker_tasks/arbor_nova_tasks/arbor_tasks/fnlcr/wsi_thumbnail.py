@@ -5,12 +5,15 @@ from tempfile import NamedTemporaryFile
 
 import large_image
 
+
 #-------------------------------------------
 
 @girder_job(title='WSI-thumbnail')
 @app.task(bind=True)
 def wsi_thumbnail(self,image_file,**kwargs):
 
+    # configure large_image to handle really pig PNGs since sometimes this is used
+    large_image.config.setConfig('max_small_image_size',100000)
    
     print('generate a thumbnail for a WSI')
     # open an access handler on the large image

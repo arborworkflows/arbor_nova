@@ -29,6 +29,7 @@ def infer_wsi(self,image_file,**kwargs):
     subprocess = False
     if (subprocess):
         # declare a subprocess that does the GPU allocation to keep the GPU memory from leaking
+        print("using a subprocess!")
         msg_queue = Queue()
         gpu_process = Process(target=start_inference, args=(msg_queue,image_file))
         gpu_process.start()
@@ -84,6 +85,9 @@ import segmentation_models_pytorch as smp
 
 ml = nn.Softmax(dim=1)
 
+#configure large_image to handle really pig PNGs since sometimes this is used
+large_image.config.setConfig('max_small_image_size',100000)
+   
 
 NE = 50
 ST = 100
@@ -401,8 +405,10 @@ def _inference(model, image_path, BATCH_SIZE, num_classes, kernel, num_tta=1):
         height = height_proc
         width = width_proc
 
+        
         PATCH_OFFSET = IMAGE_SIZE // 2
         SLIDE_OFFSET = IMAGE_SIZE // 2
+        print('using', (PATCH_OFFSET//IMAGE_SIZE*100),'% patch overlap')
 
         # these are the counts in the x and y direction.  i.e. how many samples across the image.
         # the divident is slide_offset because this is how much the window is moved each time
@@ -417,8 +423,9 @@ def _inference(model, image_path, BATCH_SIZE, num_classes, kernel, num_tta=1):
         # extend the size to allow for the whole actual image to be processed without actual
         # pixels being at a tile boundary.
 
+        # doubled to *4 and *8 when changed 408 #409 to //4
         height_ext = SLIDE_OFFSET * heights + PATCH_OFFSET * 2
-        width_ext = SLIDE_OFFSET * widths + PATCH_OFFSET * 2
+        width_ext = SLIDE_OFFSET * widths + PATCH_OFFSET * 4
         print('height_ext,width_ext:',height_ext,width_ext)
 
         org_slide_ext = np.ones((height_ext, width_ext, 3), np.uint8) * 255
@@ -490,6 +497,10 @@ def _inference(model, image_path, BATCH_SIZE, num_classes, kernel, num_tta=1):
                     from PIL import Image
                     im = Image.fromarray(test_patch)
                     im.save('hyun-patch-'+str(temp_i)+'_'+str(temp_j)+'.jpeg')
+                
+                if ((8*i // (heights-2)) ) > lastupdate:
+                    lastupdate = (8*i // (heights-2))
+                    print(lastupdate*10,'percent complete')
 
         # Very last part of the region.  This is if there is a partial batch of tiles left at the
         # end of the image.
@@ -670,11 +681,14 @@ def generateStatsString(predict_image):
     stroma_count = np.count_nonzero((img_arr == [0, 255, 0]).all(axis = 2)) 
     arms_count = np.count_nonzero((img_arr == [0, 0, 255]).all(axis = 2)) 
     necrosis_count = np.count_nonzero((img_arr == [255, 255, 0]).all(axis = 2)) 
+    # calculate sum of pixels occupied by any type of tissue, so we can report each type as a 
+    # percentage of tissue, not of the whole slide. This way totals will always add up to 100%
+    total_of_all_tissue = erms_count + arms_count + stroma_count + necrosis_count
     print(f'erms {erms_count}, stroma {stroma_count}, arms {arms_count}, necrosis {necrosis_count}')
-    erms_percent = erms_count / total_pixels * 100.0
-    arms_percent = arms_count / total_pixels * 100.0
-    necrosis_percent = necrosis_count / total_pixels * 100.0
-    stroma_percent = stroma_count / total_pixels * 100.0
+    erms_percent = erms_count / total_of_all_tissue * 100.0
+    arms_percent = arms_count / total_of_all_tissue * 100.0
+    necrosis_percent = necrosis_count / total_of_all_tissue * 100.0
+    stroma_percent = stroma_count / total_of_all_tissue * 100.0
     # pack output values into a string returned as a file
     #statsString = 'ERMS:',erms_percent+'\n'+
     #              'ARMS:',arms_percent+'\n'+

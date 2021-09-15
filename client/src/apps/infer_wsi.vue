@@ -325,10 +325,10 @@ export default {
                 "align": "center",
                 "baseline": "bottom",
                 "fontSize": 13,
-                "dx": 0
+                "dx": 0,
               },
               "encoding": {
-                "text": {"field": "percent", "type": "quantitative"}
+                "text": {"field": "percent", "type": "quantitative","color":{"value":"black"}}
               }
             }],
             "encoding": {
@@ -337,7 +337,7 @@ export default {
               "color": {
                   "field": "Class",
                   "type":"nominal",
-                  "scale": {"domain":["ARMS","ERMS","Necrosis","Stroma"],"range": ["blue","red","yellow","lightgreen"]}
+                  "scale": {"domain":["ARMS","ERMS","Necrosis","Stroma"],"range": ["blue","red","gold","lightgreen"]}
                   }
             }
           };
@@ -345,7 +345,7 @@ export default {
           vegaEmbed(this.$refs.visModel,vegaLiteSpec,
                  {padding: 10, actions: {export: true, source: false, editor: false, compiled: false}});
 
-
+// could use alternative yellow colors:  gold, moccasin, navajowhite, 
 
 
 

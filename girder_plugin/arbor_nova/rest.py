@@ -112,7 +112,8 @@ class ArborNova(Resource):
     @autoDescribeRoute(
         Description('perform classification through forward inferencing using a pretrained network')
         .param('imageId', 'The ID of the source, an Aperio .SVS image file.')
-        .param('statsId', 'The ID of the output item where the output file will be uploaded.')
+        .param('segmentId', 'The ID of the segmentation image, a PNG or TIFF image.')
+         .param('statsId', 'The ID of the output item where the output file will be uploaded.')
         .errorResponse()
         .errorResponse('Write access was denied on the parent item.', 403)
         .errorResponse('Failed to upload output file.', 500)
@@ -120,10 +121,12 @@ class ArborNova(Resource):
     def myod1(
             self, 
             imageId, 
+            segmentId,
             statsId
     ):
         result = myod1.delay(
                 GirderFileId(imageId), 
+                GirderFileId(segmentId), 
                 girder_result_hooks=[
                     GirderUploadToItem(statsId),
                 ])

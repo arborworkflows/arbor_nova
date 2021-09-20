@@ -498,9 +498,6 @@ def _inference(model, image_path, BATCH_SIZE, num_classes, kernel, num_tta=1):
                     im = Image.fromarray(test_patch)
                     im.save('hyun-patch-'+str(temp_i)+'_'+str(temp_j)+'.jpeg')
                 
-                if ((8*i // (heights-2)) ) > lastupdate:
-                    lastupdate = (8*i // (heights-2))
-                    print(lastupdate*10,'percent complete')
 
         # Very last part of the region.  This is if there is a partial batch of tiles left at the
         # end of the image.

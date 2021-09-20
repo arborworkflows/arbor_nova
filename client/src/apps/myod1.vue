@@ -69,7 +69,7 @@
             <v-card-text>
               <b>This application segments a whole slide image by executing a neural network that has
                   been pre-trained to identify for MYOD1 mutations in rhabdomyosarcoma tissue subtypes in H&E stained   
-                  whole slide images.  Uploaded images can be in Aperio (.svs) format or they can be pyramidal TIF files.
+                  whole slide images.  Uploaded images must in Aperio (.svs) or another similar WSI format.  Large PNG and TIFF files are not supported.
                             <br><br>
                   After selecting an image for upload, be patient during the upload process. Once the input image is displayed below, please click the "Go" button to begin execution.  Execution may take up to several minutes,
                   depending on the size of the input image being provided.  When the analysis is complete, the resulting classification and confidence information 
@@ -92,21 +92,32 @@
               </v-card>
           </div>
         </div>
+        <div v-if="segmentReadyForDisplay">
+  	      <v-card class="mb-4 ml-4 mr-4">
+            <v-card-text>Segmentation Mask</v-card-text>
+               <img :src="segmentImageUrl" width="800" height="600" style="display: block; margin: auto"> 
+          </v-card>
+        </div>
 
         <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
-          Running (Job Status {{ job.status }}) ... please wait for the output to show below.  This will take several minutes.
+          Running MYOD1 Neural network inferencing.  Please wait for the output to show below.  This will take several minutes.
           <v-progress-linear indeterminate=True></v-progress-linear>
         </div>
         <div v-if="runCompleted" xs12 class="text-xs-center mb-4 ml-4 mr-4">
-          Job Complete  ... 
+          Analysis Complete  ... 
         </div>
+
+        <v-card  align="center" justify="center" class="mt-20 mb-4 ml-4 mr-4">
+          <div id="visM" ref="visModel" class="mt-20 mb-4 ml-4 mr-4"></div>
+        </v-card>
+
+        <v-card v-if="table.length > 0" class="mt-8 mb-4 ml-4 mr-4">
+          <v-card-text>Probability (0 to 1) of MYOD1+ Mutation:</v-card-text>
+          <json-data-table :data="table" />
+        </v-card>
+
         <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code> 
-        <div v-if="segmentReadyForDisplay">
-  	      <v-card class="mb-4 ml-4 mr-4">
-            <v-card-text>Segmentation Image</v-card-text>
-               <img :src="segmentImageUrl" style="display: block; margin: auto"> 
-          </v-card>
-        </div>
+     
       </v-layout>
     </v-layout>
   </v-app>
@@ -120,7 +131,7 @@ import scratchFolder from '../scratchFolder';
 import pollUntilJobComplete from '../pollUntilJobComplete';
 import optionsToParameters from '../optionsToParameters';
 import JsonDataTable from '../components/JsonDataTable';
-import OpenSeadragon from 'openseadragon';
+import vegaEmbed from 'vega-embed';
 
 export default {
   name: 'myod1',
@@ -152,7 +163,9 @@ export default {
     inputDisplayed:  false,
     segmentDisplayed:  false,
     outputDisplayed:  false,
+    table: [],
     osd_viewer: [],
+    cohortData: [],
   }),
   asyncComputed: {
     scratchFolder() {
@@ -244,7 +257,7 @@ export default {
       )).data
 
       // build the params to be passed into the REST call
-      const params = optionsToParameters({
+      var params = optionsToParameters({
         imageId: this.imageFile._id,
         segmentId: this.segmentFile._id,
         statsId: outputItem._id,
@@ -261,14 +274,126 @@ export default {
         this.running = false;
 	      // pull the URL of the output from girder when processing is completed. This is used
 	      // as input to an image on the web interface
-        this.result = (await this.girderRest.get(`item/${outputItem._id}/download`,{responseType:'blob'})).data;
-	      // set this variable to display the resulting output on the webpage 
-        this.outputUrl = window.URL.createObjectURL(this.result);
-	      this.runCompleted = true;
+        this.result = (await this.girderRest.get(`item/${outputItem._id}/download`,{responseType:'text'})).data;
+        this.runCompleted = true;
+        this.stats = this.result
+
+        // copy this data to a state variable for rendering in a table
+        this.data = [this.stats]
+        this.data.columns = ['Positive Score']
+        // render by updating the this.table model
+        this.table = this.data
+
       }
+
+      // clear the webpage if the job has failed
       if (this.job.status === 4) {
         this.running = false;
       }
+
+
+      // now fetch the cohort that we need to compare against from girder storage.  This way the cohort
+      // can be updated by changing the girder contents instead of hard-coding the web app.
+
+      // create a spot in Girder for the output of the REST call to be placed
+      const cohortItem = (await this.girderRest.post(
+        `item?folderId=${this.scratchFolder._id}&name=cohort`,
+      )).data
+
+      // build the params to be passed into the REST call
+      var params = optionsToParameters({
+        cohortName: 'myod1',
+        outnameId: cohortItem._id,
+      });
+      console.log('params:',params)
+      // start the job by passing parameters to the REST call
+      this.job = (await this.girderRest.post(
+        `arbor_nova/cohort?${params}`,
+      )).data;
+
+      // wait for the job to finish
+      await pollUntilJobComplete(this.girderRest, this.job, job => this.job = job);
+      this.cohortData = csvParse((await this.girderRest.get(`item/${cohortItem._id}/download`)).data);
+      console.log('returned cohort',this.cohortData)
+
+      // render the image statistics below the image
+
+      // build the spec here.  Inside the method means that the data item will be available.  This spec is a boxplot of the cohort
+      // of data with a vertical line superimposed over the calculation for this particular image. 
+
+      var vegaLiteSpec = {
+          "title": "MYOD1 Mutation of Uploaded Image Compared to Our Cohort",
+          "height":250,
+          "width": 500,
+          "data": {
+            "values": this.cohortData },
+          "layer": [
+            {
+              "mark": "boxplot",
+              "encoding": {
+                "x": {
+                  "field": "Positive Score",
+                  "type": "quantitative",
+                  "scale": {"zero": true}
+                },
+                "y": {
+                  "field": "Category",
+                  "type": "nominal"
+                },
+                "size": {"value":40},
+                "color": {
+                  "field": "Category",
+                  "type":"nominal",
+                  "scale": {"domain":["MYOD1-","MYOD1+","Test","Uploaded Image"],"range": ["blue","red","green","orange"]}
+                }
+                }
+              }, 
+              {
+                  "mark": "rule",
+                  "data": {
+                    "values": [
+                      {"Category": "Uploaded Image", "Positive Score": this.stats['Positive Score']}
+                    ]
+                  },
+                  "encoding": {
+                    "x": {
+                      "field": "Positive Score",
+                      "type": "quantitative"
+                    },
+                    "color": {"value": "orange"},
+                    "size": {"value": 4}
+                  }
+                },
+                {
+                  "mark": {
+                      "type":"text",
+                      "fontSize": 14,
+                      "dx": 65
+                      },
+                  "data": {
+                    "values": [
+                      {"Category": "Uploaded Image", "Positive Score": this.stats['Positive Score']}
+                    ]
+                  },
+                  "encoding": {
+                    "text": {"field":"Positive Score","type":"quantitative"},
+                    "x": {
+                      "field": "Positive Score",
+                      "type": "quantitative"
+                    },
+                    "y": {
+                        "field": "Category",
+                        "type": "ordinal"
+                        },
+                    "color": {"value": "orange"}
+                  }
+                }
+            ]
+        };
+      // render the chart with options to save as PNG or SVG, but other options turned off
+      vegaEmbed(this.$refs.visModel,vegaLiteSpec,
+                {padding: 10, actions: {export: true, source: false, editor: false, compiled: false}});
+
     },
 
 
@@ -313,7 +438,8 @@ export default {
 
     // download the segmentation image result when requested by the user
     async downloadResults() {
-        const url = window.URL.createObjectURL(this.result);
+        console.log('download this:',this.result)
+        const url = window.URL.createObjectURL(JSON.stringify(this.result));
 	      console.log("url:",url)
         const link = document.createElement('a');
         link.href = url;

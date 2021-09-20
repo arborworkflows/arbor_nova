@@ -7,6 +7,7 @@ from arbor_nova_tasks.arbor_tasks.fnlcr import infer_wsi
 from arbor_nova_tasks.arbor_tasks.fnlcr import wsi_thumbnail
 from arbor_nova_tasks.arbor_tasks.fnlcr import myod1 
 from arbor_nova_tasks.arbor_tasks.fnlcr import survivability 
+from arbor_nova_tasks.arbor_tasks.fnlcr import cohort 
 
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute
@@ -23,6 +24,7 @@ class ArborNova(Resource):
         self.route('POST', ('wsi_thumbnail', ), self.wsi_thumbnail)
         self.route('POST', ('myod1', ), self.myod1)
         self.route('POST', ('survivability', ), self.survivability)
+        self.route('POST', ('cohort', ), self.cohort)
     @access.token
     @filtermodel(model='job', plugin='jobs')
 
@@ -153,5 +155,30 @@ class ArborNova(Resource):
                 GirderFileId(imageId), 
                 girder_result_hooks=[
                     GirderUploadToItem(statsId),
+                ])
+        return result.job
+
+
+     # --- return a cohort of data for use by the display algorithms
+    @access.token
+    @filtermodel(model='job', plugin='jobs')
+    @autoDescribeRoute(
+        Description('return a cohort of data')
+        .param('cohortName', 'the key to specify which cohort (e.g. "myod1" or "survivability")')
+        .param('outnameId', 'The ID of the output item where the data file will be uploaded.')
+ 
+        .errorResponse()
+        .errorResponse('Write access was denied on the parent item.', 403)
+        .errorResponse('Failed to upload output file.', 500)
+    )
+    def cohort(
+            self, 
+            cohortName,
+            outnameId
+    ):
+        result = cohort.delay(
+                cohortName, 
+                girder_result_hooks=[
+                    GirderUploadToItem(outnameId),
                 ])
         return result.job

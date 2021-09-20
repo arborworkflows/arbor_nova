@@ -75,8 +75,9 @@
            Image Upload in process...
            <v-progress-linear indeterminate=True></v-progress-linear>
         </div>
+
         <div  xs12 class="text-xs-center mb-4 ml-4 mr-4">
-  	       <v-card class="mb-4 ml-4 mr-4">
+  	       <v-card v-if="inputReadyForDisplay" class="mb-4 ml-4 mr-4">
             <v-card-text>Uploaded Image</v-card-text>
                <img :src="inputImageUrl" style="display: block; margin: auto"> 
             </v-card>
@@ -87,7 +88,7 @@
             <v-progress-linear indeterminate=True></v-progress-linear>
         </v-card>
         <v-card v-if="running && job.status == 2" xs12 class="text-xs-center mb-4 ml-4 mr-4">
-            Running (Job Status {{ job.status }}) ... please wait for the output image to show below
+            Running Segmentation Neural Netork.  Please wait for the output image to show below.  This will take several minutes
           <v-progress-linear indeterminate=True></v-progress-linear>
         </v-card>
 
@@ -181,6 +182,9 @@ export default {
     uploadIsHappening() {
       return (this.uploadInProgress)
     },
+    inputReadyForDisplay() {
+      return this.inputDisplayed
+    }
   },
 
   methods: {
@@ -361,8 +365,8 @@ export default {
       if (file) {
         this.runCompleted = false;
         this.imageFileName = file.name;
-        const uploader = new utils.Upload(file, {$rest: this.girderRest, parent: this.scratchFolder});
         this.uploadInProgress = true;
+        const uploader = new utils.Upload(file, {$rest: this.girderRest, parent: this.scratchFolder});
         this.imageFile = await uploader.start();
         // display the uploaded image on the webpage
         this.uploadInProgress = false;

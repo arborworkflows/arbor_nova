@@ -96,7 +96,7 @@ def myod1(self,image_file, segment_image_file,**kwargs):
 def generateStatsString(predict_values):
     # any number of statistics can be returned in a JSON object.  Derived 
     # stats can be calculated here and included as other keys in the dict object
-    statsDict = {'values': [x for x in predict_values] }
+    statsDict = {'Positive Score': predict_values[0] }
     # convert dict to json string
     print('statsdict:',statsDict)
     statsString = json.dumps(statsDict)

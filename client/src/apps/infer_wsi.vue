@@ -106,7 +106,7 @@
           Job Complete  ... 
         </div>
         <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code> 
-        <div v-if="!running && job.status === 3">
+        <div v-if="runCompleted && job.status === 3">
   	     <v-card class="mb-4 ml-4 mr-4">
             <v-card-text>Segmentation Image</v-card-text>
 		          {{ renderOutputImage(outputImageUrl) }} 

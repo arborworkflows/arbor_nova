@@ -9,6 +9,16 @@
           <v-container fluid>
 
           <v-flex xs12>
+              <v-btn
+              outline
+              block
+                @click="loadSampleImageFile"
+              >
+              Use a Provided Sample Image
+              </v-btn>
+            </v-flex>
+
+          <v-flex xs12>
             <v-btn class="text-none" outline block @click='$refs.imageFile.click()'>{{ imageFileName || 'UPLOAD Whole Slide Image' }}</v-btn>
             <input
               type="file"
@@ -227,8 +237,9 @@ export default {
             // set this variable to display the resulting output image on the webpage 
             this.inputImageUrl = window.URL.createObjectURL(this.thumbnail);
           }
-
           console.log('render input finished')
+          // turn off the "upload in process message, since the thumbnail is now finished"
+          this.uploadInProgress = false;
 	        this.inputDisplayed = true
 	     }
     },
@@ -241,7 +252,8 @@ export default {
           // set this variable to display the resulting output image on the webpage 
           this.segmentImageUrl = window.URL.createObjectURL(this.thumbnail);
           console.log('render segment finished')
-	        this.segmentDisplayed = true
+          this.segmentDisplayed = true
+          this.segmentUploadInProgress = false
 	     }
     },
 
@@ -405,7 +417,6 @@ export default {
         this.uploadInProgress = true;
         this.imageFile = await uploader.start();
         // display the uploaded image on the webpage
-        this.uploadInProgress = false;
 	      console.log('displaying input image...');
         //this.imageBlob = (await this.girderRest.get(`file/${this.imageFile._id}/download`,{responseType:'blob'})).data;
         //this.uploadedImageUrl = window.URL.createObjectURL(this.imageBlob);
@@ -415,6 +426,8 @@ export default {
       }
     },
 
+
+  
 
     async uploadSegmentationFile(file) {
       if (file) {
@@ -433,6 +446,47 @@ export default {
         this.renderSegmentImage();
       }
     },
+
+    // loading a sample image means loading the WSI and a corresponding segmentation.  Both of these are done
+    // here.  This requires girder to be pre-loaded with image names that match the patterns here. 
+
+    async loadSampleImageFile() {
+          console.log('load sample image')
+          this.runCompleted = false;
+          this.uploadInProgress = true;
+          this.imageFileName = 'SampleImageMYOD1_WSI'
+          const params = optionsToParameters({
+                q: this.imageFileName,
+                types: JSON.stringify(["file"])
+              });
+          // find the sample image already uploaded in Girder
+          this.fileId = (await this.girderRest.get(
+            `resource/search?${params}`,
+          )).data["file"][0];
+
+          console.log('displaying sample input stored at girder ID:',this.fileId);
+          this.imageFile = this.fileId
+          this.inputDisplayed == false;
+          this.renderInputImage();
+
+          // now get the segmentation image to match the WSI
+          this.segmentUploadInProgress = true
+          this.segmentFileName = 'SampleImageMYOD1_Segmentation'
+          const params2 = optionsToParameters({
+                q: this.segmentFileName,
+                types: JSON.stringify(["file"])
+              });
+          // find the sample image already uploaded in Girder
+          this.fileId = (await this.girderRest.get(
+            `resource/search?${params2}`,
+          )).data["file"][0];
+
+          console.log('displaying sample segmentation stored at girder ID:',this.fileId);
+          this.segmentFile = this.fileId
+          this.segmentDisplayed = false;
+          this.readyToDisplayInput = true;
+          this.renderSegmentImage();
+          },
 
 
 

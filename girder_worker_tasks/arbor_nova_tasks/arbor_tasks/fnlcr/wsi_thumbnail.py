@@ -4,7 +4,7 @@ from girder_worker.utils import girder_job
 from tempfile import NamedTemporaryFile
 
 import large_image
-
+import time
 
 #-------------------------------------------
 
@@ -22,11 +22,15 @@ def wsi_thumbnail(self,image_file,**kwargs):
     outname = NamedTemporaryFile(delete=False).name+'.png'
 
     thumbnail, mimeType = source.getThumbnail(
-        width=1024, height=1024, encoding='PNG')
+        width=800, height=1024, encoding='PNG')
     print('Made a thumbnail of type %s taking %d bytes' % (
         mimeType, len(thumbnail)))
  
-    open(outname, 'wb').write(thumbnail)
+    fileObj=open(outname, 'wb')
+    fileObj.write(thumbnail)
+    fileObj.flush()
+    fileObj.close()
+    time.sleep(5)
 
     print('thumbnail generation complete')
     # return the name of the output file

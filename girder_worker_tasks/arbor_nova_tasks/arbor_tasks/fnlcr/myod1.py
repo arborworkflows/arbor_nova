@@ -14,7 +14,6 @@ from torch.utils.data import Dataset as BaseDataset
 import torch.nn as nn
 import torch.optim as optim
 from torch.optim import lr_scheduler
-from torch.utils.tensorboard import SummaryWriter
 import torch.nn.functional as F
 from torch.autograd import Function
 from torchvision import datasets, models, transforms
@@ -37,11 +36,9 @@ import time
 import random
 import os, glob
 import copy
-import seaborn as sn
 import pandas as pd
 import albumentations as albu
 from albumentations import Resize
-import xlsxwriter
 import gc
 import timm
 from radam import RAdam

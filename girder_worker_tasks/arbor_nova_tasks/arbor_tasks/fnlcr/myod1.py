@@ -42,7 +42,6 @@ import albumentations as albu
 from albumentations import Resize
 import gc
 import timm
-from radam import RAdam
 
 from PIL import Image
 

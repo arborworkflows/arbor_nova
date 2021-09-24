@@ -453,7 +453,7 @@ def _inference(model, image_path, BATCH_SIZE, num_classes, kernel, num_tta=1):
         iteration_count = heights*widths
         report_interval = iteration_count / (100 / REPORTING_INTERVAL)
         report_count = 0
-        # report a little under actual state to leave time for final cleanup
+        # report current state 
         percent_complete = 0
 
         patch_iter = 0

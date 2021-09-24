@@ -111,7 +111,7 @@
 
         <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
           Running MYOD1 Neural network inferencing.  Please wait for the output to show below.  This will take several minutes.
-          <v-progress-linear indeterminate=True></v-progress-linear>
+          <v-progress-linear :value="progress"></v-progress-linear>
         </div>
         <div v-if="runCompleted" xs12 class="text-xs-center mb-4 ml-4 mr-4">
           Analysis Complete  ... 
@@ -178,6 +178,7 @@ export default {
     table: [],
     osd_viewer: [],
     cohortData: [],
+    progress: "0",
   }),
   asyncComputed: {
     scratchFolder() {
@@ -260,6 +261,28 @@ export default {
     },
 
 
+  updateJobStatus(job) {
+      this.job = job
+      // pick out the last print message from the job
+
+      var last_element = job.log[job.log.length - 1];
+        if (last_element) {
+        //console.log(last_element)
+        let lastIndex = last_element.lastIndexOf('\n')
+        //console.log('lastindex:',lastIndex)
+        let progressSnippet = last_element.substring(lastIndex)
+        //console.log(progressSnippet)
+        //console.log(progressSnippet.substring(1,9))
+        //console.log(progressSnippet.substring(1,2))
+        // if this is a progress update string, then extract the percentage done and update the state variable
+        if (progressSnippet.substring(1,9)=='progress') {
+          // starting at this position, is the string of the value to update the progress bar
+          this.progress = progressSnippet.substring(11)
+          console.log('percentage:',this.progress)
+        }
+      }
+    },
+
 
     async run() {
       this.running = true;
@@ -282,7 +305,7 @@ export default {
       )).data;
 
       // wait for the job to finish
-      await pollUntilJobComplete(this.girderRest, this.job, job => this.job = job);
+      await pollUntilJobComplete(this.girderRest, this.job, this.updateJobStatus);
 
       if (this.job.status === 3) {
         this.running = false;

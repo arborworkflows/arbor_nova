@@ -6,6 +6,7 @@ from tempfile import NamedTemporaryFile
 import billiard as multiprocessing
 from billiard import Queue, Process 
 import json
+import sys
 
 #---------
 
@@ -46,6 +47,8 @@ from radam import RAdam
 from PIL import Image
 
 Image.MAX_IMAGE_PIXELS = None
+
+REPORTING_INTERVAL = 10
 
 IMAGE_SIZE = 224
 PRINT_FREQ = 20
@@ -266,6 +269,13 @@ def test_auc_svs(model, inference_input, segment_input, args):
         augmented = aug(image=label_org, mask=label_org)
         label = augmented['mask']
 
+        # decide how long this will take and prepare to give status updates in the log file
+        iteration_count = 10
+        report_interval = 1
+        report_count = 0
+        # report current state 
+        percent_complete = 0
+
         ## If the Level 0 objective is 40.0
         if objective==40.0:
         ## Retrieve patches from WSI by batch_size but extract no more than 4000 patches
@@ -342,6 +352,15 @@ def test_auc_svs(model, inference_input, segment_input, args):
                         if probs.data[l, index].item() >= args.upperT:
                             correct_count[index] += 1
                             correct_probs[index] += probs.data[l, index].item()
+
+                # check that it is time to report progress.  If so, print it and flush I/O to make sure it comes 
+                # out right after it is printed 
+                report_count += 1
+                if (report_count > report_interval):
+                    percent_complete += REPORTING_INTERVAL
+                    print(f'progress: {percent_complete}')
+                    sys.stdout.flush()
+                    report_count = 0
 
                 ## When it arrives at the last iteration
                 if k == ((4000 // args.batch_size) - 1):
@@ -434,6 +453,15 @@ def test_auc_svs(model, inference_input, segment_input, args):
                         if probs.data[l, index].item() >= args.upperT:
                             correct_count[index] += 1
                             correct_probs[index] += probs.data[l, index].item()
+
+                # check that it is time to report progress.  If so, print it and flush I/O to make sure it comes 
+                # out right after it is printed 
+                report_count += 1
+                if (report_count > report_interval):
+                    percent_complete += REPORTING_INTERVAL
+                    print(f'progress: {percent_complete}')
+                    sys.stdout.flush()
+                    report_count = 0
 
                 ## When it arrives at the last iteration
                 if k == ((4000 // args.batch_size) - 1):

@@ -176,7 +176,7 @@ export default {
     outputDisplayed:  false,
     osd_viewer: [],
     imageStats: {},
-    progress: 0,
+    progress: "0",
   }),
   asyncComputed: {
     scratchFolder() {

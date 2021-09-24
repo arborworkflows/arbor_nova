@@ -9,7 +9,7 @@ from tempfile import NamedTemporaryFile
 import billiard as multiprocessing
 from billiard import Queue, Process
 import json
-
+import sys
 
 #-------------------------------------------
 
@@ -132,6 +132,9 @@ EPSILON = 1e-6
 ANALYSIS_MAGNIFICATION = 10
 THRESHOLD_MAGNIFICATION = 2.5
 ASSUMED_SOURCE_MAGNIFICATION = 20.0
+
+# what % interval we should print out progress so it can be snooped by the web interface
+REPORTING_INTERVAL = 5
 
 rot90 = albu.Rotate(limit=(90, 90), always_apply=True)
 rotn90 = albu.Rotate(limit=(-90, -90), always_apply=True)
@@ -405,7 +408,6 @@ def _inference(model, image_path, BATCH_SIZE, num_classes, kernel, num_tta=1):
         height = height_proc
         width = width_proc
 
-        
         PATCH_OFFSET = IMAGE_SIZE // 2
         SLIDE_OFFSET = IMAGE_SIZE // 2
         print('using', (PATCH_OFFSET//IMAGE_SIZE*100),'% patch overlap')
@@ -446,6 +448,13 @@ def _inference(model, image_path, BATCH_SIZE, num_classes, kernel, num_tta=1):
 
         # get an identifier for the patch files to be written out as debugging
         unique_identifier = returnIdentifierFromImagePath(image_path)
+
+        # decide how long this will take and prepare to give status updates in the log file
+        iteration_count = heights*widths
+        report_interval = iteration_count / (100 / REPORTING_INTERVAL)
+        report_count = 0
+        # report a little under actual state to leave time for final cleanup
+        percent_complete = 0
 
         patch_iter = 0
         inference_index = []
@@ -497,6 +506,15 @@ def _inference(model, image_path, BATCH_SIZE, num_classes, kernel, num_tta=1):
                     from PIL import Image
                     im = Image.fromarray(test_patch)
                     im.save('hyun-patch-'+str(temp_i)+'_'+str(temp_j)+'.jpeg')
+
+                # check that it is time to report progress.  If so, print it and flush I/O to make sure it comes 
+                # out right after it is printed 
+                report_count += 1
+                if (report_count > report_interval):
+                    percent_complete += REPORTING_INTERVAL
+                    print(f'progress: {percent_complete}')
+                    sys.stdout.flush()
+                    report_count = 0
                 
 
         # Very last part of the region.  This is if there is a partial batch of tiles left at the

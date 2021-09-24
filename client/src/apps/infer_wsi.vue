@@ -106,7 +106,8 @@
           Job Complete  ... 
         </div>
         <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code> 
-        <div v-if="runCompleted && job.status === 3">
+
+        <div v-show="runCompleted && job.status == 3">
   	     <v-card class="mb-4 ml-4 mr-4">
             <v-card-text>Segmentation Image</v-card-text>
 		          {{ renderOutputImage(outputImageUrl) }} 
@@ -124,7 +125,6 @@
             <v-card-text>Image Statistics</v-card-text>
             <json-data-table :data="table" />
           </v-card>
-
         </div>
 
 
@@ -245,7 +245,7 @@ export default {
     // above.  This code is re-executed for each change, so the code is gated to only run once 
     renderOutputImage(imageurl) {
        if ((this.outputDisplayed == false) & (this.outputImageUrl.length > 0)) {
-      console.log('output url:',imageurl)
+        console.log('output url:',imageurl)
       var viewer2 =  OpenSeadragon( {
 	       element: this.$refs.outputImageDiv, 
 	       maxZoomPixelRatio: 4.0,
@@ -310,6 +310,7 @@ export default {
         this.table = this.data
 
         // render the image statistics below the image
+        this.runCompleted = true;
 
         // build the spec here.  Inside the method means that the data item will be available. 
         let titleString = 'Percentage of the slide positive for each tissue class'
@@ -365,7 +366,7 @@ export default {
 
 
 
-        this.runCompleted = true;
+
       }
       if (this.job.status === 4) {
         this.running = false;

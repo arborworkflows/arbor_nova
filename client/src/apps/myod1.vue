@@ -117,14 +117,16 @@
           Analysis Complete  ... 
         </div>
 
-        <v-card  align="center" justify="center" class="mt-20 mb-4 ml-4 mr-4">
-          <div id="visM" ref="visModel" class="mt-20 mb-4 ml-4 mr-4"></div>
-        </v-card>
+        <div v-show="runCompleted">
+          <v-card  align="center" justify="center" class="mt-20 mb-4 ml-4 mr-4">
+            <div id="visM" ref="visModel" class="mt-20 mb-4 ml-4 mr-4"></div>
+          </v-card>
 
-        <v-card v-if="table.length > 0" class="mt-8 mb-4 ml-4 mr-4">
-          <v-card-text>Probability (0 to 1) of MYOD1+ Mutation:</v-card-text>
-          <json-data-table :data="table" />
-        </v-card>
+          <v-card v-if="table.length > 0" class="mt-8 mb-4 ml-4 mr-4">
+            <v-card-text>Probability (0 to 1) of MYOD1+ Mutation:</v-card-text>
+            <json-data-table :data="table" />
+          </v-card>
+        </div>
 
         <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code> 
      

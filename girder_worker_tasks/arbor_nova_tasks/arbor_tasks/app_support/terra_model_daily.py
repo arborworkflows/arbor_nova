@@ -145,19 +145,6 @@ def terra_model_daily(
     print('reading model output file: ',fullfilepath)
     traits_df = pd.read_csv(fullfilepath)
 
-    # Didn't work because of size of request: 
-    # instead of being read from a file, the data is passed live through the HTTP link, so multiple 
-    # users can run models simultaneously without interfering with each other (through file overwriting).
-    #print('reading model results ')
-    #modelResults = json.loads(modelResults)
-    #print('type:',type(modelResults))
-    #print('modelResults:',modelResults)
-    #traits_df = modelResults['data'] 
-
-    # we are passing back the model results, so convert them to a dataframe for use
-    #print('processing model data')
-    #traits_df = pd.DataFrame(modelResults)
-    #print('completed.')
 
     # run the extraction of the trait values across the field at or as soon before the reqested day as possible
     result_df = renderFeatureOnDay(

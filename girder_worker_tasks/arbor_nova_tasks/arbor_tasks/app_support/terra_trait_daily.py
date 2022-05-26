@@ -119,11 +119,16 @@ def terra_trait_daily(
     else:
         print('unknown season');
 
-
     path = '/arbor_nova/girder_worker_tasks/data'
-    #print('reading data file')
-    traits_df = pd.read_csv(path+'/'+data_filename)
-    #print('reading complete')
+    de_path = '/data/work/shared/genophenoenvo/sorghum/terraVisualization' 
+ 
+    if os.path.isdir(path):
+        print('reading local data file')
+        traits_df = pd.read_csv(path+'/'+data_filename)
+    else:
+        print('reading shared data file')
+        traits_df = pd.read_csv(de_path+'/'+data_filename)
+    print('reading complete')
 
     
     # find the field boundaries of the data dynamically.  It would be faster to hardcode this

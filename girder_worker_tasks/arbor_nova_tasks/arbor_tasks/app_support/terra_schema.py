@@ -13,7 +13,18 @@ def terra_schema(
 
     # this is a mini version of the data file that is quick to read and write here
     schema_filename = 's4_schema.csv'
+    de_path = '/data/work/shared/genophenoenvo/sorghum/terraVisualization' 
     path = '/arbor_nova/girder_worker_tasks/data'
+
+    if os.path.isdir(path):
+        print('reading local data file')
+        traits_df = pd.read_csv(path+'/'+data_filename)
+    else:
+        print('reading shared data file')
+        traits_df = pd.read_csv(de_path+'/'+data_filename)
+    print('reading complete')
+
+
     #path = '/home/vagrant/arbor_nova/girder_worker_tasks/arbor_nova_tasks/arbor_tasks/app_support'
     print('reading data file')
     traits_df = pd.read_csv(path+'/'+schema_filename)

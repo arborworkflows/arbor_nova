@@ -4,6 +4,7 @@ from tempfile import NamedTemporaryFile
 
 import pandas as pd
 import numpy as np
+import os
 
 
 # This routine allows selection of a dataset, it uses PANDAS to perform one of several selected correlation analyses, 
@@ -38,11 +39,20 @@ def terra_correlation(
     else:
         print('unknown season');
 
+    # the CyVerse discovery environment overwrites the user file system so user's data 
+    # is always available.  Let's look for a preloaded dataset copy if the default local
+    # one is not there
+
+    de_path = '/data/work/shared/genophenoenvo/sorghum/terraVisualization' 
     path = '/arbor_nova/girder_worker_tasks/data'
-    #path = '.'
-    #print('reading data file')
-    traits_df = pd.read_csv(path+'/'+data_filename)
-    #print('reading complete')
+    #path = '/arbor_nova'
+    if os.path.isdir(path):
+        print('reading local data file')
+        traits_df = pd.read_csv(path+'/'+data_filename)
+    else:
+        print('reading shared data file')
+        traits_df = pd.read_csv(de_path+'/'+data_filename)
+    print('reading complete')
 
     # now see what correlation option was selected
     if (correlation == 'Kendall Tau Correlation'):

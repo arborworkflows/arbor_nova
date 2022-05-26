@@ -43,8 +43,8 @@ def terra_correlation(
     # is always available.  Let's look for a preloaded dataset copy if the default local
     # one is not there
 
-    de_path = '/data/work/shared/genophenoenvo/sorghum/terraVisualization' 
     path = '/arbor_nova/girder_worker_tasks/data'
+    de_path = '/cyverse/work/home/shared/genophenoenvo/data/sorghum/terraVisualization' 
     #path = '/arbor_nova'
     if os.path.isdir(path):
         print('reading local data file')

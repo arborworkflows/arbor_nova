@@ -33,9 +33,8 @@ def terra_season(
     else:
         print('unknown season');
 
-    #path = '/home/vagrant/arbor_nova/girder_worker_tasks/arbor_nova_tasks/arbor_tasks/app_support'
     path = '/arbor_nova/girder_worker_tasks/data'
-    de_path = '/data/work/shared/genophenoenvo/sorghum/terraVisualization' 
+    de_path = '/cyverse/work/home/shared/genophenoenvo/data/sorghum/terraVisualization' 
  
     if os.path.isdir(path):
         print('reading local data file')

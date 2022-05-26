@@ -109,9 +109,9 @@ def terra_per_cultivar_model(
     else:
         print('unknown season');
 
-    de_path = '/data/work/shared/genophenoenvo/sorghum/terraVisualization' 
     path = '/arbor_nova/girder_worker_tasks/data'
-    #path = '/arbor_nova'
+    de_path = '/cyverse/work/home/shared/genophenoenvo/data/sorghum/terraVisualization' 
+
     if os.path.isdir(path):
         print('reading local data file')
         traits_df = pd.read_csv(path+'/'+data_filename)

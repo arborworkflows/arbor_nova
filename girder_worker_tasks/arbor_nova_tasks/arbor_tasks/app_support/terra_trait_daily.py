@@ -118,9 +118,9 @@ def terra_trait_daily(
         data_filename = 's4july_traits_and_models.csv'
     else:
         print('unknown season');
-
+ 
     path = '/arbor_nova/girder_worker_tasks/data'
-    de_path = '/data/work/shared/genophenoenvo/sorghum/terraVisualization' 
+    de_path = '/cyverse/work/home/shared/genophenoenvo/data/sorghum/terraVisualization' 
  
     if os.path.isdir(path):
         print('reading local data file')

@@ -4,6 +4,8 @@ from tempfile import NamedTemporaryFile
 
 import pandas as pd
 
+import os
+
 
 #--------- support routines for processing TERRA-Ref season measurements ----------------
 

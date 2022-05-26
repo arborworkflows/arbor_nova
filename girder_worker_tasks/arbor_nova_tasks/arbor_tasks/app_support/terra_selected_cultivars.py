@@ -5,6 +5,7 @@ from tempfile import NamedTemporaryFile
 import pandas as pd
 import numpy as np
 
+import os 
 
 #  This is based on terra_one_cultivar.  The only change is that a list of cultivars is passed in
 #  and data is returned if the cultivars are in the list.

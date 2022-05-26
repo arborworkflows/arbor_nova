@@ -3,6 +3,7 @@ from girder_worker.utils import girder_job
 from tempfile import NamedTemporaryFile
 
 import pandas as pd
+import os 
 
 @girder_job(title='TerraSchema')
 @app.task(bind=True)

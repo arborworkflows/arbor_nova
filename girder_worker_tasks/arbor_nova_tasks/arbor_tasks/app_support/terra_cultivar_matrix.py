@@ -7,6 +7,8 @@ import numpy as np
 from sklearn.ensemble import GradientBoostingRegressor
 import warnings
 
+import os 
+
 #--------- support routines for processing TERRA-Ref season measurements ----------------
 
 

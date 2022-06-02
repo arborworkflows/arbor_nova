@@ -15,7 +15,7 @@ def terra_schema(
     # this is a mini version of the data file that is quick to read and write here
     schema_filename = 's4_schema.csv'
     path = '/arbor_nova/girder_worker_tasks/data'
-    de_path = '/cyverse/work/home/shared/genophenoenvo/data/sorghum/terraVisualization' 
+    de_path = '/data-store/iplant/home/shared/genophenoenvo/data/sorghum/terraVisualization' 
 
     if os.path.isdir(path):
         print('reading local data file')

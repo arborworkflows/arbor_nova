@@ -5,6 +5,8 @@ from tempfile import NamedTemporaryFile
 import pandas as pd
 import numpy as np
 
+import os 
+
 #--------- support routines for processing TERRA-Ref season measurements ----------------
 
 
@@ -31,7 +33,7 @@ def terra_one_cultivar(
         print('unknown season');
 
     path = '/arbor_nova/girder_worker_tasks/data'
-    de_path = '/cyverse/work/home/shared/genophenoenvo/data/sorghum/terraVisualization' 
+    de_path = '/data-store/iplant/home/shared/genophenoenvo/data/sorghum/terraVisualization' 
 
     if os.path.isdir(path):
         print('reading local data file')

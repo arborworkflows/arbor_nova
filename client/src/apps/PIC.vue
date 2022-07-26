@@ -31,6 +31,18 @@
             <v-select label="Dependent Variable"  v-model="dependentVariable" :items="columns" />
           </v-flex>
 	  <v-flex xs12>
+	    <v-radio-group v-model ="logop">
+		<v-radio
+		   label = "Take the log of the chosen variables"
+		   value = "Yes">
+		</v-radio>
+		<v-radio
+		   label = "Do not take the log of the chosen variables"
+		   value = "No">
+		</v-radio>
+	   </v-radio-group>
+	  </v-flex>
+	  <v-flex xs12>
             <v-btn
               block
               :class="{ primary: readyToRun }"
@@ -125,6 +137,7 @@ export default {
     columns: [],
     independentVariable: null,
     dependentVariable: null,
+    logop: null,
     result: [],
     resultColumns: [],
     plotUrl: '',
@@ -139,7 +152,8 @@ export default {
       return !!this.treeFileName &&
         !!this.tableFileName &&
         !!this.independentVariable &&
-	!!this.dependentVariable;
+	!!this.dependentVariable &&
+	!!this.logop;
     },
 
     readyToDownload() {
@@ -163,6 +177,7 @@ export default {
         treeFileId: this.treeFile._id,
         independentVariable: this.independentVariable,
 	dependentVariable: this.dependentVariable,
+	logop: this.logop,
         resultSummaryItemId: resultSummaryItem._id,
         plotItemId: plotItem._id,
       });

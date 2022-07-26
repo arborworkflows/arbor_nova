@@ -44,7 +44,7 @@
       <v-layout column justify-start fill-height style="margin-left: 400px">
           <v-card class="ma-4">
             <v-card-text>
-              <b>Ancestral State Reconstruction (ASR)</b> is an estimation of characters for ancestral taxa, given data for present-day taxa and a phylogenetic tree. This app returns a table of information about the reconstructed states for each node, as well as a phylogenetic tree with color-coded representation of character states.
+              <b>Ancestral State Reconstruction (ASR)</b> is an estimation of characters for ancestral taxa, given data for present-day taxa and a phylogenetic tree. This app returns a phylogenetic tree with a color-coded representation of character states, as well as a table with marginal likelihoods of each state at user-specified nodes. TODO: Add user specification of nodes.
               <br><br>
               1. Upload your table (.csv) and tree (Newick, .phy).
               <br><br>

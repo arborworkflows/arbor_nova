@@ -63,7 +63,7 @@ def fitcontinuous(
 
   # Before the plot is made, dat needs to be named numbers
   dat <- dat[,1]
-  names(dat) <- rownames(table)
+  names(dat) <- rownames(df)
   png(plot_file, width = plotsize, height = plotsize)
   phenogram(phy, dat, fsize=0.8, color = "darkgreen")
   dev.off()

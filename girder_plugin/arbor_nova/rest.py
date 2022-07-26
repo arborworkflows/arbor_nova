@@ -238,7 +238,8 @@ class ArborNova(Resource):
         .param('tableFileId', 'The ID of the input table file.')
         .param('independentVariable', 'The independent variable for use in calculation.')
         .param('dependentVariable', 'The dependent variable for use in calculation.')
-        .param('resultSummaryItemId', 'The ID of the output item where the model summary file will be uploaded.')
+        .param('logop', 'Whether the variables chosen should be logged.')
+	.param('resultSummaryItemId', 'The ID of the output item where the model summary file will be uploaded.')
         .param('plotItemId', 'The ID of the output item where the plot file will be saved')
         .errorResponse()
         .errorResponse('Write access was denied on the parent item.', 403)
@@ -250,6 +251,7 @@ class ArborNova(Resource):
         tableFileId,
         independentVariable,
         dependentVariable,
+	logop,
         resultSummaryItemId,
 	plotItemId
     ):
@@ -258,6 +260,7 @@ class ArborNova(Resource):
             GirderFileId(tableFileId),
             independentVariable,
             dependentVariable,
+            logop,
             girder_result_hooks=[
                 GirderUploadToItem(resultSummaryItemId),
 		GirderUploadToItem(plotItemId)
